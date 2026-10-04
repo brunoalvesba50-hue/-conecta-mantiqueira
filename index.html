@@ -10,22 +10,253 @@
 <section id="profile" class="page"><h2>Meu perfil</h2><div class="box"><div id="profileAvatar" class="avatar">CM</div><h3 id="profileName"></h3><p id="profileCity" class="muted"></p><p id="profileBio" class="muted"></p><button class="ghost" onclick="logout()">Sair</button></div></section>
 </main><nav class="nav"><button class="active" onclick="page('home',this)">Início</button><button onclick="page('messages',this)">Bate-papo</button><button onclick="page('explore',this)">Explorar</button><button onclick="page('profile',this)">Perfil</button></nav></section>
 <div id="modal" class="modal"><div class="card"><button class="login" style="float:right" onclick="closeAuth()">Fechar</button><h2 id="modalTitle">Entrar</h2><div id="error" class="error"></div><div id="nameField" class="field"><label>Nome</label><input id="name" placeholder="Seu nome"></div><div class="field"><label>E-mail</label><input id="email" type="email" placeholder="voce@email.com"></div><div class="field"><label>Senha</label><input id="password" type="password" placeholder="Mínimo 8 caracteres"></div><div id="cityField" class="field"><label>Cidade</label><input id="city" placeholder="Ex.: Sapucaí-Mirim"></div><div id="ageField" class="field"><label>Idade</label><input id="age" type="number" min="13" max="120"></div><button class="primary" onclick="submitAuth()">Continuar</button></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-let mode="login", token=localStorage.getItem("cm_token"), me=null;
-const api=async(url,opt={})=>{opt.headers={...(opt.headers||{}),...(token?{Authorization:"Bearer "+token}:{}),...(opt.body?{"Content-Type":"application/json"}:{})};const r=await fetch(url,opt);const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"Erro");return d};
-function auth(m){mode=m;document.getElementById("modal").classList.add("open");document.getElementById("modalTitle").textContent=m==="register"?"Criar conta":"Entrar";document.getElementById("nameField").style.display=m==="register"?"grid":"none";document.getElementById("cityField").style.display=m==="register"?"grid":"none";document.getElementById("ageField").style.display=m==="register"?"grid":"none";document.getElementById("error").textContent=""}
-function closeAuth(){document.getElementById("modal").classList.remove("open")}
-async function submitAuth(){try{let d;if(mode==="register")d=await api("/api/auth/register",{method:"POST",body:JSON.stringify({name:name.value,email:email.value,password:password.value,city:city.value,age:age.value})});else d=await api("/api/auth/login",{method:"POST",body:JSON.stringify({email:email.value,password:password.value})});token=d.token;localStorage.setItem("cm_token",token);me=d.user;closeAuth();openApp()}catch(e){document.getElementById("error").textContent=e.message}}
-async function openApp(){document.getElementById("landing").style.display="none";document.getElementById("app").classList.add("active");await loadMe();await loadPeople();await loadFeed()}
-async function loadMe(){try{let d=await api("/api/auth/me");me=d.user;hello.textContent=me.name.split(" ")[0];profileName.textContent=me.name;profileCity.textContent=me.city+(me.age?" · "+me.age+" anos":"");profileBio.textContent=me.bio||"Ainda sem bio."}catch(e){token=null;localStorage.removeItem("cm_token")}}
-async function loadPeople(){let d=await api("/api/people");people.innerHTML=d.users.map(u=>`<div class="box"><div class="avatar">${u.name.split(" ").map(x=>x[0]).join("").slice(0,2)}</div><h3>${u.name}</h3><p class="muted">${u.city}${u.age?" · "+u.age+" anos":""}</p><button class="ghost" onclick="startChat(${u.id},'${u.name.replace(/'/g,"")}')">Conversar</button></div>`).join("")||"<p class='muted'>Ainda não há outros usuários.</p>"}
-async function loadFeed(){let d=await api("/api/posts");feed.innerHTML=d.posts.map(p=>`<div class="box" style="margin-top:10px"><b>${p.name}</b><div class="muted">${p.city}</div><p>${escapeHtml(p.body)}</p></div>`).join("")||"<p class='muted'>Seja o primeiro a publicar.</p>"}
-async function publish(){try{await api("/api/posts",{method:"POST",body:JSON.stringify({body:postBody.value})});postBody.value="";loadFeed()}catch(e){alert(e.message)}}
-async function startChat(id,name){document.getElementById("messageArea").innerHTML=`<div class="box"><h3>Conversando com ${name}</h3><div id="thread"></div><div class="row"><input id="msg" placeholder="Digite sua mensagem..." style="flex:1"><button class="primary" onclick="sendMsg(${id})">Enviar</button></div></div>`;await loadThread(id)}
-async function loadThread(id){let d=await api("/api/messages/"+id);thread.innerHTML=d.messages.map(m=>`<p><b>${m.sender_id===me.id?"Você":"Pessoa"}:</b> ${escapeHtml(m.body)}</p>`).join("")||"<p class='muted'>Nenhuma mensagem ainda.</p>"}
-async function sendMsg(id){if(!msg.value.trim())return;await api("/api/messages/"+id,{method:"POST",body:JSON.stringify({receiverId:id,body:msg.value})});msg.value="";loadThread(id)}
-function page(id,btn){document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active");document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));btn.classList.add("active");if(id==="explore")loadPeople();if(id==="home")loadFeed()}
-async function logout(){try{await api("/api/auth/logout",{method:"POST"})}catch{}localStorage.removeItem("cm_token");token=null;location.reload()}
-function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
-if(token)openApp();
-</script></body></html>
+const SUPABASE_URL="https://euvcajuoirnkojnetrj.supabase.co";
+const SUPABASE_KEY="sb_publishable_rnzlyJ9zCfh0OsLafenrtQ_GOqjmTsP";
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+let mode="login",me=null;
+
+function auth(m){
+ mode=m;
+ document.getElementById("modal").classList.add("open");
+ document.getElementById("modalTitle").textContent=m==="register"?"Criar conta":"Entrar";
+ document.getElementById("nameField").style.display=m==="register"?"grid":"none";
+ document.getElementById("cityField").style.display=m==="register"?"grid":"none";
+ document.getElementById("ageField").style.display=m==="register"?"grid":"none";
+ document.getElementById("error").textContent="";
+}
+
+function closeAuth(){
+ document.getElementById("modal").classList.remove("open");
+}
+
+async function submitAuth(){
+ try{
+  document.getElementById("error").textContent="";
+
+  if(mode==="register"){
+   const {data,error}=await sb.auth.signUp({
+    email:email.value.trim(),
+    password:password.value,
+    options:{
+     data:{
+      name:name.value.trim(),
+      city:city.value.trim(),
+      age:age.value?Number(age.value):null
+     }
+    }
+   });
+
+   if(error)throw error;
+   if(!data.user)throw new Error("Não foi possível criar a conta.");
+
+   const {error:pe}=await sb.from("profiles").upsert({
+    id:data.user.id,
+    name:name.value.trim(),
+    email:email.value.trim(),
+    city:city.value.trim(),
+    age:age.value?Number(age.value):null
+   });
+
+   if(pe)throw pe;
+
+   if(!data.session){
+    document.getElementById("error").textContent="Conta criada! Verifique seu e-mail para confirmar a conta.";
+    return;
+   }
+
+   me=data.user;
+  }else{
+   const {data,error}=await sb.auth.signInWithPassword({
+    email:email.value.trim(),
+    password:password.value
+   });
+
+   if(error)throw error;
+   me=data.user;
+  }
+
+  closeAuth();
+  await openApp();
+
+ }catch(e){
+  document.getElementById("error").textContent=e.message||"Erro";
+ }
+}
+
+async function openApp(){
+ document.getElementById("landing").style.display="none";
+ document.getElementById("app").classList.add("active");
+ await loadMe();
+ await loadPeople();
+ await loadFeed();
+}
+
+async function loadMe(){
+ const {data,error}=await sb.auth.getUser();
+ if(error||!data.user)return;
+
+ me=data.user;
+
+ const {data:p}=await sb.from("profiles")
+  .select("*")
+  .eq("id",me.id)
+  .single();
+
+ const profile=p||{
+  name:me.user_metadata?.name||me.email,
+  city:me.user_metadata?.city||"",
+  age:me.user_metadata?.age
+ };
+
+ hello.textContent=profile.name.split(" ")[0];
+ profileName.textContent=profile.name;
+ profileCity.textContent=profile.city+(profile.age?" · "+profile.age+" anos":"");
+ profileBio.textContent=profile.bio||"Ainda sem bio.";
+}
+
+async function loadPeople(){
+ const {data,error}=await sb.from("profiles")
+  .select("*")
+  .order("created_at",{ascending:false});
+
+ if(error){
+  people.innerHTML="<p class='error'>"+escapeHtml(error.message)+"</p>";
+  return;
+ }
+
+ const users=(data||[]).filter(u=>u.id!==me?.id);
+
+ people.innerHTML=users.map(u=>`
+  <div class="box">
+   <div class="avatar">${u.name.split(" ").map(x=>x[0]).join("").slice(0,2)}</div>
+   <h3>${escapeHtml(u.name)}</h3>
+   <p class="muted">${escapeHtml(u.city||"")}${u.age?" · "+u.age+" anos":""}</p>
+   <button class="ghost" onclick="startChat('${u.id}','${u.name.replace(/'/g,"&#39;")}')">Conversar</button>
+  </div>
+ `).join("")||"<p class='muted'>Ainda não há outros usuários.</p>";
+}
+
+async function loadFeed(){
+ const {data,error}=await sb.from("posts")
+  .select("*,profiles(name,city)")
+  .order("created_at",{ascending:false});
+
+ if(error){
+  feed.innerHTML="<p class='error'>"+escapeHtml(error.message)+"</p>";
+  return;
+ }
+
+ feed.innerHTML=(data||[]).map(p=>`
+  <div class="box" style="margin-top:10px">
+   <b>${escapeHtml(p.profiles?.name||"Usuário")}</b>
+   <div class="muted">${escapeHtml(p.profiles?.city||"")}</div>
+   <p>${escapeHtml(p.content||"")}</p>
+  </div>
+ `).join("")||"<p class='muted'>Seja o primeiro a publicar.</p>";
+}
+
+async function publish(){
+ try{
+  if(!postBody.value.trim())return;
+
+  const {error}=await sb.from("posts").insert({
+   user_id:me.id,
+   content:postBody.value.trim()
+  });
+
+  if(error)throw error;
+
+  postBody.value="";
+  await loadFeed();
+ }catch(e){
+  alert(e.message);
+ }
+}
+
+async function startChat(id,name){
+ document.getElementById("messageArea").innerHTML=`
+  <div class="box">
+   <h3>Conversando com ${escapeHtml(name)}</h3>
+   <div id="thread"></div>
+   <div class="row">
+    <input id="msg" placeholder="Digite sua mensagem..." style="flex:1">
+    <button class="primary" onclick="sendMsg('${id}')">Enviar</button>
+   </div>
+  </div>`;
+ await loadThread(id);
+}
+
+async function loadThread(id){
+ const {data,error}=await sb.from("messages")
+  .select("*")
+  .or("and(sender_id.eq."+me.id+",receiver_id.eq."+id+"),and(sender_id.eq."+id+",receiver_id.eq."+me.id+")")
+  .order("created_at",{ascending:true});
+
+ if(error){
+  thread.innerHTML="<p class='error'>"+escapeHtml(error.message)+"</p>";
+  return;
+ }
+
+ thread.innerHTML=(data||[]).map(m=>`
+  <p><b>${m.sender_id===me.id?"Você":"Pessoa"}:</b> ${escapeHtml(m.content||"")}</p>
+ `).join("")||"<p class='muted'>Nenhuma mensagem ainda.</p>";
+}
+
+async function sendMsg(id){
+ if(!msg.value.trim())return;
+
+ const {error}=await sb.from("messages").insert({
+  sender_id:me.id,
+  receiver_id:id,
+  content:msg.value.trim()
+ });
+
+ if(error){
+  alert(error.message);
+  return;
+ }
+
+ msg.value="";
+ await loadThread(id);
+}
+
+function page(id,btn){
+ document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));
+ btn.classList.add("active");
+
+ if(id==="explore")loadPeople();
+ if(id==="home")loadFeed();
+}
+
+async function logout(){
+ await sb.auth.signOut();
+ location.reload();
+}
+
+function escapeHtml(s){
+ return String(s||"").replace(/[&<>"']/g,c=>({
+  "&":"&amp;",
+  "<":"&lt;",
+  ">":"&gt;",
+  '"':"&quot;",
+  "'":"&#039;"
+ }[c]));
+}
+
+async function init(){
+ const {data}=await sb.auth.getSession();
+ if(data.session){
+  me=data.session.user;
+  await openApp();
+ }
+}
+
+init();
+</script>
+
+</body></html>
