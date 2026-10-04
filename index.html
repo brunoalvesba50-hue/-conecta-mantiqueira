@@ -6,193 +6,95 @@
 <title>Conecta Mantiqueira</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{
-  --bg:#06131d;--surface:#0b2230;--surface2:#102d3c;--line:#234354;
-  --green:#20df9a;--green2:#16c982;--text:#f5f8fa;--muted:#9fb2bf;
-  --danger:#ff6874;--radius:22px;
-}
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
-button,input{font:inherit}
-button{cursor:pointer}
-body{background:#06131d}
+:root{--bg:#06131d;--surface:#0b2230;--surface2:#102d3c;--line:#234354;--green:#20df9a;--green2:#16c982;--text:#f5f8fa;--muted:#9fb2bf;--danger:#ff6874;--radius:22px}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+button,input,textarea{font:inherit}button{cursor:pointer}body{background:#06131d}
 #app{min-height:100vh;background:linear-gradient(rgba(4,18,28,.42),rgba(4,18,28,.72)),url("mantiqueira-hero.jpg") center/cover fixed}
-.screen{min-height:100vh;padding:24px 18px 105px;max-width:720px;margin:auto}
-.hidden{display:none!important}
-.brand{font-size:25px;font-weight:800;margin-bottom:26px}.brand span{color:var(--green)}
-.heroTitle{font-size:34px;line-height:1.08;margin:12px 0 8px;font-weight:800}
-.sub{color:var(--muted);font-size:17px;line-height:1.45}
-.search{width:100%;border:1px solid var(--line);background:rgba(9,30,43,.9);color:white;border-radius:18px;padding:14px 16px;outline:none;margin:18px 0}
-.search::placeholder{color:#7f97a5}
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.quick{background:rgba(8,31,44,.95);border:1px solid var(--line);border-radius:18px;padding:14px 7px;text-align:center;color:white;min-height:92px}
-.quick .ico{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#12384a;color:var(--green);margin:0 auto 8px;font-size:20px}
-.quick small{font-size:11px;line-height:1.1}
-.sectionHead{display:flex;justify-content:space-between;align-items:center;margin:24px 0 12px}
-.sectionHead h2{font-size:18px;margin:0}.link{color:var(--green);font-size:12px}
-.cityGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.city{border-radius:17px;padding:16px;min-height:92px;color:white;font-weight:750;border:1px solid rgba(255,255,255,.12)}
-.city small{display:block;font-weight:500;margin-top:6px;opacity:.8}
-.c1{background:#0d936c}.c2{background:#2474c9}.c3{background:#b76b12}.c4{background:#7042b9}
-.peopleRow{display:flex;gap:12px;overflow:auto;padding-bottom:4px}.personMini{min-width:72px;text-align:center}.avatar{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #31596a;background:#183848}.personMini .avatar{width:58px;height:58px}.personMini small{display:block;font-size:11px;margin-top:5px;color:#dce5ea}
-.list{display:flex;flex-direction:column;gap:8px}.person{display:flex;align-items:center;gap:12px;padding:12px;background:rgba(8,31,44,.92);border-bottom:1px solid rgba(255,255,255,.06)}.person .avatar{width:48px;height:48px}.personInfo{flex:1}.personInfo b{display:block;font-size:14px}.personInfo span{display:block;color:#aabac4;font-size:11px;margin-top:3px}.online{color:var(--green)!important}.chatBtn{width:38px;height:38px;border-radius:50%;border:0;background:var(--green);color:#052018;font-weight:900}
-.card{background:rgba(8,31,44,.94);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:14px}
-.post img{width:100%;border-radius:15px;margin-top:12px;display:block;max-height:310px;object-fit:cover}
-.postTop{display:flex;gap:10px;align-items:center}.postTop b{font-size:13px}.postTop span{display:block;color:#8ea3af;font-size:10px}.post p{font-size:14px;line-height:1.45;margin:12px 0 0}
-.postActions{display:flex;gap:22px;color:#b5c4cc;font-size:12px;margin-top:12px}
-.profileCover{height:150px;border-radius:22px 22px 0 0;background:url("mantiqueira-hero.jpg") center/cover}.profileCard{overflow:hidden;padding:0}.profileBody{padding:0 20px 20px;position:relative}.profileAvatar{width:92px;height:92px;border-radius:50%;border:4px solid var(--surface);margin-top:-42px;object-fit:cover;background:#173848}.profileBody h1{font-size:24px;margin:8px 0}.stats{display:flex;gap:22px;margin:18px 0}.stats b{display:block;font-size:18px}.stats span{color:var(--muted);font-size:11px}.tabs{display:flex;gap:25px;border-bottom:1px solid var(--line);margin-top:15px}.tab{padding:12px 2px;color:var(--muted);font-size:13px}.tab.active{color:var(--green);border-bottom:2px solid var(--green)}
-.photoGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:12px}.photoGrid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:7px}
-.business{display:flex;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.07)}.business img{width:58px;height:58px;border-radius:12px;object-fit:cover}.businessInfo{flex:1}.businessInfo b{display:block;font-size:13px}.businessInfo span{display:block;color:#8ea3af;font-size:10px;margin-top:3px}.stars{color:#ffd34f;font-size:12px;margin-top:4px}
+.screen{min-height:100vh;padding:24px 18px 105px;max-width:720px;margin:auto}.hidden{display:none!important}
+.brand{font-size:25px;font-weight:800;margin-bottom:26px}.brand span{color:var(--green)}.heroTitle{font-size:34px;line-height:1.08;margin:12px 0 8px;font-weight:800}.sub{color:var(--muted);font-size:15px;line-height:1.45}
+.search,.field,.textarea{width:100%;border:1px solid var(--line);background:rgba(9,30,43,.92);color:white;border-radius:18px;padding:14px 16px;outline:none;margin:18px 0}.search::placeholder,.field::placeholder,.textarea::placeholder{color:#7f97a5}.textarea{min-height:100px;resize:vertical}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.quick{background:rgba(8,31,44,.95);border:1px solid var(--line);border-radius:18px;padding:14px 7px;text-align:center;color:white;min-height:92px}.quick .ico{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#12384a;color:var(--green);margin:0 auto 8px;font-size:20px}.quick small{font-size:11px;line-height:1.1}
+.sectionHead{display:flex;justify-content:space-between;align-items:center;margin:24px 0 12px}.sectionHead h2{font-size:18px;margin:0}.link{color:var(--green);font-size:12px}
+.cityGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.city{border-radius:17px;padding:16px;min-height:92px;color:white;font-weight:750;border:1px solid rgba(255,255,255,.12)}.city small{display:block;font-weight:500;margin-top:6px;opacity:.8}.c1{background:#0d936c}.c2{background:#2474c9}.c3{background:#b76b12}.c4{background:#7042b9}
+.peopleRow{display:flex;gap:12px;overflow:auto;padding-bottom:4px}.personMini{min-width:76px;text-align:center}.avatar{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #31596a;background:#183848}.personMini .avatar{width:58px;height:58px}.personMini small{display:block;font-size:11px;margin-top:5px;color:#dce5ea}
+.list{display:flex;flex-direction:column;gap:8px}.person{display:flex;align-items:center;gap:12px;padding:12px;background:rgba(8,31,44,.92);border-bottom:1px solid rgba(255,255,255,.06)}.person .avatar{width:48px;height:48px}.personInfo{flex:1}.personInfo b{display:block;font-size:14px}.personInfo span{display:block;color:#aabac4;font-size:11px;margin-top:3px}.online{color:var(--green)!important}.chatBtn,.followBtn{border:0;border-radius:14px;background:var(--green);color:#052018;font-weight:850;padding:10px 13px}.followBtn.following{background:#163b4a;color:var(--green);border:1px solid var(--green)}
+.card{background:rgba(8,31,44,.94);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:14px}.post img{width:100%;border-radius:15px;margin-top:12px;display:block;max-height:310px;object-fit:cover}.postTop{display:flex;gap:10px;align-items:center}.postTop b{font-size:13px}.postTop span{display:block;color:#8ea3af;font-size:10px}.post p{font-size:14px;line-height:1.45;margin:12px 0 0}.postActions{display:flex;gap:12px;color:#b5c4cc;font-size:12px;margin-top:12px;flex-wrap:wrap}.action{background:none;border:0;color:#b5c4cc;padding:4px 0}.action.liked{color:var(--green)}
+.profileCover{height:150px;border-radius:22px 22px 0 0;background:url("mantiqueira-hero.jpg") center/cover}.profileCard{overflow:hidden;padding:0}.profileBody{padding:0 20px 20px;position:relative}.profileAvatar{width:92px;height:92px;border-radius:50%;border:4px solid var(--surface);margin-top:-42px;object-fit:cover;background:#173848}.profileBody h1{font-size:24px;margin:8px 0}.profileActions{display:flex;gap:8px;margin:15px 0}.stats{display:flex;gap:28px;margin:18px 0}.stats b{display:block;font-size:18px}.stats span{color:var(--muted);font-size:11px}.tabs{display:flex;gap:25px;border-bottom:1px solid var(--line);margin-top:15px}.tab{padding:12px 2px;color:var(--muted);font-size:13px}.tab.active{color:var(--green);border-bottom:2px solid var(--green)}.photoGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:12px}.photoGrid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:7px}
+.business{display:flex;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.07)}.business img{width:58px;height:58px;border-radius:12px;object-fit:cover}.businessInfo{flex:1}.businessInfo b{display:block;font-size:13px}.businessInfo span{display:block;color:#8ea3af;font-size:10px;margin-top:3px}.stars{color:#ffd34f;font-size:12px;margin-top:4px}.businessLink{color:var(--green);font-size:12px}
 .chatItem{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.07)}.chatItem .avatar{width:48px;height:48px}.chatInfo{flex:1}.chatInfo b{font-size:13px}.chatInfo span{display:block;color:#8ea3af;font-size:11px;margin-top:3px}
-.nav{position:fixed;z-index:20;bottom:0;left:0;right:0;background:rgba(5,21,31,.96);border-top:1px solid var(--line);padding:10px max(12px,calc((100vw - 680px)/2)) calc(10px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(4,1fr)}
-.nav button{background:none;border:0;color:#9fb0bb;font-weight:750;font-size:11px;padding:5px}.nav button.active{color:var(--green)}
-.nav .nicon{display:block;font-size:20px;margin-bottom:2px}
-.fab{position:fixed;right:22px;bottom:92px;width:54px;height:54px;border-radius:50%;border:0;background:var(--green);color:#052018;font-size:28px;box-shadow:0 8px 25px #0008}
-.auth{min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(rgba(4,18,28,.48),rgba(4,18,28,.8)),url("mantiqueira-hero.jpg") center/cover}
-.authCard{width:min(430px,100%);background:rgba(7,29,42,.95);border:1px solid var(--line);border-radius:26px;padding:24px}.authCard h1{margin:0 0 8px}.field{width:100%;margin:8px 0;padding:14px;border-radius:14px;border:1px solid var(--line);background:#081c29;color:white;outline:none}.primary{width:100%;padding:15px;border:0;border-radius:16px;background:var(--green);color:#052018;font-weight:850;margin-top:10px}.ghost{background:none;color:white;border:0;text-decoration:underline;margin-top:14px}.error{color:#ff9aa1;font-size:13px;min-height:18px;margin-top:8px}
+.nav{position:fixed;z-index:20;bottom:0;left:0;right:0;background:rgba(5,21,31,.96);border-top:1px solid var(--line);padding:10px max(12px,calc((100vw - 680px)/2)) calc(10px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(4,1fr)}.nav button{background:none;border:0;color:#9fb0bb;font-weight:750;font-size:11px;padding:5px}.nav button.active{color:var(--green)}.nav .nicon{display:block;font-size:20px;margin-bottom:2px}
+.fab{position:fixed;z-index:19;right:22px;bottom:92px;width:54px;height:54px;border-radius:50%;border:0;background:var(--green);color:#052018;font-size:28px;box-shadow:0 8px 25px #0008}
+.stories{display:flex;gap:12px;overflow:auto;padding:4px 0 8px}.storyCircle{min-width:70px;text-align:center;font-size:10px}.storyRing{width:62px;height:62px;border-radius:50%;padding:3px;background:linear-gradient(135deg,var(--green),#3c7cff,#c83cff);margin:auto}.storyRing img{width:100%;height:100%;border-radius:50%;object-fit:cover;border:3px solid var(--bg)}.storyAdd{background:var(--surface2);display:grid;place-items:center;color:var(--green);font-size:28px}.storyViewer{position:fixed;z-index:100;inset:0;background:#02080d;display:grid;place-items:center;padding:20px}.storyViewer img{width:min(520px,100%);max-height:80vh;object-fit:contain;border-radius:20px}.storyClose{position:absolute;right:20px;top:30px;border:0;background:#ffffff18;color:white;font-size:28px;border-radius:50%;width:46px;height:46px}
+.modal{position:fixed;z-index:80;inset:0;background:#0009;display:grid;place-items:end center;padding:16px}.modalBox{width:min(680px,100%);max-height:90vh;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:20px}.modalHead{display:flex;justify-content:space-between;align-items:center}.close{background:none;border:0;color:white;font-size:24px}.primary{width:100%;padding:15px;border:0;border-radius:16px;background:var(--green);color:#052018;font-weight:850;margin-top:10px}.ghost{background:none;color:white;border:0;text-decoration:underline;margin-top:14px}.secondary{padding:12px 15px;border:1px solid var(--line);border-radius:14px;background:#102d3c;color:white;font-weight:750}.error{color:#ff9aa1;font-size:13px;min-height:18px;margin-top:8px}.empty{padding:24px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:18px}.small{font-size:11px;color:var(--muted)}
+.auth{min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(rgba(4,18,28,.48),rgba(4,18,28,.8)),url("mantiqueira-hero.jpg") center/cover}.authCard{width:min(430px,100%);background:rgba(7,29,42,.95);border:1px solid var(--line);border-radius:26px;padding:24px}.authCard h1{margin:0 0 8px}
 @media(min-width:700px){.screen{padding-top:40px}.heroTitle{font-size:42px}}
 </style>
 </head>
-<body>
-<div id="app"></div>
-
+<body><div id="app"></div>
 <script>
 const SUPABASE_URL="https://euvcajuoirnkojinetrj.supabase.co";
 const SUPABASE_KEY="sb_publishable_rnzlyJ9zCfh0OsLafenrtQ_GOqjmTsP";
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let me=null, mode="register", currentPublicUser=null;
 
-let me=null;
 const demoPeople=[
- {name:"Amanda Silva",age:22,city:"Sapucaí-Mirim",photo:"https://i.pravatar.cc/120?img=47"},
- {name:"Lucas Ferreira",age:27,city:"São Bento do Sapucaí",photo:"https://i.pravatar.cc/120?img=12"},
- {name:"Juliana Martins",age:19,city:"Santo Antônio do Pinhal",photo:"https://i.pravatar.cc/120?img=32"},
- {name:"Rafael Costa",age:31,city:"Paraisópolis",photo:"https://i.pravatar.cc/120?img=11"},
- {name:"Gabriela Souza",age:24,city:"Sapucaí-Mirim",photo:"https://i.pravatar.cc/120?img=44"},
- {name:"Thiago Oliveira",age:28,city:"São Bento do Sapucaí",photo:"https://i.pravatar.cc/120?img=13"},
- {name:"Fernanda Lima",age:21,city:"Santo Antônio do Pinhal",photo:"https://i.pravatar.cc/120?img=49"}
+ {id:"demo-amanda",name:"Amanda Silva",city:"Sapucaí-Mirim",photo:"https://i.pravatar.cc/120?img=47"},
+ {id:"demo-lucas",name:"Lucas Ferreira",city:"São Bento do Sapucaí",photo:"https://i.pravatar.cc/120?img=12"},
+ {id:"demo-juliana",name:"Juliana Martins",city:"Santo Antônio do Pinhal",photo:"https://i.pravatar.cc/120?img=32"},
+ {id:"demo-rafael",name:"Rafael Costa",city:"Paraisópolis",photo:"https://i.pravatar.cc/120?img=11"}
 ];
 const business=[
- ["Barbearia do Zé","Sapucaí-Mirim • Barbearia","4.8","https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=200"],
- ["Pousada Quinta do Vale","Santo Antônio do Pinhal • Pousada","4.9","https://images.unsplash.com/photo-1566073771259-6a8506099945?w=200"],
- ["Restaurante Sabor da Serra","São Bento do Sapucaí • Restaurante","4.7","https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=200"],
- ["Mecânica do Alemão","Paraisópolis • Oficina","4.6","https://images.unsplash.com/photo-1486006920555-c77dcf18193c?w=200"]
+ ["Barbearia do Zé","Sapucaí-Mirim • Barbearia","4.8","https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=300","https://instagram.com/"],
+ ["Pousada Quinta do Vale","Santo Antônio do Pinhal • Pousada","4.9","https://images.unsplash.com/photo-1566073771259-6a8506099945?w=300","https://instagram.com/"],
+ ["Restaurante Sabor da Serra","São Bento do Sapucaí • Restaurante","4.7","https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=300","https://instagram.com/"],
+ ["Mecânica do Alemão","Paraisópolis • Oficina","4.6","https://images.unsplash.com/photo-1486006920555-c77dcf18193c?w=300","https://instagram.com/"]
 ];
 
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 function avatar(name="CM"){return "https://ui-avatars.com/api/?name="+encodeURIComponent(name)+"&background=12384a&color=20df9a&bold=true"}
-function nav(active){
- return `<nav class="nav">
- <button class="${active==="home"?"active":""}" onclick="go('home')"><span class="nicon">⌂</span>Início</button>
- <button class="${active==="chat"?"active":""}" onclick="go('chat')"><span class="nicon">◌</span>Bate-papo</button>
- <button class="${active==="explore"?"active":""}" onclick="go('explore')"><span class="nicon">⌕</span>Explorar</button>
- <button class="${active==="profile"?"active":""}" onclick="go('profile')"><span class="nicon">♙</span>Perfil</button>
- </nav>`
-}
-function screen(content,active){return `<main class="screen">${content}</main>${nav(active)}`
-}
-function home(){
- const name=me?.user_metadata?.name||me?.user_metadata?.full_name||me?.email?.split("@")[0]||"Bruno";
- return screen(`
- <div class="brand">Conecta <span>Mantiqueira</span></div>
- <div class="heroTitle">Olá, ${esc(name)}! 👋</div><div class="sub">Que bom te ver por aqui!</div>
- <input class="search" placeholder="⌕  Buscar pessoas, cidades, interesses..." oninput="filterPeople(this.value)">
- <div class="grid4">
-  <button class="quick" onclick="go('people')"><div class="ico">♙</div><small>Pessoas<br>perto de você</small></button>
-  <button class="quick"><div class="ico">♧</div><small>Grupos<br>da região</small></button>
-  <button class="quick" onclick="go('business')"><div class="ico">⌂</div><small>Comércios<br>e serviços</small></button>
-  <button class="quick" onclick="go('explore')"><div class="ico">•••</div><small>Mais</small></button>
- </div>
- <div class="sectionHead"><h2>Pessoas por cidade</h2><span class="link">Ver todas</span></div>
- <div class="cityGrid">
-  <div class="city c1">⌖ Sapucaí-Mirim<small>128 pessoas</small></div>
-  <div class="city c2">⌖ Santo Antônio do Pinhal<small>76 pessoas</small></div>
-  <div class="city c3">⌖ São Bento do Sapucaí<small>94 pessoas</small></div>
-  <div class="city c4">⌖ Paraisópolis<small>52 pessoas</small></div>
- </div>
- <div class="sectionHead"><h2>Perfis em destaque</h2><span class="link">Ver todos</span></div>
- <div class="peopleRow">${demoPeople.slice(0,4).map(p=>`<div class="personMini"><img class="avatar" src="${p.photo}"><small>${p.name.split(" ")[0]}<br>${p.age} anos</small></div>`).join("")}</div>
- `,"home");
-}
-function people(query=""){
- const list=demoPeople.filter(p=>(p.name+" "+p.city).toLowerCase().includes(query.toLowerCase()));
- return screen(`<h1>Pessoas perto de você</h1><div class="sub">Conheça pessoas da Serra da Mantiqueira.</div>
- <div class="grid4" style="margin:18px 0"><button class="quick" style="background:var(--green);color:#052018">Todas</button><button class="quick">Online</button><button class="quick">Novas</button></div>
- <div id="peopleList" class="list">${list.map(p=>`<div class="person"><img class="avatar" src="${p.photo}"><div class="personInfo"><b>${p.name}</b><span>${p.age} anos • ${p.city}</span><span class="online">● Online agora</span></div><button class="chatBtn" onclick="go('chat')">◌</button></div>`).join("")}</div>`,"explore")
-}
-function filterPeople(v){ if(v.trim().length>0) go('people',v) }
-function chat(){
- return screen(`<h1>Bate-papo</h1><input class="search" placeholder="⌕  Buscar conversas...">
- <div class="list">${demoPeople.map((p,i)=>`<div class="chatItem"><img class="avatar" src="${p.photo}"><div class="chatInfo"><b>${p.name}</b><span>${["Show! Vamos sim! 🔥","Tô com saudade de você por aqui...","Enviou uma foto","Blz, depois a gente se fala!","Eu também! 😊","Pode deixar!","Tô indo pra São Bento hoje..."][i]}</span></div><small>${i<4?"14:"+(32-i*7):"Ontem"}</small></div>`).join("")}</div>`,"chat")
-}
-function conversation(){
- return screen(`<div class="card"><div class="postTop"><img class="avatar" src="${demoPeople[0].photo}"><div><b>Amanda Silva</b><span class="online">Online agora</span></div></div></div>
- <div class="card"><p>Oi! Tudo bem? 😊<br>Vi que você é de Sapucaí-Mirim, também?</p></div>
- <div class="card" style="margin-left:30px;background:#0d7659"><p>Oi! Tudo bem! 😊<br>Sou sim, e você?</p></div>
- <div class="card"><p>Que legal! Também sou daqui. A gente podia se conhecer melhor.</p></div>
- <div class="card" style="margin-left:30px;background:#0d7659"><p>Bora! Adoro conhecer gente nova da região! 😊</p></div>
- <input class="search" placeholder="Digite uma mensagem...">`,"chat")
-}
-function explore(){
- return screen(`<h1>Explorar</h1><div class="grid4" style="margin:18px 0"><button class="quick" style="background:var(--green);color:#052018">Feed da região</button><button class="quick">Grupos</button><button class="quick">Comércios</button></div>
- <article class="card post"><div class="postTop"><img class="avatar" src="${demoPeople[1].photo}"><div><b>Lucas Ferreira</b><span>São Bento do Sapucaí • 2 h</span></div></div><p>Alguém conhece um bom lugar pra acampar por aqui? Quero levar a galera no fim de semana! 🏕️🔥</p><img src="mantiqueira-hero.jpg"><div class="postActions">♥ 12　♡ 5　 Comentar</div></article>
- <article class="card post"><div class="postTop"><img class="avatar" src="${demoPeople[2].photo}"><div><b>Juliana Martins</b><span>Santo Antônio do Pinhal • 3 h</span></div></div><p>Esse final de semana em Santo Antônio do Pinhal é simplesmente perfeito! 😍</p><img src="hero-mobile-town.jpg"><div class="postActions">♥ 18　♡ 7　 Comentar</div></article>`,"explore")
-}
-function businessScreen(){
- return screen(`<h1>Comércios e serviços</h1><input class="search" placeholder="⌕  Buscar por nome ou categoria...">
- <div class="grid4"><button class="quick">🍴<small>Restaurantes</small></button><button class="quick">▣<small>Hotéis/Pousadas</small></button><button class="quick">◉<small>Oficinas</small></button><button class="quick">⌁<small>Serviços gerais</small></button></div>
- <div class="sectionHead"><h2>Destaques da região</h2><span class="link">Ver todos</span></div>
- <div class="card">${business.map(b=>`<div class="business"><img src="${b[3]}"><div class="businessInfo"><b>${b[0]}</b><span>${b[1]}</span><div class="stars">★ ${b[2]}</div></div></div>`).join("")}</div>`,"explore")
-}
-function profile(){
- const name=me?.user_metadata?.name||"Bruno alves";
- const city=me?.user_metadata?.city||"Sapucaí-Mirim";
- const age=me?.user_metadata?.age||25;
- return screen(`<h1>Meu perfil</h1><div class="card profileCard"><div class="profileCover"></div><div class="profileBody"><img class="profileAvatar" src="${avatar(name)}"><h1>${esc(name)}</h1><div class="sub">⌾ ${esc(city)} · ${age} anos</div><p class="sub">Sonhador, aventureiro e sempre de boas. 🌿<br>A vida fica mais leve quando a gente tá perto de quem faz bem. 💚</p><button class="ghost" onclick="editProfile()">Editar perfil</button><div class="stats"><div><b>12</b><span>Fotos</span></div><div><b>48</b><span>Amigos</span></div><div><b>7</b><span>Interesses</span></div></div><div class="tabs"><div class="tab active">Publicações</div><div class="tab">Fotos</div><div class="tab">Sobre</div></div><div class="photoGrid">${["mantiqueira-hero.jpg","hero-mobile-town.jpg","hero-mobile-city.png","hero-desktop.jpg","hero-mobile.jpg","hero-mobile-town.jpg"].map(x=>`<img src="${x}">`).join("")}</div></div></div><button class="ghost" onclick="logout()">Sair</button>`,"profile")
-}
-function editProfile(){alert("A edição do perfil pode ser adicionada nesta tela sem alterar o restante do site.")}
+function nav(active){return `<nav class="nav">
+<button class="${active==="home"?"active":""}" onclick="go('home')"><span class="nicon">⌂</span>Início</button>
+<button class="${active==="chat"?"active":""}" onclick="go('chat')"><span class="nicon">◌</span>Bate-papo</button>
+<button class="${active==="explore"?"active":""}" onclick="go('explore')"><span class="nicon">⌕</span>Explorar</button>
+<button class="${active==="profile"?"active":""}" onclick="go('profile')"><span class="nicon">♙</span>Perfil</button></nav>`}
+function screen(content,active){return `<main class="screen">${content}</main>${nav(active)}`}
+function profileData(){const m=me?.user_metadata||{};return{name:m.name||m.full_name||me?.email?.split("@")[0]||"Novo usuário",city:m.city||"Cidade não informada",bio:m.bio||"Ainda não adicionou uma descrição.",photo:m.photo||avatar(m.name||"Novo usuário")}}
+function stories(){return `<div class="sectionHead"><h2>Status</h2><span class="link">Agora</span></div><div class="stories"><div class="storyCircle" onclick="newStory()"><div class="storyRing storyAdd">+</div><div>Seu status</div></div>${demoPeople.slice(0,4).map(p=>`<div class="storyCircle" onclick="viewStory('${p.id}','${encodeURIComponent(p.name)}','${p.photo}')"><div class="storyRing"><img src="${p.photo}"></div><div>${p.name.split(" ")[0]}</div></div>`).join("")}</div>`}
+function home(){const p=profileData();return screen(`
+<div class="brand">Conecta <span>Mantiqueira</span></div><div class="heroTitle">Olá, ${esc(p.name)}! 👋</div><div class="sub">Que bom te ver por aqui!</div>
+${stories()}<input class="search" placeholder="⌕  Buscar pessoas, cidades, interesses..." oninput="filterPeople(this.value)">
+<div class="grid4"><button class="quick" onclick="go('people')"><div class="ico">♙</div><small>Pessoas<br>perto de você</small></button><button class="quick" onclick="alert('Grupos da região em breve.')"><div class="ico">♧</div><small>Grupos<br>da região</small></button><button class="quick" onclick="go('business')"><div class="ico">⌂</div><small>Comércios<br>e serviços</small></button><button class="quick" onclick="go('explore')"><div class="ico">•••</div><small>Mais</small></button></div>
+<div class="sectionHead"><h2>Pessoas por cidade</h2></div><div class="cityGrid"><div class="city c1">⌖ Sapucaí-Mirim<small>Pessoas da região</small></div><div class="city c2">⌖ Santo Antônio do Pinhal<small>Pessoas da região</small></div><div class="city c3">⌖ São Bento do Sapucaí<small>Pessoas da região</small></div><div class="city c4">⌖ Paraisópolis<small>Pessoas da região</small></div></div>
+<div class="sectionHead"><h2>Perfis em destaque</h2></div><div class="peopleRow">${demoPeople.map(p=>`<div class="personMini" onclick="publicProfile('${p.id}')"><img class="avatar" src="${p.photo}"><small>${p.name.split(" ")[0]}<br>${p.city}</small></div>`).join("")}</div>`,"home")}
+function people(query=""){const list=demoPeople.filter(p=>(p.name+" "+p.city).toLowerCase().includes(query.toLowerCase()));return screen(`<h1>Pessoas perto de você</h1><div class="sub">Conheça pessoas da Serra da Mantiqueira.</div><div class="grid4" style="margin:18px 0"><button class="quick" style="background:var(--green);color:#052018">Todas</button><button class="quick">Online</button><button class="quick">Novas</button></div><div id="peopleList" class="list">${list.map(p=>`<div class="person" onclick="publicProfile('${p.id}')"><img class="avatar" src="${p.photo}"><div class="personInfo"><b>${p.name}</b><span>${p.city}</span><span class="online">● Online agora</span></div><button class="followBtn" onclick="event.stopPropagation();toggleFollow('${p.id}')">${isFollowing(p.id)?"Seguindo":"Seguir"}</button></div>`).join("")}</div>`,"explore")}
+function filterPeople(v){if(v.trim())go("people",v)}
+function isFollowing(id){return JSON.parse(localStorage.getItem("cm_follows")||"[]").includes(id)}
+function toggleFollow(id){let a=JSON.parse(localStorage.getItem("cm_follows")||"[]");a=a.includes(id)?a.filter(x=>x!==id):[...a,id];localStorage.setItem("cm_follows",JSON.stringify(a));go("people")}
+function publicProfile(id){const p=demoPeople.find(x=>x.id===id);if(!p)return;currentPublicUser=p;go("publicProfile")}
+function publicProfileScreen(){const p=currentPublicUser||demoPeople[0];const following=isFollowing(p.id);return screen(`<button class="ghost" onclick="go('people')">← Voltar</button><div class="card profileCard"><div class="profileCover"></div><div class="profileBody"><img class="profileAvatar" src="${p.photo}"><h1>${esc(p.name)}</h1><div class="sub">⌾ ${esc(p.city)}</div><p class="sub">Pessoa da região conectada à Mantiqueira. 🌿</p><div class="profileActions"><button class="followBtn ${following?"following":""}" onclick="toggleFollow('${p.id}')">${following?"Seguindo ✓":"Seguir"}</button><button class="secondary" onclick="go('conversation')">Mensagem</button></div><div class="stats"><div><b>0</b><span>Fotos</span></div><div><b>${following?1:0}</b><span>Amigos</span></div><div><b>0</b><span>Interesses</span></div></div><div class="tabs"><div class="tab active">Publicações</div><div class="tab">Fotos</div><div class="tab">Sobre</div></div><div class="empty">Ainda não há publicações.</div></div></div>`,"explore")}
+function chat(){return screen(`<h1>Bate-papo</h1><input class="search" placeholder="⌕  Buscar conversas..."><div class="list">${demoPeople.map(p=>`<div class="chatItem" onclick="publicProfile('${p.id}')"><img class="avatar" src="${p.photo}"><div class="chatInfo"><b>${p.name}</b><span>Toque para abrir a conversa</span></div></div>`).join("")}</div>`,"chat")}
+function conversation(){const p=currentPublicUser||demoPeople[0];return screen(`<button class="ghost" onclick="go('chat')">← Voltar</button><div class="card"><div class="postTop"><img class="avatar" src="${p.photo}"><div><b>${p.name}</b><span class="online">Online agora</span></div></div></div><div class="card"><p>Comece uma conversa com ${p.name.split(" ")[0]}. 😊</p></div><input class="search" placeholder="Digite uma mensagem...">`,"chat")}
+function explore(){return screen(`<h1>Explorar</h1><div class="grid4" style="margin:18px 0"><button class="quick" style="background:var(--green);color:#052018">Feed</button><button class="quick" onclick="alert('Grupos da região em breve.')">Grupos</button><button class="quick" onclick="go('business')">Comércios</button><button class="quick" onclick="newPost()">＋ Publicar</button></div><div id="feed"></div>`,"explore")}
+function renderFeed(){const el=document.getElementById("feed");if(!el)return;const posts=JSON.parse(localStorage.getItem("cm_posts")||"[]");const all=[...posts];if(!all.length){el.innerHTML=`<div class="empty">Ainda não há publicações reais. Seja o primeiro a publicar! 📸</div>`;return}el.innerHTML=all.reverse().map((p,i)=>`<article class="card post"><div class="postTop"><img class="avatar" src="${p.photo||avatar(p.name)}"><div><b>${esc(p.name)}</b><span>${esc(p.city||"Mantiqueira")} • agora</span></div></div><p>${esc(p.text)}</p>${p.image?`<img src="${p.image}">`:""}<div class="postActions"><button class="action" onclick="likePost('${p.id}')">♥ ${p.likes||0}</button><button class="action" onclick="commentPost('${p.id}')">💬 Comentar</button><button class="action" onclick="sharePost('${p.id}')">↗ Compartilhar</button></div></article>`).join("")}
+function newPost(){const text=prompt("O que você quer publicar?");if(!text)return;const p=profileData();const posts=JSON.parse(localStorage.getItem("cm_posts")||"[]");posts.push({id:Date.now().toString(),name:p.name,city:p.city,photo:p.photo,text,likes:0});localStorage.setItem("cm_posts",JSON.stringify(posts));go("explore");setTimeout(renderFeed,0)}
+function likePost(id){const posts=JSON.parse(localStorage.getItem("cm_posts")||"[]");const p=posts.find(x=>x.id===id);if(p)p.likes=(p.likes||0)+1;localStorage.setItem("cm_posts",JSON.stringify(posts));renderFeed()}
+function commentPost(id){const c=prompt("Digite seu comentário:");if(!c)return;alert("Comentário salvo nesta versão. A integração pública de comentários entra na próxima etapa.");}
+function sharePost(id){if(navigator.share)navigator.share({title:"Conecta Mantiqueira",text:"Confira esta publicação no Conecta Mantiqueira"});else alert("Compartilhe o link do Conecta Mantiqueira com seus amigos.")}
+function businessScreen(){return screen(`<h1>Comércios e serviços</h1><div class="sub">Descubra negócios da região, vitrines, produtos e links.</div><input class="search" placeholder="⌕  Buscar por nome ou categoria..."><button class="primary" onclick="newBusiness()">＋ Criar meu comércio</button><div class="sectionHead"><h2>Destaques da região</h2></div><div class="card">${business.map(b=>`<div class="business"><img src="${b[3]}"><div class="businessInfo"><b>${b[0]}</b><span>${b[1]}</span><div class="stars">★ ${b[2]}</div><a class="businessLink" href="${b[4]}" target="_blank">Ver comércio ↗</a></div></div>`).join("")}</div>`,"explore")}
+function newBusiness(){alert("A tela de criação do comércio está preparada. Na próxima etapa ela será ligada às tabelas públicas do Supabase para que todos possam ver a vitrine, produtos e links.")}
+function profile(){const p=profileData();return screen(`<h1>Meu perfil</h1><div class="card profileCard"><div class="profileCover"></div><div class="profileBody"><img class="profileAvatar" src="${p.photo}"><h1>${esc(p.name)}</h1><div class="sub">⌾ ${esc(p.city)}</div><p class="sub">${esc(p.bio)}</p><div class="profileActions"><button class="followBtn" onclick="editProfile()">Editar perfil</button><button class="secondary" onclick="newStory()">＋ Status</button></div><div class="stats"><div><b>0</b><span>Fotos</span></div><div><b>0</b><span>Amigos</span></div><div><b>0</b><span>Interesses</span></div></div><div class="tabs"><div class="tab active">Publicações</div><div class="tab">Fotos</div><div class="tab">Sobre</div></div><div class="empty">Você ainda não publicou nada.</div></div></div><button class="ghost" onclick="logout()">Sair</button>`,"profile")}
+function editProfile(){const p=profileData();openModal(`<div class="modalHead"><h2>Editar perfil</h2><button class="close" onclick="closeModal()">×</button></div><input id="editName" class="field" placeholder="Nome" value="${esc(p.name)}"><input id="editCity" class="field" placeholder="Cidade" value="${esc(p.city)}"><input id="editPhoto" class="field" placeholder="Link da foto" value="${esc(p.photo)}"><textarea id="editBio" class="textarea" placeholder="Sua bio">${esc(p.bio)}</textarea><button class="primary" onclick="saveProfile()">Salvar alterações</button>`)}
+async function saveProfile(){const meta={...(me?.user_metadata||{}),name:document.getElementById("editName").value.trim(),city:document.getElementById("editCity").value.trim(),photo:document.getElementById("editPhoto").value.trim()||avatar(document.getElementById("editName").value),bio:document.getElementById("editBio").value.trim()};const {data,error}=await sb.auth.updateUser({data:meta});if(error)return alert(error.message);me=data.user;closeModal();go("profile")}
+function newStory(){const image=prompt("Cole o link de uma imagem para seu status:");if(!image)return;const p=profileData();localStorage.setItem("cm_my_story",JSON.stringify({name:p.name,photo:p.photo,image,created:Date.now()}));alert("Status criado! Ele ficará disponível nesta versão no seu aparelho.");go("home")}
+function viewStory(id,name,photo){const old=document.getElementById("storyViewer");if(old)old.remove();document.body.insertAdjacentHTML("beforeend",`<div id="storyViewer" class="storyViewer"><button class="storyClose" onclick="document.getElementById('storyViewer').remove()">×</button><div><img src="${photo}"><h2>${decodeURIComponent(name)}</h2><p class="sub">Status da região</p></div></div>`)}
+function openModal(content){const old=document.getElementById("modal");if(old)old.remove();document.body.insertAdjacentHTML("beforeend",`<div id="modal" class="modal"><div class="modalBox">${content}</div></div>`)}
+function closeModal(){document.getElementById("modal")?.remove()}
 function logout(){sb.auth.signOut();me=null;location.reload()}
-function go(page,arg=""){
- const a=document.getElementById("app");
- if(page==="home")a.innerHTML=home();
- else if(page==="people")a.innerHTML=people(arg);
- else if(page==="chat")a.innerHTML=chat();
- else if(page==="conversation")a.innerHTML=conversation();
- else if(page==="explore")a.innerHTML=explore();
- else if(page==="business")a.innerHTML=businessScreen();
- else if(page==="profile")a.innerHTML=profile();
-}
-function authScreen(){
- document.getElementById("app").innerHTML=`<div class="auth"><div class="authCard"><div class="brand">Conecta <span>Mantiqueira</span></div><h1 id="authTitle">Criar conta</h1><div class="sub">Entre para fazer parte da região conectada.</div><div id="registerFields"><input id="name" class="field" placeholder="Nome"><input id="city" class="field" placeholder="Cidade"><input id="age" class="field" type="number" placeholder="Idade"></div><input id="email" class="field" type="email" placeholder="E-mail"><input id="password" class="field" type="password" placeholder="Senha"><div id="error" class="error"></div><button class="primary" onclick="submitAuth()">Continuar</button><button class="ghost" onclick="toggleAuth()">Já tenho uma conta</button></div></div>`;
- window.mode="register";
-}
-function toggleAuth(){
- mode=mode==="register"?"login":"register";
- document.getElementById("authTitle").textContent=mode==="register"?"Criar conta":"Entrar";
- document.getElementById("registerFields").classList.toggle("hidden",mode!=="register");
- document.querySelector(".ghost").textContent=mode==="register"?"Já tenho uma conta":"Criar uma conta";
-}
-async function submitAuth(){
- try{
-  document.getElementById("error").textContent="";
-  const emailInput=document.getElementById("email"),passwordInput=document.getElementById("password");
-  const nameInput=document.getElementById("name"),cityInput=document.getElementById("city"),ageInput=document.getElementById("age");
-  if(mode==="register"){
-   const {data,error}=await sb.auth.signUp({email:emailInput.value.trim(),password:passwordInput.value,options:{data:{name:nameInput?.value.trim()||"",city:cityInput?.value.trim()||"",age:ageInput?.value?Number(ageInput.value):null}}});
-   if(error)throw error;if(!data.user)throw new Error("Não foi possível criar a conta.");
-   me=data.user;
-  }else{
-   const {data,error}=await sb.auth.signInWithPassword({email:emailInput.value.trim(),password:passwordInput.value});
-   if(error)throw error;me=data.user;
-  }
-  go("home");
- }catch(e){document.getElementById("error").textContent=e.message}
-}
-let mode="register";
-async function start(){
- const {data}=await sb.auth.getUser();me=data?.user||null;
- if(me)go("home");else authScreen();
-}
-start();
+function go(page,arg=""){const a=document.getElementById("app");if(page==="home")a.innerHTML=home();else if(page==="people")a.innerHTML=people(arg);else if(page==="chat")a.innerHTML=chat();else if(page==="conversation")a.innerHTML=conversation();else if(page==="explore"){a.innerHTML=explore();setTimeout(renderFeed,0)}else if(page==="business")a.innerHTML=businessScreen();else if(page==="profile")a.innerHTML=profile();else if(page==="publicProfile"){a.innerHTML=publicProfileScreen()}}
+function authScreen(){document.getElementById("app").innerHTML=`<div class="auth"><div class="authCard"><div class="brand">Conecta <span>Mantiqueira</span></div><h1 id="authTitle">Criar conta</h1><div class="sub">Entre para fazer parte da região conectada.</div><div id="registerFields"><input id="name" class="field" placeholder="Nome"><input id="city" class="field" placeholder="Cidade"></div><input id="email" class="field" type="email" placeholder="E-mail"><input id="password" class="field" type="password" placeholder="Senha"><div id="error" class="error"></div><button class="primary" onclick="submitAuth()">Continuar</button><button class="ghost" onclick="toggleAuth()">Já tenho uma conta</button></div></div>`;window.mode="register"}
+function toggleAuth(){mode=mode==="register"?"login":"register";document.getElementById("authTitle").textContent=mode==="register"?"Criar conta":"Entrar";document.getElementById("registerFields").classList.toggle("hidden",mode!=="register");document.querySelector(".ghost").textContent=mode==="register"?"Já tenho uma conta":"Criar uma conta"}
+async function submitAuth(){try{document.getElementById("error").textContent="";const emailInput=document.getElementById("email"),passwordInput=document.getElementById("password"),nameInput=document.getElementById("name"),cityInput=document.getElementById("city");if(mode==="register"){const {data,error}=await sb.auth.signUp({email:emailInput.value.trim(),password:passwordInput.value,options:{data:{name:nameInput?.value.trim()||"",city:cityInput?.value.trim()||"",bio:"",photo:""}}});if(error)throw error;if(!data.user)throw new Error("Não foi possível criar a conta.");me=data.user}else{const {data,error}=await sb.auth.signInWithPassword({email:emailInput.value.trim(),password:passwordInput.value});if(error)throw error;me=data.user}go("home")}catch(e){document.getElementById("error").textContent=e.message}}
+async function start(){const {data}=await sb.auth.getUser();me=data?.user||null;if(me)go("home");else authScreen()}start();
 </script>
 </body>
 </html>
