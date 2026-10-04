@@ -59,6 +59,59 @@ async function submitAuth(){
  try{
   document.getElementById("error").textContent="";
 
+  const emailInput=document.getElementById("email");
+  const passwordInput=document.getElementById("password");
+  const nameInput=document.getElementById("name");
+  const cityInput=document.getElementById("city");
+  const ageInput=document.getElementById("age");
+
+  if(mode==="register"){
+   const {data,error}=await sb.auth.signUp({
+    email:emailInput.value.trim(),
+    password:passwordInput.value,
+    options:{
+     data:{
+      name:nameInput.value.trim(),
+      city:cityInput.value.trim(),
+      age:ageInput.value?Number(ageInput.value):null
+     }
+    }
+   });
+
+   if(error)throw error;
+   if(!data.user)throw new Error("Não foi possível criar a conta.");
+
+   const {error:pe}=await sb.from("profiles").upsert({
+    id:data.user.id,
+    name:nameInput.value.trim(),
+    email:emailInput.value.trim(),
+    city:cityInput.value.trim(),
+    age:ageInput.value?Number(ageInput.value):null
+   });
+
+   if(pe)throw pe;
+
+   me=data.user;
+  }else{
+   const {data,error}=await sb.auth.signInWithPassword({
+    email:emailInput.value.trim(),
+    password:passwordInput.value
+   });
+
+   if(error)throw error;
+   me=data.user;
+  }
+
+  closeAuth();
+  await openApp();
+
+ }catch(e){
+  document.getElementById("error").textContent=e.message||"Erro";
+ }
+}
+ try{
+  document.getElementById("error").textContent="";
+
   if(mode==="register"){
    const {data,error}=await sb.auth.signUp({
     email:email.value.trim(),
