@@ -109,59 +109,6 @@ async function submitAuth(){
   document.getElementById("error").textContent=e.message||"Erro";
  }
 }
- try{
-  document.getElementById("error").textContent="";
-
-  if(mode==="register"){
-   const {data,error}=await sb.auth.signUp({
-    email:email.value.trim(),
-    password:password.value,
-    options:{
-     data:{
-      name:name.value.trim(),
-      city:city.value.trim(),
-      age:age.value?Number(age.value):null
-     }
-    }
-   });
-
-   if(error)throw error;
-   if(!data.user)throw new Error("Não foi possível criar a conta.");
-
-   const {error:pe}=await sb.from("profiles").upsert({
-    id:data.user.id,
-    name:name.value.trim(),
-    email:email.value.trim(),
-    city:city.value.trim(),
-    age:age.value?Number(age.value):null
-   });
-
-   if(pe)throw pe;
-
-   if(!data.session){
-    document.getElementById("error").textContent="Conta criada! Verifique seu e-mail para confirmar a conta.";
-    return;
-   }
-
-   me=data.user;
-  }else{
-   const {data,error}=await sb.auth.signInWithPassword({
-    email:email.value.trim(),
-    password:password.value
-   });
-
-   if(error)throw error;
-   me=data.user;
-  }
-
-  closeAuth();
-  await openApp();
-
- }catch(e){
-  document.getElementById("error").textContent=e.message||"Erro";
- }
-}
-
 async function openApp(){
  document.getElementById("landing").style.display="none";
  document.getElementById("app").classList.add("active");
