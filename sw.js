@@ -1,6 +1,6 @@
 /* Conecta Mantiqueira — trabalha em segundo plano no celular:
    notificações, app instalado e abrir mesmo com internet fraca. */
-const CACHE = 'conecta-v5';
+const CACHE = 'conecta-v7';
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./', './manifest.json', './icon-192.png'])).catch(() => {}));
@@ -35,17 +35,24 @@ self.addEventListener('push', e => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; } catch (_) { d = { body: e.data && e.data.text() }; }
   const title = d.title || 'Conecta Mantiqueira';
-  e.waitUntil(Promise.all([
-    self.registration.showNotification(title, {
+  const apple = /iPhone|iPad|iPod|Macintosh/.test(self.navigator.userAgent || '');
+  e.waitUntil((async () => {
+    const list = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    const onScreen = list.some(c => c.visibilityState === 'visible' && c.focused);
+    list.forEach(c => c.postMessage({ type: 'push', data: d }));
+    // Com o app aberto na tela, o próprio site já toca o som. No iPhone a Apple exige mostrar sempre.
+    if (onScreen && !apple) return;
+    try { if (self.navigator.setAppBadge) await self.navigator.setAppBadge(); } catch (_) {}
+    await self.registration.showNotification(title, {
       body: d.body || 'Você tem uma novidade no Conecta Mantiqueira.',
       icon: 'icon-192.png',
       badge: 'icon-192.png',
       tag: d.tag || 'conecta',
       renotify: true,
+      vibrate: [80, 40, 80],
       data: { url: d.url || './', from: d.from || '' }
-    }),
-    self.navigator && self.navigator.setAppBadge ? self.navigator.setAppBadge().catch(() => {}) : null
-  ]));
+    });
+  })());
 });
 
 /* Tocou na notificação: abre o app (ou traz ele para frente). */
