@@ -670,6 +670,13 @@ async function rlSearchCity(city,topic){
   const label=city.replace(/ (Minas Gerais|São Paulo)$/,'').replace(/^Serra da Mantiqueira$/,'Mantiqueira');
   return rows.filter(x=>x.id&&x.title&&(x.dur==null||x.dur<0||(x.dur>=4&&x.dur<=1500))).slice(0,20).map(x=>({title:String(x.title).slice(0,160),url:'https://www.youtube.com/watch?v='+x.id,pubDate:x.ts?new Date(x.ts).toISOString():'',source:x.source||'YouTube',city:label,thumbnail:'https://i.ytimg.com/vi/'+x.id+'/hqdefault.jpg',priority:40,kind:'youtube',short:x.short,dateText:x.date}));
 }
+/* ---------- Shorts aleatórios do YouTube, misturados no feed ---------- */
+const RL_SHORT_TOPICS=['humor','comédia','natureza','viagem','receitas','comida','animais','cachorro','gato','futebol','música','curiosidades','paisagens','roça','fazenda','cavalos','moto','carros','dança','pesca','camping','trilha','cachoeira','churrasco','agro','vida no interior','motivação','esportes'];
+async function rlSearchShorts(topic){
+  const rows=await rlSearch('#shorts '+topic);
+  return rows.filter(x=>x.id&&x.title&&(x.short||(x.dur>0&&x.dur<=65))).slice(0,15).map(x=>({title:String(x.title).slice(0,160),url:'https://www.youtube.com/shorts/'+x.id,pubDate:x.ts?new Date(x.ts).toISOString():'',source:x.source||'YouTube Shorts',city:'Shorts '+topic,thumbnail:'https://i.ytimg.com/vi/'+x.id+'/hqdefault.jpg',priority:35,kind:'youtube',short:true,isShortsFeed:true,dateText:x.date}));
+}
+function rlPickShortTopics(){return [...RL_SHORT_TOPICS].sort(()=>Math.random()-.5).slice(0,5)}
 function rlPickQueries(){
   const cs=[...RL_CITIES].sort(()=>Math.random()-.5).slice(0,10);
   return cs.map(c=>[c,RL_TOPICS[Math.floor(Math.random()*RL_TOPICS.length)]]);
@@ -690,7 +697,7 @@ async function refreshVideos(force=false,manual=false){
   videoLoading=true;
   const status=document.getElementById('videoStatusText');if(status)status.textContent='Buscando vídeos de várias cidades…';
   try{
-    const tasks=[...videoYoutubeChannels.map(ch=>fetchVideoYoutubeChannel(ch).then(rlIngest)),...rlPickQueries().map(([c,t])=>rlSearchCity(c,t).then(rlIngest)),...rlPickQueries().slice(0,5).map(([c,t])=>dmSearch(c,t).then(rlIngestExtra)),...(PEXELS_KEY?[...PX_QUERIES].sort(()=>Math.random()-.5).slice(0,3).map(q=>pxSearch(q).then(rlIngestExtra)):[])];
+    const tasks=[...videoYoutubeChannels.map(ch=>fetchVideoYoutubeChannel(ch).then(rlIngest)),...rlPickQueries().map(([c,t])=>rlSearchCity(c,t).then(rlIngest)),...rlPickShortTopics().map(t=>rlSearchShorts(t).then(rlIngest)),...rlPickQueries().slice(0,5).map(([c,t])=>dmSearch(c,t).then(rlIngestExtra)),...(PEXELS_KEY?[...PX_QUERIES].sort(()=>Math.random()-.5).slice(0,3).map(q=>pxSearch(q).then(rlIngestExtra)):[])];
     await Promise.allSettled(tasks);
     videoRound++;videoLastFetch=Date.now();
     const tot=videoPool.length+EXTRA_POOL.length;if(status)status.textContent=tot?`${tot} vídeos de várias cidades`:'Sem conexão com a fonte de vídeos';
@@ -823,7 +830,7 @@ function reelPaintUI(){
   const ui=document.getElementById('reelUI');if(!ui)return;
   const x=RL.items[RL.cur];if(!x){ui.innerHTML='';return}
   const liked=rlLikes().includes(x.youtubeId),sv=rlSavedList().some(s=>s.youtubeId===x.youtubeId);
-  ui.innerHTML=`<div class="reelShade"></div><div class="reelFlash"></div><div class="reelHeart">♥</div><div id="reelErr" class="reelErr">Este vídeo não pode ser exibido aqui. Passando para o próximo…</div><button id="reelPill" class="reelPill${RL.pill?' on':''}" onclick="reelUnmute()">🔇 Toque para ativar o som</button><div class="reelInfo"><div class="videoSource">${esc(x.source||'Fonte regional')}</div><b class="videoTitle">${esc(x.title)}</b><div class="videoMeta"><span>📍 ${esc(x.city||'Mantiqueira')}</span><span>• ${esc(x.date||'Agora')}</span></div></div><div class="reelRail"><button class="rbtn like${liked?' on':''}" onclick="reelLike(RL.cur)" aria-label="Curtir"><i>${liked?'♥':'♡'}</i></button><button class="rbtn" onclick="reelShare(RL.cur)" aria-label="Compartilhar"><i>➤</i></button><button class="rbtn save${sv?' on':''}" onclick="reelSave(RL.cur)" aria-label="Salvar"><i>${sv?'★':'☆'}</i></button><button class="rbtn" onclick="reelMenu(RL.cur)" aria-label="Mais opções"><i>⋯</i></button></div><div class="reelProg" onpointerdown="reelScrub(event)"><i></i></div>`;
+  ui.innerHTML=`<div class="reelShade"></div><div class="reelFlash"></div><div class="reelHeart">♥</div><div id="reelErr" class="reelErr">Este vídeo não pode ser exibido aqui. Passando para o próximo…</div><button id="reelPill" class="reelPill${RL.pill?' on':''}" onclick="reelUnmute()">🔇 Toque para ativar o som</button><div class="reelInfo"><div class="videoSource">${esc(x.source||'Fonte regional')}</div><b class="videoTitle">${esc(x.title)}</b><div class="videoMeta">${x.isShortsFeed?'<span>▶ Shorts</span>':`<span>📍 ${esc(x.city||'Mantiqueira')}</span>`}<span>• ${esc(x.date||'Agora')}</span></div></div><div class="reelRail"><button class="rbtn like${liked?' on':''}" onclick="reelLike(RL.cur)" aria-label="Curtir"><i>${liked?'♥':'♡'}</i></button><button class="rbtn" onclick="reelShare(RL.cur)" aria-label="Compartilhar"><i>➤</i></button><button class="rbtn save${sv?' on':''}" onclick="reelSave(RL.cur)" aria-label="Salvar"><i>${sv?'★':'☆'}</i></button><button class="rbtn" onclick="reelMenu(RL.cur)" aria-label="Mais opções"><i>⋯</i></button></div><div class="reelProg" onpointerdown="reelScrub(event)"><i></i></div>`;
 }
 function reelPaintSound(){
   const b=document.getElementById('reelMuteBtn');if(b)b.textContent=RL.muted?'🔇':'🔊';

@@ -1,6 +1,6 @@
 /* Conecta Mantiqueira — trabalha em segundo plano no celular:
    notificações, app instalado e abrir mesmo com internet fraca. */
-const CACHE = 'conecta-v4';
+const CACHE = 'conecta-v5';
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./', './manifest.json', './icon-192.png'])).catch(() => {}));
