@@ -5516,4 +5516,8 @@ async function srSave(kind){
 /* ===================== fim ABA SERRA ===================== */
 
 </script>
+<script>
+try{Object.assign(NOTIF_TXT,{serra_alert:'publicou um alerta na sua cidade. ⚠️'})}catch(_){}
+(function(){const g=window.cmNotifGo;window.cmNotifGo=async function(id){const n=(CM_NOTIF.list||[]).find(x=>x.id===id);if(n&&n.kind==='serra_alert'){closeModal();go('serra');return}return g(id)}})();
+</script>
 </body></html>
