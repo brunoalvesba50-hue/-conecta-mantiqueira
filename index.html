@@ -447,6 +447,299 @@ html,body{width:100%;max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:1
 @media(max-width:400px){.pfStat{flex-direction:column;align-items:flex-start;gap:4px;padding:11px 12px}.pfStat span{font-size:12.5px}}
 @media(max-width:380px){.pfBtn{font-size:14px;gap:6px}.pfStat{gap:6px;padding:12px 6px}.pfStat svg{width:22px;height:22px}.pfName{font-size:25px}}
 </style>
+<style id="stV3Style">
+/* ===================== STORIES v3 — visual premium Conecta ===================== */
+:root{--st1:#20df9a;--st2:#19c6d6;--st3:#8ff7cf;--stInk:#04140f;--stGlass:rgba(12,22,30,.72);--stCard:#0f1d27;--stCard2:#132634;--stLine:rgba(140,220,210,.14)}
+@keyframes stPop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+@keyframes stUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes stFade{from{opacity:0}to{opacity:1}}
+@keyframes stSpin{to{transform:rotate(360deg)}}
+@keyframes stBeat{0%{transform:scale(1)}30%{transform:scale(1.35)}60%{transform:scale(.92)}100%{transform:scale(1)}}
+@keyframes stBurst{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}25%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}70%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-60%) scale(1.25)}}
+
+/* ---------- bandeja ---------- */
+.stories{gap:4px;padding:4px 2px 10px;scroll-snap-type:x proximity;scrollbar-width:none}
+.stories::-webkit-scrollbar{display:none}
+.storyCircle{min-width:80px;max-width:80px;text-align:center;scroll-snap-align:start;transition:transform .18s}
+.storyCircle:active{transform:scale(.94)}
+.storyCircle>div:last-child{margin-top:6px;font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.storyCircle.isSeen>div:last-child{color:var(--muted);font-weight:500}
+.storyRingWrap{width:72px}
+.storyRing{width:72px;height:72px;padding:3px;background:conic-gradient(from 200deg,var(--st1),var(--st2),var(--st3),var(--st1));box-shadow:0 0 18px rgba(32,223,154,.28)}
+.storyRing.seen{background:rgba(150,170,180,.32);box-shadow:none}
+.storyRing.close{background:conic-gradient(from 200deg,#b8f53a,#20df9a,#b8f53a);box-shadow:0 0 18px rgba(184,245,58,.28)}
+.storyRing.none{background:transparent;border:0;padding:3px;box-shadow:none}
+.storyRing.none img{border-color:transparent;box-shadow:0 0 0 1.5px var(--line)}
+.storyRing img{border:3px solid var(--bg)}
+.storyPlus{width:24px;height:24px;right:0;bottom:0;background:linear-gradient(135deg,#2ff0b0,#13c98a);color:#03251a;font-size:16px;border:2.5px solid var(--bg);box-shadow:0 4px 10px rgba(0,0,0,.35)}
+.stCloseTag{position:absolute;left:50%;bottom:-4px;transform:translateX(-50%);background:#b8f53a;color:#10240a;font-size:9px;font-weight:900;border-radius:999px;padding:1px 6px;border:2px solid var(--bg)}
+
+/* ---------- criador: base ---------- */
+.sc{background:radial-gradient(120% 70% at 50% 0%,#0d2431 0%,#05101a 55%,#03080d 100%);animation:stFade .18s ease}
+.scTop{padding:calc(8px + env(safe-area-inset-top)) 12px 6px}
+.scTop b{font-size:17px;letter-spacing:.2px}
+.stIco{width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;padding:0;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.stIco svg{width:21px;height:21px}
+.stIco:active{transform:scale(.92)}
+
+/* ---------- Novo story ---------- */
+.stPick{flex:1;display:flex;flex-direction:column;justify-content:center;gap:18px;padding:12px 18px calc(18px + env(safe-area-inset-bottom));max-width:520px;width:100%;margin:0 auto;overflow:auto}
+.stPickHero{text-align:center;color:#c9d6de;font-size:14px;line-height:1.5;animation:stUp .3s ease both}
+.stPickHero h2{color:#fff;font-size:26px;margin:0 0 6px;letter-spacing:-.3px}
+.stPickGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stBig{position:relative;overflow:hidden;min-height:150px;border-radius:24px;border:1px solid var(--stLine);background:linear-gradient(160deg,var(--stCard2),var(--stCard));color:#fff;padding:18px 16px;display:flex;flex-direction:column;justify-content:flex-start;gap:4px;align-items:flex-start;text-align:left;cursor:pointer;box-shadow:0 14px 30px rgba(0,0,0,.35);animation:stUp .35s ease both;transition:transform .16s,border-color .16s}
+.stBig:nth-child(2){animation-delay:.04s}.stBig:nth-child(3){animation-delay:.08s}.stBig:nth-child(4){animation-delay:.12s}
+.stBig:active{transform:scale(.97)}
+.stBig:after{content:"";position:absolute;right:-30px;top:-30px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(32,223,154,.22),transparent 70%)}
+.stBigIco{width:50px;height:50px;border-radius:16px;display:grid;place-items:center;background:rgba(32,223,154,.14);color:var(--st1);font-size:22px;font-weight:900}
+.stBigIco svg{width:26px;height:26px}
+.stBig b{font-size:17px;display:block;margin-top:14px}
+.stBig small{display:block;color:#9fb2bf;font-size:12.5px;margin-top:3px;line-height:1.35}
+.stPickLinks{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.stChip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;border:1px solid var(--stLine);background:rgba(255,255,255,.05);color:#dfe9ee;padding:9px 14px;font-weight:700;font-size:13px;cursor:pointer}
+.stChip svg{width:16px;height:16px;color:var(--st1)}
+
+/* ---------- câmera ---------- */
+.stCam{position:fixed;inset:0;z-index:160;background:#000;display:flex;flex-direction:column;animation:stFade .2s ease}
+.stCam video,.stCam img.stCamShot,.stCam video.stCamShot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.stCam .mirror{transform:scaleX(-1)}
+.stCamTop{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:calc(10px + env(safe-area-inset-top)) 14px 0}
+.stCamBot{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:16px 20px calc(22px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.55))}
+.stCamModes{display:flex;justify-content:center;gap:22px;margin-bottom:16px}
+.stCamModes button{background:none;border:0;color:rgba(255,255,255,.6);font-weight:800;font-size:14px;letter-spacing:.6px;text-transform:uppercase;padding:6px 2px;cursor:pointer}
+.stCamModes button.on{color:#fff;border-bottom:2px solid var(--st1)}
+.stCamRow{display:flex;align-items:center;justify-content:space-between}
+.stShutter{position:relative;width:82px;height:82px;border-radius:50%;border:5px solid #fff;background:rgba(255,255,255,.18);padding:0;cursor:pointer;transition:transform .15s}
+.stShutter:active{transform:scale(.92)}
+.stShutter i{position:absolute;inset:6px;border-radius:50%;background:#fff;transition:all .2s}
+.stShutter.video i{background:#ff3b5c}
+.stShutter.rec i{inset:22px;border-radius:9px;background:#ff3b5c}
+.stShutter svg{position:absolute;inset:-5px;width:82px;height:82px;transform:rotate(-90deg)}
+.stShutter svg circle{fill:none;stroke:var(--st1);stroke-width:5;stroke-dasharray:245;stroke-dashoffset:245}
+.stCamTime{position:absolute;top:calc(64px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:3;background:#ff3b5c;color:#fff;font-weight:800;border-radius:999px;padding:4px 12px;font-size:13px;display:none}
+.stCamTime.on{display:block}
+.stCamFlashFx{position:absolute;inset:0;background:#fff;z-index:5;opacity:0;pointer-events:none;transition:opacity .25s}
+.stCamFlashFx.on{opacity:1;transition:none}
+.stCamMsg{position:absolute;inset:0;z-index:1;display:grid;place-items:center;text-align:center;color:#c9d6de;padding:30px;font-size:15px;line-height:1.5}
+.stIco.on{background:#ffd60a;color:#1a1400;border-color:#ffd60a}
+.stUseRow{display:flex;gap:10px}
+.stUseRow button{flex:1}
+
+/* ---------- editor ---------- */
+.scStageWrap{gap:10px;padding:0 10px calc(10px + env(safe-area-inset-bottom))}
+.scStage{border-radius:22px;box-shadow:0 20px 50px rgba(0,0,0,.55)}
+.stEdTop{position:absolute;left:0;right:0;top:0;z-index:7;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:10px;background:linear-gradient(rgba(0,0,0,.42),transparent)}
+.stEdTools{display:flex;gap:6px}
+.stEdTools .stIco,.stEdTop>.stIco{background:rgba(0,0,0,.38);border-color:rgba(255,255,255,.14);font-weight:900;font-size:15px}
+.stEdTools .stIco.txt{font-family:Georgia,serif;font-size:18px}
+.stEdTools .stIco.act{background:#fff;color:#000}
+.scTools{display:none}
+.stQueue{position:absolute;left:50%;top:62px;transform:translateX(-50%);z-index:6;background:rgba(0,0,0,.5);color:#fff;font-size:12px;font-weight:800;border-radius:999px;padding:4px 10px}
+.scBottom{max-width:520px;gap:10px}
+.scAud{gap:8px}
+.scAud button{display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:11px 8px;font-size:13px;color:#e8f0f4}
+.scAud button i{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:11px;background:#33434e}
+.scAud button.on{border-color:var(--st1);background:rgba(32,223,154,.12);color:#fff}
+.scAud button.on i{background:var(--st1);color:#04140f}
+.scAud button.on.close{border-color:#b8f53a;color:#fff;background:rgba(184,245,58,.12)}
+.scAud button.on.close i{background:#b8f53a}
+.scPub{width:52px;height:52px;flex:0 0 52px;padding:0;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#2ff0b0,#13c98a);color:#03251a;box-shadow:0 8px 22px rgba(32,223,154,.4);font-size:0}
+.scPub svg{width:24px;height:24px}
+.scPub:disabled{opacity:.7}
+.scPub.busy svg{display:none}
+.scPub.busy:after{content:"";width:22px;height:22px;border-radius:50%;border:3px solid rgba(3,37,26,.3);border-top-color:#03251a;animation:stSpin .7s linear infinite}
+.scPanel{background:rgba(10,18,24,.97);border-top:1px solid var(--stLine);border-radius:24px 24px 0 0;max-height:74%;animation:stUp .22s ease;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.scPanel:before{content:"";display:block;width:40px;height:4px;border-radius:4px;background:rgba(255,255,255,.25);margin:-4px auto 10px}
+.scPanelHead b{font-size:16px}
+.scPanel .field{background:rgba(255,255,255,.07);color:#fff;border-color:rgba(255,255,255,.14)}
+.scPanel .primary{width:100%;margin-top:10px}
+.stSearch{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border-radius:14px;padding:0 12px;margin-bottom:12px}
+.stSearch svg{width:18px;height:18px;color:#9fb2bf;flex:none}
+.stSearch input{flex:1;background:none;border:0;outline:none;color:#fff;font-size:15px;padding:12px 0}
+.stToolGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stTool{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:86px;border-radius:18px;border:1px solid var(--stLine);background:linear-gradient(160deg,#152a37,#0e1c26);color:#fff;font-weight:800;font-size:13px;cursor:pointer;animation:stPop .2s ease both;padding:10px 4px}
+.stTool span{font-size:26px;line-height:1}
+.stTool.dis{opacity:.35;pointer-events:none}
+.stTool:active{transform:scale(.95)}
+.stSecTitle{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--st1);margin:16px 2px 8px}
+.scEmojiGrid{grid-template-columns:repeat(7,1fr)}
+.stGifGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stGifGrid button{aspect-ratio:1;border-radius:14px;border:0;background:rgba(255,255,255,.06);padding:6px;cursor:pointer}
+.stGifGrid img{width:100%;height:100%;object-fit:contain}
+.stList{display:flex;flex-direction:column;gap:6px;max-height:46vh;overflow:auto}
+.stList button{display:flex;align-items:center;gap:10px;text-align:left;border:0;background:rgba(255,255,255,.05);color:#fff;border-radius:14px;padding:12px;font-weight:700;cursor:pointer}
+.stRow2{display:flex;gap:8px}.stRow2>*{flex:1}
+.stFilterRow{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px}
+.stFilterRow button{flex:none;width:76px;background:none;border:0;color:#cfdbe2;font-size:12px;font-weight:700;cursor:pointer;padding:0}
+.stFilterRow button div{width:76px;height:100px;border-radius:14px;background:#000 center/cover;border:2px solid transparent;margin-bottom:6px}
+.stFilterRow button.on{color:#fff}
+.stFilterRow button.on div{border-color:var(--st1)}
+.scItem.sel{outline:1.5px dashed rgba(255,255,255,.9)}
+.scItem{width:max-content;max-width:none}.scItem .scLine,.svStk .scLine{white-space:pre;overflow-wrap:normal}.svStk.svStkGif{width:max-content}
+
+/* ---------- figurinhas (editor e visualizador) ---------- */
+.stk{font-family:Inter,system-ui,sans-serif;color:#111;user-select:none;-webkit-user-select:none}
+.stkLoc{display:inline-flex;align-items:center;gap:.3em;background:#fff;color:#0c6b52;border-radius:.6em;padding:.35em .7em;font-weight:900;font-size:1em;white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.stkGif{display:block;width:100%;height:auto;pointer-events:none}
+.stkCard{width:100%;background:#fff;border-radius:1.1em;padding:.9em;box-shadow:0 10px 26px rgba(0,0,0,.3);text-align:center;font-size:1em}
+.stkCard h4{margin:0 0 .6em;font-size:1.05em;line-height:1.25;color:#111;overflow-wrap:anywhere}
+.stkPoll .stkOpt{position:relative;display:block;width:100%;border:0;border-radius:.8em;background:#eef3f5;color:#111;font-weight:800;font-size:.95em;padding:.75em .8em;margin-top:.45em;overflow:hidden;text-align:center;cursor:pointer}
+.stkPoll .stkOpt b{position:relative;z-index:1}
+.stkPoll .stkOpt em{position:relative;z-index:1;font-style:normal;float:right;color:#0c6b52}
+.stkPoll .stkOpt i{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#9ff3d6,#bdf7e3);transition:width .5s ease}
+.stkPoll.voted .stkOpt{text-align:left}
+.stkPoll .stkOpt.mine{box-shadow:inset 0 0 0 2px #20df9a}
+.stkAsk{background:linear-gradient(160deg,#20df9a,#19c6d6);color:#04140f}
+.stkAsk h4{color:#04140f}
+.stkAsk .stkIn{background:rgba(255,255,255,.92);border-radius:.8em;padding:.75em;color:#7a8a92;font-size:.85em;font-weight:600;text-align:center}
+.stkCount{background:linear-gradient(160deg,#10202b,#1b3443);color:#fff;border:1px solid rgba(255,255,255,.15)}
+.stkCount h4{color:#fff;text-transform:uppercase;letter-spacing:.06em;font-size:.85em}
+.stkCount .stkNum{display:flex;justify-content:center;gap:.35em;font-weight:900;font-variant-numeric:tabular-nums}
+.stkCount .stkNum span{background:rgba(255,255,255,.1);border-radius:.4em;padding:.25em .35em;font-size:1.25em;min-width:1.9em}
+.stkCount .stkNum small{display:block;font-size:.42em;font-weight:700;opacity:.7;letter-spacing:.05em}
+.stkCount .stkEnd{color:#8ff7cf;font-weight:900}
+.stkTxt{color:#fff;font-weight:800;text-align:center;white-space:pre-wrap;line-height:1.25;text-shadow:0 1px 6px rgba(0,0,0,.45)}
+
+/* ---------- visualizador ---------- */
+.sv{animation:stFade .18s ease}
+.svBox{animation:stPop .22s cubic-bezier(.2,.8,.3,1)}
+.svBars{gap:4px;left:10px;right:10px}
+.svBars i{height:3px;background:rgba(255,255,255,.3)}
+.svBars b{background:#fff;box-shadow:0 0 6px rgba(255,255,255,.5)}
+.svHead{top:calc(20px + env(safe-area-inset-top))}
+.svUser .avatar{width:36px;height:36px;box-shadow:0 0 0 2px rgba(255,255,255,.85)}
+.svUser b{font-size:14px}
+.svBtns button{border-radius:50%}
+.svBtns button svg{width:22px;height:22px}
+.svX{display:none!important}
+.svMedia.stSwitch{animation:stFade .2s ease}
+.svStage{position:absolute;z-index:3;pointer-events:none}
+.svStage>*{pointer-events:auto}
+.svStk{position:absolute;transform:translate(-50%,-50%);max-width:92%}
+.svStk.svStkGif{pointer-events:none}
+.svFoot{padding:10px 12px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.45))}
+.svReply{gap:8px}
+.svReply input{background:rgba(0,0,0,.25);border:1.5px solid rgba(255,255,255,.55);padding:13px 18px;font-size:15px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.svReply input:disabled{opacity:.6}
+.svIconBtn{background:none;border:0;color:#fff;width:44px;height:44px;padding:0;display:grid;place-items:center;cursor:pointer;flex:none}
+.svIconBtn svg{width:28px;height:28px}
+.svHeart svg{width:30px;height:30px;transition:transform .2s}
+.svHeart.on{color:#ff3b6b}
+.svHeart.on svg{animation:stBeat .45s ease}
+.svHeart.on svg path{fill:#ff3b6b;stroke:#ff3b6b}
+.svBigHeart{position:absolute;left:50%;top:50%;z-index:9;width:120px;height:120px;color:#ff3b6b;animation:stBurst .9s ease forwards;pointer-events:none;filter:drop-shadow(0 8px 20px rgba(255,59,107,.5))}
+.svOwnBar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.svActBtn{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:999px;padding:8px 14px 8px 8px;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.svActBtn .svFaces{display:flex}
+.svActBtn .svFaces img{width:26px;height:26px;border-radius:50%;border:2px solid #000;margin-left:-8px;object-fit:cover;background:#234}
+.svActBtn .svFaces img:first-child{margin-left:0}
+.svActBtn b{font-size:13px}
+.svActBtn small{font-size:12px;opacity:.8;margin-left:4px}
+.svUpHint{text-align:center;color:rgba(255,255,255,.75);font-size:11px;font-weight:700;letter-spacing:.4px}
+.svUpHint svg{width:14px;height:14px;display:block;margin:0 auto 1px}
+.svToast{background:rgba(10,18,24,.88);border:1px solid rgba(255,255,255,.12);font-weight:700}
+.svCaption{bottom:130px}
+.svLink{bottom:100px;display:flex;align-items:center;gap:6px;box-shadow:0 8px 20px rgba(0,0,0,.35)}
+.svLocked{color:rgba(255,255,255,.7);font-size:13px;text-align:center;padding:12px}
+
+/* ---------- folhas (atividade, compartilhar, ações) ---------- */
+.modal .modalBox.stSheet{padding:0;overflow:hidden;display:flex;flex-direction:column;max-height:min(88vh,760px);border-radius:26px 26px 0 0;animation:stUp .25s ease;background:#0b1720;border:1px solid var(--stLine)}
+@media(min-width:600px){.modal .modalBox.stSheet{border-radius:26px}}
+.stSheetHead{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 6px}
+.stSheetHead h2{margin:0;font-size:19px}
+.stSheetBody{padding:4px 16px calc(16px + env(safe-area-inset-bottom));overflow:auto;flex:1;min-height:0}
+.stGrab{width:40px;height:4px;border-radius:4px;background:rgba(255,255,255,.22);margin:10px auto 0}
+.stThumbs{display:flex;gap:8px;overflow-x:auto;padding:4px 0 12px}
+.stThumbs button{flex:none;width:58px;height:96px;border-radius:12px;border:2px solid transparent;background:#000 center/cover;padding:0;cursor:pointer;opacity:.6;transition:all .15s}
+.stThumbs button.on{border-color:var(--st1);opacity:1;transform:translateY(-2px)}
+.stStats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stStat{border-radius:18px;background:linear-gradient(160deg,#132634,#0e1c26);border:1px solid var(--stLine);padding:12px 8px;text-align:center}
+.stStat b{display:block;font-size:22px;color:#fff}
+.stStat span{display:flex;align-items:center;justify-content:center;gap:5px;font-size:12px;color:#9fb2bf;margin-top:2px}
+.stStat svg{width:15px;height:15px}
+.stTabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;scrollbar-width:none}
+.stTabs::-webkit-scrollbar{display:none}
+.stTabs button{flex:none;border-radius:999px;border:1px solid var(--stLine);background:rgba(255,255,255,.04);color:#cfdbe2;font-weight:800;font-size:13px;padding:9px 14px;cursor:pointer}
+.stTabs button.on{background:var(--st1);border-color:var(--st1);color:#04140f}
+.stPeople{display:flex;flex-direction:column;gap:2px}
+.stPerson{display:flex;align-items:center;gap:12px;padding:9px 4px;border-radius:14px;animation:stUp .2s ease both}
+.stPerson img{width:46px;height:46px;border-radius:50%;object-fit:cover;background:#173848;flex:none;cursor:pointer}
+.stPerson .stPInfo{flex:1;min-width:0;cursor:pointer}
+.stPerson .stPInfo b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stPerson .stPInfo small{display:block;color:#9fb2bf;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stPerson .stHeartMini{color:#ff3b6b;font-size:18px}
+.stMiniBtn{border-radius:999px;border:1px solid var(--stLine);background:rgba(255,255,255,.06);color:#fff;font-weight:800;font-size:12.5px;padding:8px 12px;cursor:pointer;flex:none}
+.stMiniBtn.main{background:var(--st1);border-color:var(--st1);color:#04140f}
+.stMiniBtn.done{background:transparent;color:#9fb2bf}
+.stEmptyBox{text-align:center;color:#9fb2bf;padding:34px 10px;font-size:14px;line-height:1.5}
+.stEmptyBox b{display:block;color:#fff;font-size:16px;margin-bottom:4px}
+.stEmptyBox i{display:block;font-style:normal;font-size:34px;margin-bottom:8px}
+.stPollRes{border-radius:16px;background:rgba(255,255,255,.04);border:1px solid var(--stLine);padding:12px;margin-bottom:10px}
+.stPollRes h4{margin:0 0 8px}
+.stBar{position:relative;border-radius:10px;background:rgba(255,255,255,.06);padding:9px 10px;margin-top:6px;overflow:hidden;font-weight:700;font-size:13px}
+.stBar i{position:absolute;inset:0 auto 0 0;background:rgba(32,223,154,.25)}
+.stBar span{position:relative}
+.stBar em{position:relative;float:right;font-style:normal;color:var(--st1)}
+.stAnswer{border-radius:16px;background:linear-gradient(160deg,rgba(32,223,154,.12),rgba(25,198,214,.08));border:1px solid var(--stLine);padding:12px;margin-bottom:8px}
+.stAnswer p{margin:6px 0 0;font-size:15px;color:#fff;overflow-wrap:anywhere}
+.stMenu{display:flex;flex-direction:column;gap:8px}
+.stMenu button,.stMenu a{display:flex;align-items:center;gap:12px;width:100%;padding:14px;border-radius:16px;border:1px solid var(--stLine);background:rgba(255,255,255,.04);color:#fff;font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;text-align:left}
+.stMenu button svg,.stMenu a svg{width:21px;height:21px;color:var(--st1);flex:none}
+.stMenu .danger{color:#ff8a95}.stMenu .danger svg{color:#ff8a95}
+.stSeg{display:flex;gap:4px;background:rgba(255,255,255,.05);border-radius:14px;padding:4px;margin-top:8px}
+.stSeg button{flex:1;border:0;border-radius:10px;background:none;color:#b8c7d0;font-weight:800;font-size:12px;padding:9px 2px;cursor:pointer}
+.stSeg button.on{background:var(--st1);color:#04140f}
+.stPrivRow{padding:12px 0;border-bottom:1px solid var(--stLine)}
+.stPrivRow b{font-size:15px}
+.stPrivRow small{display:block;color:#9fb2bf;font-size:12.5px;margin-top:2px}
+.stArchDay{font-size:13px;font-weight:800;color:var(--st1);margin:14px 2px 8px}
+.stArchGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.stArchGrid button{position:relative;aspect-ratio:9/16;border-radius:12px;border:0;padding:0;background:#0f1d27 center/cover;cursor:pointer;overflow:hidden}
+.stArchGrid button span{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;font-weight:800;border-radius:999px;padding:2px 7px}
+.stArchGrid button i{position:absolute;right:6px;top:6px;color:#fff;font-style:normal;font-size:14px;text-shadow:0 1px 4px #000}
+.stArchGrid video{width:100%;height:100%;object-fit:cover;pointer-events:none}
+.lightTheme .modal .modalBox.stSheet{background:#0b1720;color:#f5f8fa}
+
+/* ---------- anel de story no perfil ---------- */
+.pfAvatarWrap.hasStory .pfAvatar{box-shadow:0 0 0 3px #06131d,0 0 0 6px var(--st1),0 0 24px rgba(32,223,154,.45)}
+.pfAvatarWrap.hasStory:before{content:"";position:absolute;inset:-6px;border-radius:50%;background:conic-gradient(from 200deg,var(--st1),var(--st2),var(--st3),var(--st1));z-index:-1;animation:stSpin 6s linear infinite}
+.pfAvatarWrap.hasStory.seenStory:before{background:rgba(150,170,180,.35);animation:none}
+.pfAvatarWrap.hasStory .pfAvatar{box-shadow:0 0 0 3px var(--bg)}
+.pfAvatarWrap{isolation:isolate}
+@media (prefers-reduced-motion:reduce){.sv,.svBox,.sc,.stBig,.stTool,.stPerson,.scPanel,.stCam{animation:none!important}.pfAvatarWrap.hasStory:before{animation:none}}
+
+</style>
+<style id="flStyle">.fl{position:fixed;inset:0;z-index:170;background:var(--bg,#06131d);color:var(--text,#f5f8fa);display:flex;flex-direction:column;animation:stUp .22s ease}
+.flTop{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;padding:calc(8px + env(safe-area-inset-top)) 12px 8px}
+.flTop b{text-align:center;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flBack{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--text);display:grid;place-items:center;padding:0;cursor:pointer}
+.flBack svg{width:22px;height:22px}
+.flTabs{display:flex;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.flTabs::-webkit-scrollbar{display:none}
+.flTabs button{flex:1;min-width:max-content;background:none;border:0;color:var(--muted);font-weight:700;font-size:15px;padding:14px 12px;position:relative;cursor:pointer}
+.flTabs button.on{color:var(--text)}
+.flTabs button.on:after{content:"";position:absolute;left:12%;right:12%;bottom:-1px;height:2px;border-radius:2px;background:var(--text)}
+.flSearch{display:flex;align-items:center;gap:10px;margin:12px 14px 6px;padding:0 14px;border-radius:14px;background:rgba(255,255,255,.07)}
+.flSearch svg{width:19px;height:19px;color:var(--muted);flex:none}
+.flSearch input{flex:1;background:none;border:0;outline:none;color:var(--text);font-size:16px;padding:12px 0}
+.flList{flex:1;overflow-y:auto;padding:4px 14px calc(16px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
+.flRow{display:flex;align-items:center;gap:12px;padding:9px 0;cursor:pointer}
+.flAv{flex:none;width:58px;height:58px;border-radius:50%;padding:0}
+.flAv.story,.flAv.seen{padding:2.5px;background:conic-gradient(from 200deg,#20df9a,#19c6d6,#8ff7cf,#20df9a)}
+.flAv.seen{background:rgba(150,170,180,.4)}
+.flAv img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;background:#173848;border:2px solid var(--bg,#06131d)}
+.flInfo{flex:1;min-width:0}
+.flInfo b{display:flex;align-items:center;gap:4px;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flInfo b .cmVBadge{width:16px;height:16px;flex:none}
+.flInfo span{display:block;color:var(--muted);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flFollow{flex:none;min-width:108px;height:38px;border-radius:10px;border:0;font-weight:800;font-size:14px;cursor:pointer;background:linear-gradient(135deg,#2ff0b0,#13c98a);color:#03251a}
+.flFollow.on{background:rgba(255,255,255,.12);color:var(--text)}
+.flEmpty{text-align:center;color:var(--muted);padding:50px 20px;font-size:14px}
+.flEmpty b{display:block;color:var(--text);font-size:16px;margin-bottom:4px}
+.flSkel{height:58px;border-radius:14px;margin:10px 0;background:linear-gradient(90deg,rgba(255,255,255,.04),rgba(255,255,255,.09),rgba(255,255,255,.04));background-size:200% 100%;animation:flSh 1.2s infinite linear}
+@keyframes flSh{to{background-position:-200% 0}}
+.lightTheme .fl{background:#f3f7f8}.lightTheme .flSearch{background:#e3ecef}.lightTheme .flFollow.on{background:#dfe7ea}
+</style>
 </head>
 <body><div id="app"></div>
 <script>
@@ -531,7 +824,7 @@ function renderPeopleList(list,q){return list.length?list.map(p=>`<div class="pe
 function colFromError(err){const msg=String((err&&err.message)||'')+' '+String((err&&err.details)||'');const m=msg.match(/column ["']?(?:[A-Za-z0-9_]+\.)?["']?([A-Za-z0-9_]+)["']? (?:of '[A-Za-z0-9_]+' )?(?:does not exist|in the schema cache)/i)||msg.match(/'([A-Za-z0-9_]+)' column/i)||msg.match(/profiles\.([A-Za-z0-9_]+)/);return m?m[1].toLowerCase():''}
 let profilesLoadError='';
 async function loadPublicProfiles(){
-  const all=['id','name','city','bio','photo','cover','interests','links','whatsapp','showcaseEnabled','aboutPublic','created_at'];
+  const all=['id','name','city','bio','photo','cover','interests','links','whatsapp','showcaseEnabled','aboutPublic','story_prefs','created_at'];
   let cols=[...all],r=null;
   try{
     for(let k=0;k<14;k++){
@@ -1782,14 +2075,14 @@ function pfShowTab(i){const pages=document.querySelectorAll('#pfPages > .pfPage'
 function profileTab(i){pfShowTab(i)}
 function pubTab(i){pfShowTab(i)}
 function pfStatsHtml(o){return `<div class="pfStats"><button type="button" class="pfStat" onclick="showFollowList('${o.id}','followers')">${PFI.users}<div><b id="${o.fid}">0</b><span>Seguidores</span></div></button><button type="button" class="pfStat" onclick="showFollowList('${o.id}','following')">${PFI.userPlus}<div><b id="${o.gid}">${o.following||0}</b><span>Seguindo</span></div></button><button type="button" class="pfStat" onclick="pfShowTab(0);document.getElementById('pfTabs')?.scrollIntoView({behavior:'smooth',block:'start'})">${PFI.doc}<div><b>${o.posts}</b><span>Publicações</span></div></button></div>`}
-function pfHeadHtml(o){return `<div class="pfCover" style="background-image:url('${esc(o.cover)}')">${o.back?`<button type="button" class="pfCoverBtn l" onclick="${o.back}" aria-label="Voltar">${PFI.back}</button>`:''}${o.admin?`<button type="button" class="pfCoverBtn r2" onclick="admOpen()" aria-label="Painel">${PFI.crown}</button>`:''}<button type="button" class="pfCoverBtn r" onclick="${o.menu}" aria-label="Mais opções">${PFI.vdots}</button></div><div class="pfHead"><div class="pfAvatarWrap ${userVerified(o.id)?'premium':''}"><img class="pfAvatar" src="${esc(o.photo)}" onerror="this.src=avatar('${esc(o.name).replace(/'/g,'')}')" ${o.avatarClick?`onclick="${o.avatarClick}"`:''} alt="">${vBadge(o.id)}</div><div class="pfNameRow"><h1 class="pfName">${esc(o.name)}</h1>${o.follow||''}</div>${creatorTag(o.id)}<div class="pfCity">${PFI.pin}<span>${esc(o.city||'Serra da Mantiqueira')}</span></div>${o.bio?`<div class="pfBio">${esc(o.bio)}</div>`:''}${o.contact||''}<div class="pfActions">${o.actions}</div>${pfStatsHtml(o)}${o.extra||''}</div>`}
+function pfHeadHtml(o){return `<div class="pfCover" style="background-image:url('${esc(o.cover)}')">${o.back?`<button type="button" class="pfCoverBtn l" onclick="${o.back}" aria-label="Voltar">${PFI.back}</button>`:''}${o.admin?`<button type="button" class="pfCoverBtn r" onclick="admOpen()" aria-label="Painel">${PFI.crown}</button>`:''}</div><div class="pfHead"><div class="pfAvatarWrap ${userVerified(o.id)?'premium':''} ${typeof pfStoryCls==='function'?pfStoryCls(o.id):''}"><img class="pfAvatar" src="${esc(o.photo)}" onerror="this.src=avatar('${esc(o.name).replace(/'/g,'')}')" ${o.avatarClick?`onclick="${o.avatarClick}"`:''} alt="">${vBadge(o.id)}</div><div class="pfNameRow"><h1 class="pfName">${esc(o.name)}</h1>${o.follow||''}</div>${creatorTag(o.id)}<div class="pfCity">${PFI.pin}<span>${esc(o.city||'Serra da Mantiqueira')}</span></div>${o.bio?`<div class="pfBio">${esc(o.bio)}</div>`:''}${o.contact||''}<div class="pfActions">${o.actions}</div>${pfStatsHtml(o)}${o.extra||''}</div>`}
 function profile(){const p=profileData(),posts=getPosts().filter(x=>x.ownerId===me?.id||(x.collabs||[]).includes(me?.id)),showcase=p.showcaseEnabled;setTimeout(async()=>{const c=await followCounts(me?.id);const a=document.getElementById("profileFollowers"),b=document.getElementById("profileFollowing");if(a)a.textContent=c.followers;if(b)b.textContent=c.following;if(showcase){await loadVitrine(me.id);const el=document.getElementById("profileShowcase");if(el)el.innerHTML=showcaseHtml()}},0);const bio=/Ainda não adicionou/.test(p.bio)?'':p.bio;const hl=`<div class="highlightBar"><span class="highlightLabel">Destaques</span><div class="highlightRow compact"><div class="highlight"><div class="highlightCircle highlightAdd" onclick="addHighlight()">+</div></div>${p.highlights.map(h=>`<div class="highlight" onclick="viewHighlight(${JSON.stringify(h.images||[h.image]).replace(/"/g,"&quot;")},${JSON.stringify(h.name).replace(/"/g,"&quot;")})"><img class="highlightCircle" src="${esc(h.image)}"><div>${esc(h.name)}</div></div>`).join('')}</div><button class="publishMini" onclick="newPost()" title="Nova publicação">+</button></div>`;const head=pfHeadHtml({id:me?.id,name:p.name,city:p.city,bio,photo:p.photo,cover:p.cover,menu:'settingsScreen()',admin:cmIsAdmin(),avatarClick:'openMyStoryOrNew()',contact:profileContactHtml(p,true),actions:`<button type="button" class="pfBtn main" onclick="editProfile()">${PFI.edit}<span>Editar perfil</span></button><button type="button" class="pfBtn" onclick="profileShare('me')">${PFI.share}<span>Compartilhar</span></button><button type="button" class="pfBtn round" onclick="pfOwnMenu()" aria-label="Mais">${PFI.dots}</button>`,fid:'profileFollowers',gid:'profileFollowing',following:followCache.size,posts:posts.length,extra:hl});const postsHtml=posts.length?posts.slice().sort((a,b)=>b.created-a.created).map(postHtml).join(''):pfEmpty('photos','Você ainda não publicou nada.','Compartilhe fotos, vídeos e novidades com a sua região.',`<button type="button" class="pfBtn main" onclick="newPost()">${PFI.plus}<span>Nova publicação</span></button>`);return screen(`<div class="pf">${head}${pfTabsHtml('profileTab',showcase)}<div id="pfPages" class="pfPages"><div class="pfPage" id="profilePages">${postsHtml}</div><div class="pfPage hidden">${profVideosHtml(me?.id,true)}</div><div class="pfPage hidden"><button class="photoAdd" onclick="newPhoto()">＋ Publicar nova foto</button>${profPhotosHtml(me?.id)}</div>${showcase?`<div class="pfPage hidden"><div class="card"><div class="showcaseHead"><div><h3 style="margin:0">Vitrine</h3><div class="small">Produtos, serviços, preços e links</div></div><button class="publishMini" onclick="newProduct()" title="Adicionar produto">+</button></div><div id="profileShowcase">${showcaseHtml()}</div></div></div>`:''}</div></div>`,'profile')}
 function pfOwnMenu(){openModal(`<div class="modalHead"><h2>Meu perfil</h2><button class="close" onclick="closeModal()">×</button></div><div class="pfMenu"><button onclick="closeModal();newPost()">${PFI.plus}<span>Nova publicação</span></button><button onclick="pfSavedModal()">${PFI.bookmark}<span>Salvos<small>Publicações que você guardou</small></span></button><button onclick="pfAboutModal()">${PFI.info}<span>Sobre<small>Cidade, bio, interesses e contato</small></span></button><button onclick="settingsScreen()">${PFI.gear}<span>Configurações<small>Vitrine, Sobre, tema e conta</small></span></button></div>`)}
 function pfSavedModal(){openModal(`<div class="modalHead"><h2>Salvos</h2><button class="close" onclick="closeModal()">×</button></div>${profSavedHtml()}`)}
 function pfAboutModal(){const p={...profileData(),id:me?.id,created_at:me?.created_at};openModal(`<div class="modalHead"><h2>Sobre</h2><button class="close" onclick="settingsScreen()" aria-label="Voltar">‹</button></div>${profAboutHtml(p,true)}<div class="settingRow" style="margin-top:14px"><span><b>Deixar a seção Sobre pública</b><small>Ligado: outras pessoas veem bio, interesses e links pelo menu ⋯ do seu perfil.</small></span><button type="button" class="switch ${p.aboutPublic?'on':''}" onclick="pfToggleMeta(this,'aboutPublic')"><i></i></button></div><button class="secondary" style="width:100%;margin-top:12px" onclick="closeModal()">Fechar</button>`)}
 async function pfToggleMeta(btn,key){if(!me?.id||btn.disabled)return;const on=!btn.classList.contains('on');btn.classList.toggle('on',on);btn.disabled=true;try{const meta={...(me.user_metadata||{}),[key]:on};const {data,error}=await sb.auth.updateUser({data:cmLite(meta)});if(error)throw error;me=data.user;const p=profileData();await upsertMyProfile({id:me.id,name:p.name,city:p.city,photo:p.photo,cover:p.cover,bio:meta.bio||'',interests:p.interests,links:p.links,whatsapp:p.whatsappPublic?p.whatsapp:'',aboutPublic:p.aboutPublic,showcaseEnabled:p.showcaseEnabled});if(window.cmCurrentPage==='profile'){const a=document.getElementById('app');if(a)a.innerHTML=profile()}}catch(e){btn.classList.toggle('on',!on);alert(e.message||'Não foi possível salvar agora.')}finally{btn.disabled=false}}
-function publicProfileScreen(){const p=currentPublicUser;if(!p)return people();const showcase=p.showcaseEnabled===true;setTimeout(async()=>{const c=await followCounts(p.id);const a=document.getElementById("publicFollowers"),b=document.getElementById("publicFollowing");if(a)a.textContent=c.followers;if(b)b.textContent=c.following;if(showcase)pubLoadVitrine(p)},0);const fol=isFollowing(p.id);const posts=profUserPosts(p.id);const first=pfFirst(p.name);const head=pfHeadHtml({id:p.id,name:p.name,city:p.city,bio:p.bio||'Pessoa da região conectada à Mantiqueira. 🌿',photo:p.photo||avatar(p.name),cover:p.cover||CM_HERO_IMAGE,back:"go('people')",menu:'pfPubMenu()',follow:`<button type="button" class="pfFollow ${fol?'on':''}" onclick="toggleFollow('${p.id}')">${fol?'Seguindo ✓':'+ Seguir'}</button>`,actions:`<button type="button" class="pfBtn main" onclick="go('conversation')">${PFI.msg}<span>Mensagem</span></button><button type="button" class="pfBtn" onclick="profileShare('${p.id}')">${PFI.share}<span>Compartilhar</span></button><button type="button" class="pfBtn round" onclick="pfPubMenu()" aria-label="Mais">${PFI.dots}</button>`,fid:'publicFollowers',gid:'publicFollowing',following:0,posts:posts.length});const postsHtml=posts.length?publicPostsHtml(p.id):pfEmpty('photos','Ainda não há publicações.',`Quando ${esc(p.name)} compartilhar algo, você verá aqui.`);const vids=profUserPosts(p.id).filter(postIsVideo).length?profVideosHtml(p.id,false):pfEmpty('play','Ainda não há vídeos.',`Os vídeos de ${esc(first)} aparecerão aqui.`);const phs=profPhotosHtml(p.id);const photos=/class='empty'/.test(phs)?pfEmpty('image','Ainda não há fotos.',`As fotos de ${esc(first)} aparecerão aqui.`):phs;return screen(`<div class="pf">${head}${pfTabsHtml('pubTab',showcase)}<div id="pfPages" class="pfPages"><div class="pfPage"><div id="publicPosts">${postsHtml}</div></div><div class="pfPage hidden">${vids}</div><div class="pfPage hidden">${photos}</div>${showcase?`<div class="pfPage hidden"><div id="publicShowcase">${pfEmpty('store','Carregando vitrine...','')}</div></div>`:''}</div></div>`,'explore')}
-function pfPubMenu(){const p=currentPublicUser;if(!p)return;const fol=isFollowing(p.id);openModal(`<div class="modalHead"><h2>${esc(p.name)}</h2><button class="close" onclick="closeModal()">×</button></div><div class="pfMenu"><button onclick="closeModal();toggleFollow('${p.id}')">${PFI.userPlus}<span>${fol?'Deixar de seguir':'Seguir'}</span></button><button onclick="pfPubAbout()">${PFI.info}<span>Sobre<small>Cidade, bio, interesses e contato</small></span></button><button onclick="closeModal();profileShare('${p.id}')">${PFI.share}<span>Compartilhar perfil</span></button></div>`)}
+function publicProfileScreen(){const p=currentPublicUser;if(!p)return people();const showcase=p.showcaseEnabled===true;setTimeout(async()=>{const c=await followCounts(p.id);const a=document.getElementById("publicFollowers"),b=document.getElementById("publicFollowing");if(a)a.textContent=c.followers;if(b)b.textContent=c.following;if(showcase)pubLoadVitrine(p)},0);const fol=isFollowing(p.id);const posts=profUserPosts(p.id);const first=pfFirst(p.name);const head=pfHeadHtml({id:p.id,name:p.name,city:p.city,bio:p.bio||'Pessoa da região conectada à Mantiqueira. 🌿',photo:p.photo||avatar(p.name),cover:p.cover||CM_HERO_IMAGE,back:"go('people')",menu:'pfPubMenu()',avatarClick:`pfAvatarTap('${p.id}')`,follow:`<button type="button" class="pfFollow ${fol?'on':''}" onclick="toggleFollow('${p.id}')">${fol?'Seguindo ✓':'+ Seguir'}</button>`,actions:`<button type="button" class="pfBtn main" onclick="go('conversation')">${PFI.msg}<span>Mensagem</span></button><button type="button" class="pfBtn" onclick="profileShare('${p.id}')">${PFI.share}<span>Compartilhar</span></button><button type="button" class="pfBtn round" onclick="pfPubMenu()" aria-label="Mais">${PFI.dots}</button>`,fid:'publicFollowers',gid:'publicFollowing',following:0,posts:posts.length});const postsHtml=posts.length?publicPostsHtml(p.id):pfEmpty('photos','Ainda não há publicações.',`Quando ${esc(p.name)} compartilhar algo, você verá aqui.`);const vids=profUserPosts(p.id).filter(postIsVideo).length?profVideosHtml(p.id,false):pfEmpty('play','Ainda não há vídeos.',`Os vídeos de ${esc(first)} aparecerão aqui.`);const phs=profPhotosHtml(p.id);const photos=/class='empty'/.test(phs)?pfEmpty('image','Ainda não há fotos.',`As fotos de ${esc(first)} aparecerão aqui.`):phs;return screen(`<div class="pf">${head}${pfTabsHtml('pubTab',showcase)}<div id="pfPages" class="pfPages"><div class="pfPage"><div id="publicPosts">${postsHtml}</div></div><div class="pfPage hidden">${vids}</div><div class="pfPage hidden">${photos}</div>${showcase?`<div class="pfPage hidden"><div id="publicShowcase">${pfEmpty('store','Carregando vitrine...','')}</div></div>`:''}</div></div>`,'explore')}
+function pfPubMenu(){const p=currentPublicUser;if(!p)return;const fol=isFollowing(p.id);openModal(`<div class="modalHead"><h2>${esc(p.name)}</h2><button class="close" onclick="closeModal()">×</button></div><div class="pfMenu"><button onclick="closeModal();toggleFollow('${p.id}')">${PFI.userPlus}<span>${fol?'Deixar de seguir':'Seguir'}</span></button><button onclick="pfPubAbout()">${PFI.info}<span>Sobre<small>Cidade, bio, interesses e contato</small></span></button></div>`)}
 function pfPubAbout(){const p=currentPublicUser;if(!p)return;openModal(`<div class="modalHead"><h2>Sobre</h2><button class="close" onclick="closeModal()">×</button></div>${p.aboutPublic!==false?profAboutHtml(p,false):`<div class="aboutPrivate">🔒 ${esc(pfFirst(p.name))} optou por manter a seção Sobre privada.</div>`}`)}
 
 function getProducts(){return Array.isArray(vitrineCache)?vitrineCache.filter(x=>!['comercio','post','post_like','post_comment'].includes(x.item_type)):[]}
@@ -3679,4 +3972,827 @@ body:has(#cmInstall) .cmFab{bottom:calc(176px + env(safe-area-inset-bottom))}
 body:has(#modal) #cmInstall{display:none!important}
 .rmSheet .reelSpeeds button{flex:1 1 auto;min-width:0;padding:10px 6px;font-size:14px}
 </style>
+<script>
+/* ===================== STORIES v3 (Conecta Mantiqueira) =====================
+   Reaproveita o STORIES v2 (tabelas stories, story_views, story_likes, story_mentions, close_friends)
+   e substitui apenas as funções de interface/fluxo. Recursos extras (enquete, perguntas, compartilhamentos)
+   usam a tabela story_interactions (atualizacao-stories.sql); sem ela, caem para mensagens no bate-papo. */
+const STI={
+x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg>',
+cam:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.6"/></svg>',
+gal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="3"/><circle cx="9" cy="9" r="1.8"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg>',
+file:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg>',
+arch:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+star:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>',
+flip:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 15a8 8 0 0 1-14 3l-2-2"/><path d="M20 4v4h-4M4 20v-4h4"/></svg>',
+flash:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>',
+sticker:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 12.5a8.5 8.5 0 1 1-9-9h1l8 8z"/><path d="M12.5 3.5v5a3 3 0 0 0 3 3h5M8.5 14.5s1.2 1.6 3.5 1.6"/><circle cx="8.5" cy="10" r=".6" fill="currentColor"/></svg>',
+music:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>',
+fx:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8zM19 14l.9 2.1L22 17l-2.1.9L19 20l-.9-2.1L16 17l2.1-.9zM5 15l.7 1.6 1.6.7-1.6.7L5 19.6l-.7-1.6-1.6-.7 1.6-.7z"/></svg>',
+draw:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c2-1 3-3 3-5l9-9a2.1 2.1 0 0 1 3 3l-9 9c-2 0-4 1-5 3z"/></svg>',
+more:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
+send:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4z"/></svg>',
+heart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20.5s-8-4.7-8-11a4.6 4.6 0 0 1 8-3.1 4.6 4.6 0 0 1 8 3.1c0 6.3-8 11-8 11z"/></svg>',
+heartFill:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-8-4.7-8-11a4.6 4.6 0 0 1 8-3.1 4.6 4.6 0 0 1 8 3.1c0 6.3-8 11-8 11z"/></svg>',
+eye:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+vol:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>',
+mute:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>',
+up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>',
+search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>',
+trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
+user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg>',
+bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7M10 21h4"/><path d="M3 3l18 18"/></svg>',
+link:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>',
+chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>',
+pin:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5.3 7 13 7 13s7-7.7 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>'
+};
+const ST_FILTERS=[['','Normal',''],['vivo','Vívido','saturate(1.35) contrast(1.08)'],['serra','Serra','sepia(.22) saturate(1.25) hue-rotate(-6deg) contrast(1.05)'],['neblina','Neblina','brightness(1.08) contrast(.88) saturate(.8)'],['quente','Quente','sepia(.35) saturate(1.3) brightness(1.03)'],['frio','Frio','hue-rotate(14deg) saturate(1.1) brightness(1.03)'],['noite','Noite','contrast(1.18) brightness(.88) saturate(.9)'],['pb','P&B','grayscale(1) contrast(1.08)']];
+function stFilterCss(k){const f=ST_FILTERS.find(x=>x[0]===k);return f?f[2]:''}
+const ST_GIFS=[['1f600','feliz sorriso'],['1f602','rindo risada'],['1f923','rolando de rir'],['1f60d','apaixonado amor'],['1f970','carinho amor'],['1f618','beijo'],['1f60e','legal oculos'],['1f929','uau estrelas'],['1f973','festa aniversario'],['1f62d','chorando triste'],['1f97a','pidão fofo'],['1f631','susto'],['1f914','pensando'],['1f644','revirando'],['1f634','sono'],['1f92f','explodindo'],['1f60b','gostoso comida'],['1f924','babando'],['1f917','abraço'],['1f64f','obrigado reza'],['1f44f','palmas'],['1f44d','joia ok'],['1f44b','tchau oi'],['1f4aa','força'],['1f525','fogo top'],['2764_fe0f','coração amor'],['1f496','coração brilho'],['1f494','coração partido'],['2728','brilho'],['1f389','festa'],['1f38a','confete'],['1f381','presente'],['1f382','bolo aniversario'],['2600_fe0f','sol'],['1f308','arco iris'],['26c8_fe0f','tempestade chuva'],['2744_fe0f','frio neve'],['1f319','lua noite'],['1f31f','estrela'],['1f4af','cem'],['1f680','foguete'],['1f697','carro'],['1f3cd_fe0f','moto'],['26bd','futebol'],['1f3c6','troféu'],['1f3b8','violão musica'],['1f3b6','musica notas'],['1f436','cachorro'],['1f431','gato'],['1f414','galinha roça'],['1f40e','cavalo'],['1f984','unicornio'],['1f98b','borboleta'],['1f33b','girassol flor'],['1f335','cacto'],['2615','café'],['1f37b','cerveja brinde'],['1f355','pizza'],['1f37f','pipoca'],['1f4f8','foto camera'],['1f440','olhos'],['1f60c','tranquilo'],['1f607','anjo'],['1f608','diabinho'],['1f47b','fantasma'],['1f916','robo'],['1f4a9','cocô'],['1f92a','doido'],['1f92b','silencio'],['1f971','bocejo']];
+const ST_EMOJIS=['😀','😁','😂','🤣','😊','😍','🥰','😘','😎','🤩','🥳','😮','😢','😭','😡','🤔','🙄','😴','🤯','🙏','👏','👍','👋','💪','🔥','❤️','💚','💙','💛','💜','🖤','✨','⭐','🌟','🎉','🎂','🎁','🌿','🌱','🌳','⛰️','🏔️','🌄','🌅','☀️','🌤️','🌧️','❄️','🌙','🌈','🍃','🌻','🌸','☕','🍷','🍺','🧀','🍕','🍓','🚗','🏍️','🚲','🥾','⛺','🎣','🐎','🐶','🐱','🐔','📍','🏡','⛪','📸','🎶','🎸','⚽','🏆','💯','✅','📣'];
+const ST_TOOLS=[['loc','📍','Localização','local cidade lugar'],['mention','@','Menção','mencionar pessoa marcar'],['music','🎵','Música','musica som'],['gif','🎞️','GIF','gif figurinha animada'],['poll','📊','Enquete','enquete votação votar'],['ask','❓','Perguntas','pergunta caixa responder'],['link','🔗','Link','link site url'],['count','⏱','Contagem','contagem regressiva data evento'],['emoji','😀','Emoji','emoji carinha'],['text','Aa','Texto','texto escrever'],['draw','🎨','Desenho','desenho pincel desenhar']];
+let ST={tick:0,poll:{},canvasFilter:null,deep:false};
+function stP(uid){if(!uid)return null;if(uid===me?.id){const p=profileData();return{id:me.id,name:p.name,photo:p.photo,city:p.city}}try{const p=personById(uid);if(p)return p}catch(_){}return (publicProfilesCache||[]).find(p=>p.id===uid)||null}
+function stFirst(n){return String(n||'').trim().split(/\s+/)[0]||'Usuário'}
+function stDefPrefs(){return{view:'all',reply:'all',mention:'all',share:'all'}}
+function stPrefsOf(uid){let raw=uid===me?.id?me?.user_metadata?.story_prefs:stP(uid)?.story_prefs;if(typeof raw==='string'){try{raw=JSON.parse(raw)}catch(_){raw=null}}return{...stDefPrefs(),...(raw&&typeof raw==='object'?raw:{})}}
+function stAllowedBy(level,owner){if(!owner||owner===me?.id)return true;level=level||'all';if(level==='all')return true;if(level==='followers')return followCache.has(owner);if(level==='close')return closeOf.has(owner);return false}
+function stCanSee(row){return row.user_id===me?.id||stAllowedBy(row.audience||'all',row.user_id)}
+function stPerm(it,key){const lv=(it.overlay&&it.overlay.perm&&it.overlay.perm[key])||'all';return stAllowedBy(lv,it.user_id)}
+const ST_AUD_TXT={all:'Todos',followers:'Seguidores',close:'Amigos próximos',none:'Só eu'};
+function stCanvasFilterOK(){if(ST.canvasFilter!=null)return ST.canvasFilter;try{const c=document.createElement('canvas').getContext('2d');c.filter='grayscale(1)';ST.canvasFilter=c.filter==='grayscale(1)'}catch(_){ST.canvasFilter=false}return ST.canvasFilter}
+function stIsMissingTable(e){return /does not exist|schema cache|relation|not find/i.test(String(e?.message||e||''))}
+async function stInteract(story,kind,value,extra){try{const row={story_id:story.id,user_id:me.id,owner_id:story.user_id,kind,value:value==null?'':String(value).slice(0,500)};if(extra)Object.assign(row,extra);const r=await sb.from('story_interactions').insert(row);if(r.error)throw r.error;return true}catch(e){return false}}
+function stMapRow(x,p){p=p||{};return{id:x.id,owner:x.user_id===me.id?'me':x.user_id,user_id:x.user_id,name:p.name||'Usuário',photo:p.photo||avatar(p.name||'Usuário'),image:x.media_url,type:x.media_type,text:x.caption||'',link:x.link_url||'',music:x.music||'',audience:x.audience||'all',orig:x.original_post_id||'',origOwner:x.original_owner_id||'',overlay:(x.overlay&&typeof x.overlay==='object')?x.overlay:null,expires:Date.parse(x.expires_at)||0,created:new Date(x.created_at).getTime()}}
+
+/* ---------- carregamento com privacidade ---------- */
+async function loadStories(){
+  if(!me?.id)return [];
+  storySeen=new Set(lsGet('cm_seen_stories',[]));
+  storyMutedUsers=new Set(lsGet('cm_muted_story_users',[]));
+  closeFriends=new Set(lsGet('cm_close_friends',[]));
+  try{
+    const nowIso=new Date().toISOString();
+    const base='id,user_id,media_url,media_type,caption,music,link_url,created_at,expires_at';
+    let r=await sb.from('stories').select(base+',audience,original_post_id,original_owner_id,overlay').gt('expires_at',nowIso).order('created_at',{ascending:true});
+    if(r.error)r=await sb.from('stories').select(base+',audience').gt('expires_at',nowIso).order('created_at',{ascending:true});
+    if(r.error)r=await sb.from('stories').select(base).gt('expires_at',nowIso).order('created_at',{ascending:true});
+    if(r.error)throw r.error;
+    try{const cf=await sb.from('close_friends').select('owner_id,friend_id').or(`owner_id.eq.${me.id},friend_id.eq.${me.id}`);if(!cf.error&&Array.isArray(cf.data)){closeFriends=new Set(cf.data.filter(x=>x.owner_id===me.id).map(x=>x.friend_id));closeOf=new Set(cf.data.filter(x=>x.friend_id===me.id).map(x=>x.owner_id))}}catch(_){}
+    if(!followCache.size&&typeof loadFollowState==='function'){try{await loadFollowState()}catch(_){}}
+    const rows=(r.data||[]).filter(stCanSee);
+    const ids=[...new Set(rows.map(x=>x.user_id))];
+    let profiles=[];
+    if(ids.length){const pr=await sb.from('profiles').select('id,name,photo').in('id',ids);profiles=pr.data||[]}
+    const map=new Map(profiles.map(x=>[x.id,x]));
+    const sids=rows.map(x=>x.id);
+    if(sids.length){
+      try{const v=await sb.from('story_views').select('story_id').eq('viewer_id',me.id).in('story_id',sids);if(!v.error&&v.data)v.data.forEach(x=>storySeen.add(x.story_id))}catch(_){}
+      try{const l=await sb.from('story_likes').select('story_id').eq('user_id',me.id).in('story_id',sids);if(!l.error&&l.data)storyLikes=new Set(l.data.map(x=>x.story_id))}catch(_){}
+    }
+    storiesCache=rows.map(x=>stMapRow(x,map.get(x.user_id)||(x.user_id===me.id?{name:profileData().name,photo:profileData().photo}:{})));
+    return storiesCache;
+  }catch(_){return storiesCache}
+}
+
+/* ---------- bandeja ---------- */
+function stories(){
+  const gs=storyGroups(),own=gs.find(g=>g.mine),others=gs.filter(g=>!g.mine),p=profileData();
+  const cls=g=>g.allSeen?'seen':(g.close?'close':'');
+  const ownHtml=`<div class="storyCircle${own&&own.allSeen?' isSeen':''}" onclick="${own?`openStories('${esc(own.uid)}')`:'newStory()'}"><div class="storyRingWrap"><div class="storyRing ${own?cls(own):'none'}"><img src="${esc(own?own.photo:p.photo)}" alt="" loading="lazy" onerror="this.src=avatar('${esc(stFirst(p.name))}')"></div><button class="storyPlus" aria-label="Novo story" onclick="event.stopPropagation();newStory()">+</button></div><div>Seu story</div></div>`;
+  const othersHtml=others.map(g=>`<div class="storyCircle${g.allSeen?' isSeen':''}" onclick="openStories('${esc(g.uid)}')"><div class="storyRingWrap"><div class="storyRing ${cls(g)}"><img src="${esc(g.photo)}" alt="" loading="lazy"></div>${g.close&&!g.allSeen?'<span class="stCloseTag">★</span>':''}</div><div>${esc(stFirst(g.name))}</div></div>`).join('');
+  return `<div class="sectionHead"><h2>Stories</h2><button class="link" onclick="storySettings()">⚙ Configurações</button></div><div class="stories">${ownHtml}${typeof bizStoriesHtml==='function'?bizStoriesHtml():''}${othersHtml}</div>`;
+}
+function pfStoryCls(uid){try{const g=storyGroups().find(x=>x.uid===uid);return g?('hasStory'+(g.allSeen?' seenStory':'')):''}catch(_){return ''}}
+function pfAvatarTap(uid){const g=storyGroups().find(x=>x.uid===uid);if(g)openStories(uid)}
+
+/* ---------- Novo story ---------- */
+function newStory(){
+  document.getElementById('sc')?.remove();
+  SC={file:null,url:'',video:false,grad:null,gradI:0,items:[],sel:-1,mode:'',strokes:[],drawColor:'#ff3b30',drawW:.012,music:'',link:'',audience:'all',editing:-1,busy:false,filter:'',queue:[],qTotal:1,qDone:0,post:null};
+  document.body.classList.add('svOpen');
+  document.body.insertAdjacentHTML('beforeend',`<div id="sc" class="sc"><div class="scTop" id="scTop"><button class="stIco" aria-label="Fechar" onclick="scClose()">${STI.x}</button><b>Novo story</b><button class="stIco" aria-label="Configurações de stories" onclick="storySettings()">${STI.gear}</button></div><div id="scBody" class="scBody"></div></div>`);
+  scRenderPick();
+}
+function scClose(){
+  try{musicStop()}catch(_){}
+  stCamClose();
+  if(SC&&SC.url)URL.revokeObjectURL(SC.url);
+  document.getElementById('sc')?.remove();document.body.classList.remove('svOpen');SC=null;
+}
+function scRenderPick(){
+  const top=document.getElementById('scTop');if(top)top.classList.remove('hidden');
+  const pr=stPrefsOf(me?.id);
+  document.getElementById('scBody').innerHTML=`<div class="stPick"><div class="stPickHero"><h2>Novo story</h2>Compartilhe um momento com a região. Fica no ar por 24 horas.<br><small style="opacity:.75">Visível para: <b>${ST_AUD_TXT[pr.view]||'Todos'}</b></small></div><div class="stPickGrid"><button class="stBig" onclick="stCamOpen()"><span class="stBigIco">${STI.cam}</span><span><b>Câmera</b><small>Foto ou vídeo na hora</small></span></button><button class="stBig" onclick="document.getElementById('scGal').click()"><span class="stBigIco">${STI.gal}</span><span><b>Galeria</b><small>Fotos e vídeos · vários de uma vez</small></span></button><button class="stBig" onclick="scStartText()"><span class="stBigIco" style="font-family:Georgia,serif">Aa</span><span><b>Texto</b><small>Só texto com fundo colorido</small></span></button><button class="stBig" onclick="document.getElementById('scFile').click()"><span class="stBigIco">${STI.file}</span><span><b>Arquivo</b><small>JPG, PNG, HEIC, MP4, MOV</small></span></button></div><div class="stPickLinks"><button class="stChip" onclick="storyArchive()">${STI.arch} Arquivo de stories</button><button class="stChip" onclick="closeFriendsEditor()">${STI.star} Amigos próximos</button></div></div><input id="scCam" class="hidden" type="file" accept="image/*,video/*" capture="environment" onchange="scPicked(this)"><input id="scGal" class="hidden" type="file" accept="image/*,video/*" multiple onchange="scPicked(this)"><input id="scFile" class="hidden" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/gif,video/mp4,video/quicktime,video/webm,.heic,.heif,.mov,.mp4" multiple onchange="scPicked(this)">`;
+}
+function scPicked(inp){
+  const files=[...(inp.files||[])].filter(f=>/^(image|video)\//.test(f.type)||/\.(heic|heif|mov|mp4|webm|jpe?g|png|webp|gif)$/i.test(f.name));
+  inp.value='';
+  if(!files.length){if(inp.files&&inp.files.length)alert('Formato não suportado. Use foto (JPG, PNG, HEIC) ou vídeo (MP4, MOV).');return}
+  const big=files.find(f=>/^video\//.test(f.type)&&f.size>50*1024*1024);if(big){alert('O vídeo "'+big.name+'" passa de 50 MB. Escolha um vídeo menor.');return}
+  SC.queue=files.slice(1,10);SC.qTotal=Math.min(files.length,10);SC.qDone=0;
+  if(files.length>10)shareToast('Máximo de 10 stories por vez. Usando os 10 primeiros.');
+  stSetFile(files[0]);scRenderEdit();
+}
+function stSetFile(f){
+  if(SC.url)URL.revokeObjectURL(SC.url);
+  SC.file=f;SC.video=/^video\//.test(f.type)||/\.(mov|mp4|webm)$/i.test(f.name);SC.url=URL.createObjectURL(f);SC.grad=null;
+  SC.items=SC.post?SC.items.filter(i=>i.type==='post'):[];SC.sel=-1;SC.strokes=[];SC.filter='';SC.link='';SC.music='';SC.mode='';
+}
+function scStartText(){SC.file=null;SC.video=false;SC.grad=SC_GRADS[0];SC.gradI=0;SC.queue=[];SC.qTotal=1;SC.qDone=0;scRenderEdit();scOpenTextEditor(-1)}
+function scBackToPick(){
+  if(SC&&(SC.items.length||SC.strokes.length)&&!confirm('Descartar as edições deste story?'))return;
+  musicStop&&musicStop();
+  if(SC.url)URL.revokeObjectURL(SC.url);
+  Object.assign(SC,{file:null,url:'',video:false,grad:null,items:[],sel:-1,strokes:[],filter:'',link:'',music:'',queue:[],qTotal:1,qDone:0,post:null,mode:''});
+  scRenderPick();
+}
+
+/* ---------- câmera ---------- */
+let CAM={stream:null,facing:'environment',mode:'photo',rec:null,chunks:[],t0:0,timer:0,torch:false,shot:null,shotUrl:''};
+function stCamOpen(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){document.getElementById('scCam')?.click();return}
+  document.getElementById('stCam')?.remove();
+  document.getElementById('sc').insertAdjacentHTML('beforeend',`<div id="stCam" class="stCam"><video id="stCamV" playsinline autoplay muted></video><div id="stCamMsg" class="stCamMsg">Abrindo a câmera…</div><div class="stCamFlashFx" id="stCamFx"></div><div class="stCamTop"><button class="stIco" aria-label="Fechar câmera" onclick="stCamClose()">${STI.x}</button><button class="stIco" id="stCamFlashBtn" aria-label="Flash" onclick="stCamFlash()">${STI.flash}</button></div><div class="stCamTime" id="stCamTime">0:00</div><div class="stCamBot" id="stCamBot"></div></div>`);
+  stCamPaintBot();stCamStart();
+}
+function stCamPaintBot(){
+  const b=document.getElementById('stCamBot');if(!b)return;
+  if(CAM.shot){b.innerHTML=`<div class="stUseRow"><button class="secondary" onclick="stCamRetake()">Refazer</button><button class="primary" onclick="stCamUse()">Usar ${CAM.shot.type.startsWith('video')?'vídeo':'foto'} ›</button></div>`;return}
+  b.innerHTML=`<div class="stCamModes"><button class="${CAM.mode==='photo'?'on':''}" onclick="stCamMode('photo')">Foto</button><button class="${CAM.mode==='video'?'on':''}" onclick="stCamMode('video')">Vídeo</button></div><div class="stCamRow"><button class="stIco" aria-label="Galeria" onclick="stCamClose();document.getElementById('scGal').click()">${STI.gal}</button><button class="stShutter ${CAM.mode==='video'?'video':''}" id="stShutter" aria-label="${CAM.mode==='video'?'Gravar':'Tirar foto'}" onclick="stCamShutter()"><i></i><svg viewBox="0 0 82 82"><circle cx="41" cy="41" r="39"/></svg></button><button class="stIco" aria-label="Trocar câmera" onclick="stCamFlip()">${STI.flip}</button></div>`;
+}
+async function stCamStart(){
+  stCamStopTracks();
+  const v=document.getElementById('stCamV'),msg=document.getElementById('stCamMsg');if(!v)return;
+  const video={facingMode:CAM.facing,width:{ideal:1920},height:{ideal:1080}};
+  try{
+    let s;
+    try{s=await navigator.mediaDevices.getUserMedia({video,audio:CAM.mode==='video'})}
+    catch(e){if(CAM.mode==='video'){s=await navigator.mediaDevices.getUserMedia({video,audio:false})}else throw e}
+    if(!document.getElementById('stCam')){s.getTracks().forEach(t=>t.stop());return}
+    CAM.stream=s;v.srcObject=s;v.classList.toggle('mirror',CAM.facing==='user');await v.play().catch(()=>{});
+    if(msg)msg.style.display='none';
+    CAM.torch=false;const fb=document.getElementById('stCamFlashBtn');if(fb)fb.classList.remove('on');
+  }catch(e){
+    if(msg){msg.style.display='grid';msg.innerHTML=`<div><b style="color:#fff;font-size:17px">Não foi possível abrir a câmera aqui</b><br>Permita o acesso à câmera nas configurações do navegador, ou use a câmera do celular.<br><br><button class="primary" onclick="stCamClose();document.getElementById('scCam').click()">Usar câmera do celular</button></div>`}
+  }
+}
+function stCamStopTracks(){if(CAM.stream){CAM.stream.getTracks().forEach(t=>{try{t.stop()}catch(_){}});CAM.stream=null}}
+function stCamClose(){
+  try{if(CAM.rec&&CAM.rec.state!=='inactive'){CAM.rec.onstop=null;CAM.rec.stop()}}catch(_){}
+  clearInterval(CAM.timer);stCamStopTracks();
+  if(CAM.shotUrl)URL.revokeObjectURL(CAM.shotUrl);
+  CAM.rec=null;CAM.shot=null;CAM.shotUrl='';
+  document.getElementById('stCam')?.remove();
+}
+function stCamFlip(){CAM.facing=CAM.facing==='user'?'environment':'user';stCamStart()}
+function stCamMode(m){if(CAM.mode===m||CAM.rec)return;CAM.mode=m;stCamPaintBot();stCamStart()}
+async function stCamFlash(){
+  CAM.torch=!CAM.torch;const b=document.getElementById('stCamFlashBtn');if(b)b.classList.toggle('on',CAM.torch);
+  const t=CAM.stream&&CAM.stream.getVideoTracks()[0];
+  try{const cap=t&&t.getCapabilities?t.getCapabilities():{};if(cap.torch)await t.applyConstraints({advanced:[{torch:CAM.torch}]})}catch(_){}
+}
+function stCamHasTorch(){try{const t=CAM.stream&&CAM.stream.getVideoTracks()[0];return !!(t&&t.getCapabilities&&t.getCapabilities().torch)}catch(_){return false}}
+async function stCamShutter(){
+  const v=document.getElementById('stCamV');if(!v||!CAM.stream)return;
+  if(CAM.mode==='photo'){
+    const fx=document.getElementById('stCamFx');
+    if(CAM.torch&&!stCamHasTorch()&&fx){fx.classList.add('on');await new Promise(r=>setTimeout(r,180))}
+    const vw=v.videoWidth||1080,vh=v.videoHeight||1920,box=document.getElementById('stCam');
+    const ar=box&&box.clientHeight?box.clientWidth/box.clientHeight:9/16;
+    let sw=vw,sh=vh;if(vw/vh>ar)sw=vh*ar;else sh=vw/ar;const sx=(vw-sw)/2,sy=(vh-sh)/2;
+    const sc=Math.min(1,1920/Math.max(sw,sh)),w=Math.round(sw*sc),h=Math.round(sh*sc),c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+    if(CAM.facing==='user'){x.translate(w,0);x.scale(-1,1)}
+    x.drawImage(v,sx,sy,sw,sh,0,0,w,h);
+    if(fx)setTimeout(()=>fx.classList.remove('on'),80);
+    const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.92));if(!blob)return;
+    stCamShow(new File([blob],'camera.jpg',{type:'image/jpeg'}));return;
+  }
+  if(CAM.rec&&CAM.rec.state==='recording'){CAM.rec.stop();return}
+  if(typeof MediaRecorder==='undefined'){alert('Seu navegador não grava vídeo aqui. Use a câmera do celular.');stCamClose();document.getElementById('scCam').click();return}
+  const types=['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
+  const mt=types.find(t=>{try{return MediaRecorder.isTypeSupported(t)}catch(_){return false}})||'';
+  try{CAM.rec=new MediaRecorder(CAM.stream,mt?{mimeType:mt,videoBitsPerSecond:2500000}:undefined)}catch(_){CAM.rec=new MediaRecorder(CAM.stream)}
+  CAM.chunks=[];CAM.rec.ondataavailable=e=>{if(e.data&&e.data.size)CAM.chunks.push(e.data)};
+  CAM.rec.onstop=()=>{clearInterval(CAM.timer);const type=(CAM.rec&&CAM.rec.mimeType)||mt||'video/webm';const base=type.split(';')[0];const blob=new Blob(CAM.chunks,{type:base});CAM.rec=null;document.getElementById('stCamTime')?.classList.remove('on');if(blob.size<1000){stCamPaintBot();return}stCamShow(new File([blob],'camera.'+(base.includes('mp4')?'mp4':'webm'),{type:base}))};
+  CAM.rec.start(250);CAM.t0=Date.now();
+  const sh=document.getElementById('stShutter');sh&&sh.classList.add('rec');
+  const tm=document.getElementById('stCamTime');tm&&tm.classList.add('on');
+  const circ=sh&&sh.querySelector('circle');
+  CAM.timer=setInterval(()=>{const s=(Date.now()-CAM.t0)/1000;if(tm)tm.textContent=Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');if(circ)circ.style.strokeDashoffset=String(245-245*Math.min(1,s/60));if(s>=60&&CAM.rec&&CAM.rec.state==='recording')CAM.rec.stop()},200);
+}
+function stCamShow(file){
+  CAM.shot=file;if(CAM.shotUrl)URL.revokeObjectURL(CAM.shotUrl);CAM.shotUrl=URL.createObjectURL(file);
+  const box=document.getElementById('stCam');if(!box)return;
+  box.querySelector('.stCamShot')?.remove();
+  const el=file.type.startsWith('video')?`<video class="stCamShot" src="${CAM.shotUrl}" autoplay loop playsinline></video>`:`<img class="stCamShot" src="${CAM.shotUrl}" alt="">`;
+  box.insertAdjacentHTML('afterbegin',el);stCamPaintBot();
+}
+function stCamRetake(){document.querySelector('#stCam .stCamShot')?.remove();if(CAM.shotUrl)URL.revokeObjectURL(CAM.shotUrl);CAM.shot=null;CAM.shotUrl='';stCamPaintBot()}
+function stCamUse(){const f=CAM.shot;CAM.shot=null;stCamClose();if(!f)return;SC.queue=[];SC.qTotal=1;SC.qDone=0;stSetFile(f);scRenderEdit()}
+
+/* ---------- editor ---------- */
+function scRenderEdit(){
+  const top=document.getElementById('scTop');if(top)top.classList.add('hidden');
+  const fcss=SC.filter?`filter:${stFilterCss(SC.filter)};`:'';
+  const bg=SC.grad?`<div class="scBg" id="scBg" style="background:linear-gradient(135deg,${SC.grad.join(',')})"></div>`:SC.video?`<video class="scBg" id="scBg" src="${SC.url}" autoplay loop muted playsinline style="${fcss}"></video>`:`<img class="scBgBlur" src="${SC.url}" alt="" style="${fcss}"><img class="scBg scFit" id="scBg" src="${SC.url}" alt="" style="${fcss}">`;
+  const q=SC.qTotal>1?`<div class="stQueue">${SC.qDone+1} de ${SC.qTotal}</div>`:'';
+  document.getElementById('scBody').innerHTML=`<div class="scStageWrap"><div class="scStage" id="scStage">${bg}<canvas id="scDraw" class="scDraw"></canvas><div id="scItems" class="scItems"></div><div id="scMusicChip" class="scMusicChip hidden" onclick="scMusicPanel()"></div><div id="scTrash" class="scTrash">🗑</div><div class="stEdTop"><button class="stIco" aria-label="Voltar" onclick="scBackToPick()">${STI.back}</button><div class="stEdTools"><button class="stIco txt" aria-label="Texto" onclick="scOpenTextEditor(-1)">Aa</button><button class="stIco" aria-label="Figurinhas" onclick="stStickerSheet()">${STI.sticker}</button><button class="stIco" aria-label="Música" onclick="scMusicPanel()">${STI.music}</button>${SC.grad?`<button class="stIco" aria-label="Cor de fundo" onclick="scNextGrad()">🎨</button>`:`<button class="stIco" aria-label="Filtros" onclick="stFilterPanel()">${STI.fx}</button>`}${SC.video?'':`<button class="stIco" id="stDrawBtn" aria-label="Desenhar" onclick="scToggleDraw();document.getElementById('stDrawBtn')?.classList.toggle('act',SC.mode==='draw')">${STI.draw}</button>`}<button class="stIco" aria-label="Mais" onclick="stMorePanel()">${STI.more}</button></div></div>${q}<div class="scTools"></div><div id="scDrawBar" class="scDrawBar hidden"></div><div id="scPanel" class="scPanel hidden"></div><div id="scSel" class="scSel hidden"></div></div><div class="scBottom"><div id="scAud" class="scAud"></div><button id="scPub" class="scPub" aria-label="Publicar" onclick="scPublish()">${STI.send}</button></div></div>`;
+  scSetupDraw();scRenderItems();scRenderAudience();scUpdateMusicChip();stSetupPinch();
+}
+function scRenderAudience(){
+  const el=document.getElementById('scAud');if(!el||!SC)return;
+  const v=stPrefsOf(me?.id).view;
+  el.innerHTML=`<button class="${SC.audience!=='close'?'on':''}" onclick="scSetAudience('all')"><i>${esc(stFirst(profileData().name).slice(0,1).toUpperCase())}</i>Seu story${v!=='all'?` · ${ST_AUD_TXT[v]}`:''}</button><button class="${SC.audience==='close'?'on close':''}" onclick="scSetAudience('close')"><i>★</i>Amigos próximos${closeFriends.size?` (${closeFriends.size})`:''}</button>`;
+}
+function stMorePanel(){scPanelShow(`<div class="scPanelHead"><b>Mais opções</b><button onclick="scPanelHide()">×</button></div><div class="stList"><button onclick="scLinkPanel()">🔗 Adicionar link</button><button onclick="scMentionPanel()">@ Mencionar alguém</button><button onclick="stSaveLocal()">⬇ Salvar no aparelho</button><button onclick="scPanelHide();storySettings()">⚙ Privacidade dos stories</button></div>`)}
+async function stSaveLocal(){
+  scPanelHide();
+  try{let blob,name;if(SC.video&&SC.file){blob=SC.file;name=SC.file.name||'story.mp4'}else{blob=await scFlatten();name='story-conecta.jpg'}const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);shareToast('Salvo no aparelho')}catch(_){alert('Não foi possível salvar agora.')}
+}
+/* painel de figurinhas */
+function stStickerSheet(){
+  scPanelShow(`<div class="scPanelHead"><b>Figurinhas</b><button onclick="scPanelHide()">×</button></div><div class="stSearch">${STI.search}<input id="stStkQ" placeholder="Pesquisar" autocomplete="off" oninput="stStickerFill()"></div><div id="stStkBody"></div>`);
+  stStickerFill();
+}
+function stStickerFill(){
+  const box=document.getElementById('stStkBody');if(!box)return;const q=normText(document.getElementById('stStkQ')?.value||'').trim();
+  const tools=ST_TOOLS.filter(t=>!q||normText(t[2]+' '+t[3]).includes(q));
+  const gifs=q?ST_GIFS.filter(g=>normText(g[1]).includes(q)).slice(0,12):[];
+  box.innerHTML=(tools.length?`<div class="stToolGrid">${tools.map(t=>`<button class="stTool${t[0]==='draw'&&(SC.video||SC.grad)?'':''}${t[0]==='draw'&&SC.video?' dis':''}" onclick="stTool('${t[0]}')"><span>${t[1]}</span>${t[2]}</button>`).join('')}</div>`:'')+(gifs.length?`<div class="stSecTitle">GIFs</div><div class="stGifGrid">${gifs.map(g=>`<button onclick="stAddGif('${stNoto(g[0])}')"><img src="${stNoto(g[0])}" alt="" loading="lazy"></button>`).join('')}</div>`:'')+(!q?`<div class="stSecTitle">Emojis</div><div class="scEmojiGrid">${ST_EMOJIS.map(e=>`<button onclick="scAddEmoji('${e}')">${e}</button>`).join('')}</div>`:'')+(!tools.length&&!gifs.length?'<div class="stEmptyBox">Nada encontrado.</div>':'');
+}
+function stTool(k){
+  if(k==='loc')return stLocPanel();if(k==='mention')return scMentionPanel();if(k==='music')return scMusicPanel();if(k==='gif')return stGifPanel();
+  if(k==='poll')return stPollPanel();if(k==='ask')return stAskPanel();if(k==='link')return scLinkPanel();if(k==='count')return stCountPanel();
+  if(k==='emoji')return scEmojiPanel();if(k==='text'){scPanelHide();return scOpenTextEditor(-1)}
+  if(k==='draw'){scPanelHide();if(SC.video){shareToast('O desenho funciona em fotos e textos.');return}scToggleDraw();document.getElementById('stDrawBtn')?.classList.toggle('act',SC.mode==='draw')}
+}
+function scEmojiPanel(){scPanelShow(`<div class="scPanelHead"><b>Emojis</b><button onclick="scPanelHide()">×</button></div><div class="scEmojiGrid">${ST_EMOJIS.map(e=>`<button onclick="scAddEmoji('${e}')">${e}</button>`).join('')}</div>`)}
+function stAddItem(it){const busy=SC.items.map(i=>i.y);if(ST_CARD.has(it.type)||it.type==='gif'||it.type==='loc'){let y=it.y,k=0;while(busy.some(b=>Math.abs(b-y)<(ST_CARD.has(it.type)?20:10))&&k<6){y=(y+22)%86;if(y<24)y=24;k++}it.y=y}SC.items.push(it);SC.sel=SC.items.length-1;scPanelHide();scRenderItems()}
+function stNoto(code){return `https://fonts.gstatic.com/s/e/notoemoji/latest/${code}/512.gif`}
+function stLocPanel(){scPanelShow(`<div class="scPanelHead"><b>📍 Localização</b><button onclick="scPanelHide()">×</button></div><div class="stSearch">${STI.search}<input id="stLocQ" placeholder="Cidade ou lugar" autocomplete="off" oninput="stLocFill()"></div><div id="stLocList" class="stList"></div>`);stLocFill();setTimeout(()=>document.getElementById('stLocQ')?.focus(),80)}
+function stLocFill(){
+  const el=document.getElementById('stLocList');if(!el)return;const raw=(document.getElementById('stLocQ')?.value||'').trim(),q=normText(raw);
+  const base=[...new Set([profileData().city,...(typeof cities!=='undefined'?cities:[])].filter(Boolean))];
+  const list=base.filter(c=>!q||normText(c).includes(q)).slice(0,25);
+  el.innerHTML=(raw&&!list.some(c=>normText(c)===q)?`<button onclick="stAddLoc(this.dataset.v)" data-v="${esc(raw)}">📍 Usar “${esc(raw)}”</button>`:'')+list.map(c=>`<button onclick="stAddLoc(this.dataset.v)" data-v="${esc(c)}">📍 ${esc(c)}</button>`).join('');
+}
+function stAddLoc(name){name=String(name||'').trim().slice(0,40);if(!name)return;stAddItem({type:'loc',name,x:50,y:38,size:6})}
+function stGifPanel(){
+  if(typeof GIPHY_KEY!=='undefined'&&GIPHY_KEY){scPanelShow(`<div class="scPanelHead"><b>GIFs</b><button onclick="scPanelHide()">×</button></div><div class="stSearch">${STI.search}<input id="stGifQ" placeholder="Pesquisar GIFs" autocomplete="off" oninput="clearTimeout(window._stGT);window._stGT=setTimeout(stGiphy,350)"></div><div id="stGifGrid" class="stGifGrid"></div><div class="small" style="text-align:center;opacity:.6;margin-top:8px">GIFs por GIPHY</div>`);stGiphy();return}
+  scPanelShow(`<div class="scPanelHead"><b>GIFs animados</b><button onclick="scPanelHide()">×</button></div><div class="stSearch">${STI.search}<input id="stGifQ" placeholder="Pesquisar (ex.: amor, festa, café)" autocomplete="off" oninput="stGifNoto()"></div><div id="stGifGrid" class="stGifGrid"></div>`);stGifNoto();
+}
+function stGifNoto(){const el=document.getElementById('stGifGrid');if(!el)return;const q=normText(document.getElementById('stGifQ')?.value||'').trim();const a=ST_GIFS.filter(g=>!q||normText(g[1]).includes(q));el.innerHTML=a.length?a.map(g=>`<button onclick="stAddGif('${stNoto(g[0])}')" aria-label="${esc(g[1])}"><img src="${stNoto(g[0])}" alt="" loading="lazy"></button>`).join(''):'<div class="stEmptyBox" style="grid-column:1/-1">Nada encontrado.</div>'}
+async function stGiphy(){const el=document.getElementById('stGifGrid');if(!el)return;const q=(document.getElementById('stGifQ')?.value||'').trim();el.innerHTML='<div class="stEmptyBox" style="grid-column:1/-1">Carregando…</div>';try{const u=`https://api.giphy.com/v1/stickers/${q?'search':'trending'}?api_key=${encodeURIComponent(GIPHY_KEY)}&limit=24&rating=pg&lang=pt${q?'&q='+encodeURIComponent(q):''}`;const d=await (await fetch(u)).json();const a=(d.data||[]).map(x=>x.images?.fixed_width?.url).filter(Boolean);el.innerHTML=a.length?a.map(s=>`<button onclick="stAddGif('${esc(s)}')"><img src="${esc(s)}" alt="" loading="lazy"></button>`).join(''):'<div class="stEmptyBox" style="grid-column:1/-1">Nada encontrado.</div>'}catch(_){stGifNoto()}}
+function stAddGif(src){if(!/^https:\/\//.test(src))return;stAddItem({type:'gif',src,x:50,y:34,size:34})}
+function stPollPanel(){scPanelShow(`<div class="scPanelHead"><b>📊 Enquete</b><button onclick="scPanelHide()">×</button></div><input id="stPollQ" class="field" maxlength="80" placeholder="Faça uma pergunta…" autocomplete="off"><div class="stRow2"><input id="stPollA" class="field" maxlength="24" value="Sim" autocomplete="off"><input id="stPollB" class="field" maxlength="24" value="Não" autocomplete="off"></div><div class="stRow2"><input id="stPollC" class="field" maxlength="24" placeholder="Opção 3 (opcional)" autocomplete="off"><input id="stPollD" class="field" maxlength="24" placeholder="Opção 4 (opcional)" autocomplete="off"></div><button class="primary" onclick="stAddPoll()">Adicionar enquete</button>`);setTimeout(()=>document.getElementById('stPollQ')?.focus(),80)}
+function stAddPoll(){const q=(document.getElementById('stPollQ').value||'').trim()||'O que você acha?';const opts=['A','B','C','D'].map(k=>(document.getElementById('stPoll'+k)?.value||'').trim()).filter(Boolean).slice(0,4);if(opts.length<2){alert('Coloque pelo menos duas opções.');return}stAddItem({type:'poll',q,opts,x:50,y:56,size:66})}
+function stAskPanel(){scPanelShow(`<div class="scPanelHead"><b>❓ Caixa de perguntas</b><button onclick="scPanelHide()">×</button></div><input id="stAskQ" class="field" maxlength="80" value="Me faça uma pergunta" autocomplete="off"><button class="primary" onclick="stAddAsk()">Adicionar perguntas</button>`)}
+function stAddAsk(){const q=(document.getElementById('stAskQ').value||'').trim()||'Me faça uma pergunta';stAddItem({type:'ask',q,x:50,y:56,size:64})}
+function stCountPanel(){const d=new Date(Date.now()+86400000);d.setMinutes(0,0,0);const v=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);scPanelShow(`<div class="scPanelHead"><b>⏱ Contagem regressiva</b><button onclick="scPanelHide()">×</button></div><input id="stCntT" class="field" maxlength="40" placeholder="Nome do evento" autocomplete="off"><input id="stCntD" class="field" type="datetime-local" value="${v}"><button class="primary" onclick="stAddCount()">Adicionar contagem</button>`)}
+function stAddCount(){const t=(document.getElementById('stCntT').value||'').trim()||'Contagem regressiva';const end=Date.parse(document.getElementById('stCntD').value||'');if(!end||end<Date.now()){alert('Escolha uma data e hora no futuro.');return}stAddItem({type:'count',title:t,end,x:50,y:56,size:64})}
+function scLinkPanel(){scPanelShow(`<div class="scPanelHead"><b>🔗 Link</b><button onclick="scPanelHide()">×</button></div><input id="scLinkIn" class="field" placeholder="https://..." inputmode="url" autocomplete="off" value="${esc(SC.link)}"><button class="primary" onclick="scSaveLink()">Adicionar link</button>${SC.link?'<button class="secondary" style="width:100%;margin-top:8px" onclick="stRemoveLink()">Remover link</button>':''}`)}
+function scSaveLink(){
+  let v=(document.getElementById('scLinkIn').value||'').trim();
+  if(v&&!/^https?:\/\//i.test(v))v='https://'+v;
+  if(v){try{const u=new URL(v);if(!/^https?:$/.test(u.protocol))throw 0}catch(_){alert('Link inválido.');return}}
+  SC.items=SC.items.filter(i=>i.type!=='link');SC.link=v;
+  if(v)stAddItem({type:'link',url:v,x:50,y:80,size:5});else{scPanelHide();scRenderItems()}
+}
+function stRemoveLink(){SC.link='';SC.items=SC.items.filter(i=>i.type!=='link');SC.sel=-1;scPanelHide();scRenderItems()}
+function stFilterPanel(){
+  if(SC.grad)return;
+  const th=SC.video?'':`background-image:url('${SC.url}')`;
+  scPanelShow(`<div class="scPanelHead"><b>✨ Filtros</b><button onclick="scPanelHide()">×</button></div><div class="stFilterRow">${ST_FILTERS.map(f=>`<button class="${SC.filter===f[0]?'on':''}" onclick="stSetFilter('${f[0]}')"><div style="${th};filter:${f[2]||'none'}${SC.video?';background:linear-gradient(160deg,#4b7c6c,#20516b,#e0a457)':''}"></div>${f[1]}</button>`).join('')}</div>`);
+}
+function stSetFilter(k){SC.filter=k;const css=stFilterCss(k)||'none';document.querySelectorAll('#scStage .scBg,#scStage .scBgBlur').forEach(e=>{if(!SC.grad)e.style.filter=css});document.querySelectorAll('.stFilterRow button').forEach((b,i)=>b.classList.toggle('on',ST_FILTERS[i][0]===k))}
+function stHost(u){try{return new URL(u).hostname.replace(/^www\./,'')}catch(_){return String(u||'').slice(0,30)}}
+function stCountParts(end){let s=Math.max(0,Math.floor((end-Date.now())/1000));const d=Math.floor(s/86400);s%=86400;const h=Math.floor(s/3600);s%=3600;const m=Math.floor(s/60);return{d,h,m,s:s%60,done:end<=Date.now()}}
+function stCountHtml(end){const p=stCountParts(end);if(p.done)return '<div class="stkEnd">Chegou a hora! 🎉</div>';return `<div class="stkNum"><span>${p.d}<small>DIAS</small></span><span>${String(p.h).padStart(2,'0')}<small>HORAS</small></span><span>${String(p.m).padStart(2,'0')}<small>MIN</small></span><span>${String(p.s).padStart(2,'0')}<small>SEG</small></span></div>`}
+/* html de uma figurinha (editor = live false) */
+function stStickerHtml(it,live,storyId){
+  if(it.type==='loc')return `<span class="stk stkLoc">${STI.pin.replace('<svg','<svg style="width:1em;height:1em"')}${esc(it.name)}</span>`;
+  if(it.type==='gif')return `<img class="stkGif" src="${esc(it.src)}" alt="">`;
+  if(it.type==='link')return `<span class="stk stkLoc" style="color:#0a5cff">🔗 ${esc(stHost(it.url))}</span>`;
+  if(it.type==='poll'){const pd=live?ST.poll[storyId]:null;const voted=pd&&pd.mine!=null;const tot=pd?pd.total:0;return `<div class="stk stkCard stkPoll${voted?' voted':''}"><h4>${esc(it.q)}</h4>${it.opts.map((o,i)=>{const n=pd?(pd.counts[i]||0):0,pc=tot?Math.round(n/tot*100):0;return `<button type="button" class="stkOpt${voted&&pd.mine===i?' mine':''}" ${live?`onclick="svPollVote(${i})"`:''}><i style="width:${voted?pc:0}%"></i><b>${esc(o)}</b>${voted?`<em>${pc}%</em>`:''}</button>`}).join('')}</div>`}
+  if(it.type==='ask')return `<div class="stk stkCard stkAsk"><h4>${esc(it.q)}</h4><div class="stkIn" ${live?'onclick="svAsk()"':''}>${live?'Toque para responder…':'As pessoas respondem aqui'}</div></div>`;
+  if(it.type==='count')return `<div class="stk stkCard stkCount"><h4>${esc(it.title)}</h4><div data-count-end="${Number(it.end)||0}">${stCountHtml(Number(it.end)||0)}</div></div>`;
+  return '';
+}
+const ST_CARD=new Set(['poll','ask','count']);
+function stApplySize(el,it){
+  const W=scStageW(),px=it.size/100*W;
+  if(it.type==='post'||it.type==='gif'||ST_CARD.has(it.type)){el.style.width=it.size+'%';if(ST_CARD.has(it.type))el.style.fontSize=(it.size/100*W*.075)+'px'}
+  else if(it.type==='mention'){const sp=el.querySelector('.cmMentionPill');if(sp)sp.style.fontSize=px+'px'}
+  else if(it.type==='loc'||it.type==='link'){el.style.fontSize=px+'px'}
+  else el.style.fontSize=px+'px';
+}
+function scRenderItems(){
+  const box=document.getElementById('scItems');if(!box)return;const W=scStageW();
+  box.innerHTML='';
+  SC.items.forEach((it,i)=>{
+    const el=document.createElement('div');el.className='scItem'+(i===SC.sel?' sel':'');el.dataset.i=i;
+    const px=it.size/100*W;
+    if(it.type==='emoji'){el.textContent=it.e;el.style.fontSize=px+'px'}
+    else if(it.type==='mention'){el.classList.add('scMentionItem');el.innerHTML=`<span class="cmMentionPill" style="font-size:${px}px">@${esc(it.name)}</span>`}
+    else if(it.type==='post'){el.classList.add('scPostItem');el.style.width=it.size+'%';el.innerHTML=storyPostCardHtml(SC.post,false)}
+    else if(it.type==='text'||!it.type){
+      el.style.font=scFontCss(it,px);el.style.fontSize=px+'px';el.style.textAlign='center';
+      const t=SC_FONTS[it.font||0].upper?it.t.toUpperCase():it.t;
+      el.innerHTML=t.split('\n').map(l=>`<span class="scLine" style="${it.bg?`background:${it.color};color:${scLum(it.color)>.6?'#000':'#fff'}`:`color:${it.color};text-shadow:0 1px 6px rgba(0,0,0,.45)`}">${esc(l)||'&nbsp;'}</span>`).join('<br>');
+    }
+    else{el.innerHTML=stStickerHtml(it,false);stApplySize(el,it)}
+    el.style.left=it.x+'%';el.style.top=it.y+'%';
+    scBindDrag(el,i);box.appendChild(el);
+  });
+  scRenderSel();
+}
+function stSizeRange(it){return it.type==='emoji'?[10,60]:it.type==='post'?[38,96]:it.type==='mention'?[3,12]:it.type==='gif'?[12,90]:(it.type==='loc'||it.type==='link')?[3,14]:ST_CARD.has(it.type)?[40,92]:[3,18]}
+function scRenderSel(){
+  const bar=document.getElementById('scSel');if(!bar)return;
+  const it=SC.items[SC.sel];
+  if(!it){bar.classList.add('hidden');return}
+  bar.classList.remove('hidden');const rg=stSizeRange(it);
+  bar.innerHTML=`<span>Tamanho</span><input id="stSizeIn" type="range" min="${rg[0]}" max="${rg[1]}" value="${it.size}" oninput="scSetSize(this.value)">${it.type==='text'?`<button onclick="scOpenTextEditor(${SC.sel})">✏️</button>`:''}<button onclick="scDeleteSel()">🗑</button>`;
+}
+function scSetSize(v){const it=SC.items[SC.sel];if(!it)return;it.size=Number(v);const el=document.querySelector(`.scItem[data-i="${SC.sel}"]`);if(!el)return;if(it.type==='text'||!it.type){el.style.fontSize=(it.size/100*scStageW())+'px'}else if(it.type==='emoji')el.style.fontSize=(it.size/100*scStageW())+'px';else stApplySize(el,it)}
+let ST_PINCH={pts:new Map(),on:false,d0:0,s0:0};
+function scBindDrag(el,i){
+  let st=null;
+  el.addEventListener('pointerdown',e=>{
+    e.stopPropagation();if(SC.mode==='draw')return;
+    if(SC.sel!==i&&ST_PINCH.pts.size<=1){SC.sel=i;document.querySelectorAll('.scItem').forEach(x=>x.classList.toggle('sel',Number(x.dataset.i)===i));scRenderSel()}
+    st={x:e.clientX,y:e.clientY,moved:false,tapSel:true};
+    try{el.setPointerCapture(e.pointerId)}catch(_){}
+  });
+  el.addEventListener('pointermove',e=>{
+    if(!st||ST_PINCH.on)return;const stg=document.getElementById('scStage').getBoundingClientRect();
+    if(Math.abs(e.clientX-st.x)>5||Math.abs(e.clientY-st.y)>5){st.moved=true;document.getElementById('scTrash').classList.add('show')}
+    if(!st.moved)return;
+    const it=SC.items[i];if(!it)return;it.x=Math.max(0,Math.min(100,(e.clientX-stg.left)/stg.width*100));it.y=Math.max(0,Math.min(100,(e.clientY-stg.top)/stg.height*100));
+    el.style.left=it.x+'%';el.style.top=it.y+'%';
+    const tr=document.getElementById('scTrash').getBoundingClientRect();
+    document.getElementById('scTrash').classList.toggle('hot',e.clientY>tr.top-10&&Math.abs(e.clientX-(tr.left+tr.width/2))<60);
+  });
+  const end=e=>{
+    if(!st)return;const s=st;st=null;
+    const tr=document.getElementById('scTrash');const hot=tr&&tr.classList.contains('hot');
+    tr&&tr.classList.remove('show','hot');
+    if(ST_PINCH.on)return;
+    if(s.moved&&hot){SC.items.splice(i,1);SC.sel=-1;scRenderItems();return}
+  };
+  el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);
+}
+function stSetupPinch(){
+  const stg=document.getElementById('scStage');if(!stg)return;
+  const dist=()=>{const a=[...ST_PINCH.pts.values()];return Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)};
+  stg.addEventListener('pointerdown',e=>{ST_PINCH.pts.set(e.pointerId,{x:e.clientX,y:e.clientY});if(ST_PINCH.pts.size===2&&SC&&SC.items[SC.sel]&&SC.mode!=='draw'){ST_PINCH.on=true;ST_PINCH.d0=dist()||1;ST_PINCH.s0=SC.items[SC.sel].size}},true);
+  stg.addEventListener('pointermove',e=>{if(!ST_PINCH.pts.has(e.pointerId))return;ST_PINCH.pts.set(e.pointerId,{x:e.clientX,y:e.clientY});if(!ST_PINCH.on||ST_PINCH.pts.size<2)return;const it=SC.items[SC.sel];if(!it)return;const rg=stSizeRange(it);const v=Math.max(rg[0],Math.min(rg[1],ST_PINCH.s0*dist()/ST_PINCH.d0));scSetSize(v);const inp=document.getElementById('stSizeIn');if(inp)inp.value=v},true);
+  const up=e=>{ST_PINCH.pts.delete(e.pointerId);if(ST_PINCH.pts.size<2)setTimeout(()=>{ST_PINCH.on=ST_PINCH.pts.size>=2},0)};
+  stg.addEventListener('pointerup',up,true);stg.addEventListener('pointercancel',up,true);
+  stg.addEventListener('pointerdown',e=>{if(e.target===stg||e.target.classList.contains('scItems')||e.target.id==='scBg'||e.target.classList.contains('scDraw')&&SC.mode!=='draw'){if(SC.sel>=0&&!ST_PINCH.on){SC.sel=-1;document.querySelectorAll('.scItem.sel').forEach(x=>x.classList.remove('sel'));scRenderSel()}}});
+}
+/* menções respeitando privacidade de quem é mencionado */
+function stMentionAllowed(p){if(!p||p.id===me?.id)return false;const lv=stPrefsOf(p.id).mention;if(lv==='all')return true;if(lv==='followers')return followCache.has(p.id);if(lv==='close')return closeOf.has(p.id);return false}
+function scMentionList(){const el=document.getElementById('scMenList');if(!el)return;const a=cmPeopleFind(document.getElementById('scMenQ')?.value||'');el.innerHTML=a.length?a.map(p=>stMentionAllowed(p)?cmPersonRow(p,`scAddMention('${esc(p.id)}')`):`<div class="cmPersonRow" style="opacity:.45"><img src="${esc(p.photo||avatar(p.name))}" alt=""><span><b>${esc(p.name)}</b><small>🔒 Não aceita menções</small></span></div>`).join(''):'<div class="cmEmpty small"><b>Ninguém encontrado</b><span>Só dá para mencionar pessoas cadastradas no Conecta.</span></div>'}
+
+/* ---------- achatar imagem (com filtro) ---------- */
+const ST_OVERLAY_TYPES=new Set(['mention','post','gif','loc','poll','ask','count','link']);
+async function scFlatten(){
+  const W=1080,H=1920,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  const fcss=SC.filter&&!SC.grad&&stCanvasFilterOK()?stFilterCss(SC.filter):'';
+  if(SC.grad){const g=x.createLinearGradient(0,0,W,H);SC.grad.forEach((col,i,a)=>g.addColorStop(i/(a.length-1),col));x.fillStyle=g;x.fillRect(0,0,W,H)}
+  else{
+    const im=await scLoadImg(SC.url);
+    x.fillStyle='#000';x.fillRect(0,0,W,H);
+    const rc=Math.max(W/im.width,H/im.height),cw=im.width*rc,ch=im.height*rc;
+    if(stCanvasFilterOK()){x.filter='blur(48px) brightness(.55)'+(fcss?' '+fcss:'');x.drawImage(im,(W-cw*1.15)/2,(H-ch*1.15)/2,cw*1.15,ch*1.15);x.filter='none'}
+    else{x.globalAlpha=.3;x.drawImage(im,(W-cw)/2,(H-ch)/2,cw,ch);x.globalAlpha=1}
+    const r=Math.min(W/im.width,H/im.height),w=im.width*r,h=im.height*r;
+    if(fcss)x.filter=fcss;x.drawImage(im,(W-w)/2,(H-h)/2,w,h);x.filter='none';
+  }
+  scPaintStrokes(x,W,H);
+  const k=W;
+  SC.items.forEach(it=>{
+    if(ST_OVERLAY_TYPES.has(it.type))return;
+    const px=it.size/100*k,cx=it.x/100*W,cy=it.y/100*H;
+    x.textAlign='center';x.textBaseline='middle';
+    if(it.type==='emoji'){x.font=`${px}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;x.fillStyle='#fff';x.fillText(it.e,cx,cy);return}
+    x.font=scFontCss(it,px);
+    const lines=(SC_FONTS[it.font||0].upper?it.t.toUpperCase():it.t).split('\n'),lh=px*1.25,top=cy-(lines.length*lh)/2+lh/2;
+    lines.forEach((ln,i)=>{
+      const y=top+i*lh;
+      if(it.bg){const w=x.measureText(ln||' ').width+px*.7;x.fillStyle=it.color;x.beginPath();if(x.roundRect)x.roundRect(cx-w/2,y-lh/2,w,lh,px*.3);else x.rect(cx-w/2,y-lh/2,w,lh);x.fill();x.fillStyle=scLum(it.color)>.6?'#000':'#fff'}
+      else{x.fillStyle=it.color;x.shadowColor='rgba(0,0,0,.45)';x.shadowBlur=px*.25;x.shadowOffsetY=2}
+      x.fillText(ln,cx,y);x.shadowColor='transparent';x.shadowBlur=0;x.shadowOffsetY=0;
+    });
+  });
+  return new Promise(res=>c.toBlob(b=>res(b),'image/jpeg',.88));
+}
+function stR(n){return +Number(n).toFixed(2)}
+/* ---------- publicar ---------- */
+async function scPublish(){
+  if(!SC||SC.busy)return;
+  const btn=document.getElementById('scPub');
+  if(!SC.file&&!SC.grad){alert('Escolha uma foto, um vídeo ou crie um story de texto.');return}
+  if(SC.audience==='close'&&!closeFriends.size){alert('Adicione pessoas à lista de Amigos próximos primeiro.');closeFriendsEditor();return}
+  const prefs=stPrefsOf(me.id);
+  const audience=SC.audience==='close'?'close':(prefs.view||'all');
+  SC.busy=true;if(btn){btn.disabled=true;btn.classList.add('busy')}
+  try{
+    let file=SC.file;
+    const filterBaked=!SC.video&&!SC.grad&&SC.filter&&stCanvasFilterOK();
+    if(!SC.video){const blob=await scFlatten();if(!blob)throw new Error('Não foi possível preparar a imagem.');file=new File([blob],'story.jpg',{type:'image/jpeg'})}
+    const media=await uploadMedia(file,'stories','story');
+    const ments=SC.items.filter(i=>i.type==='mention'),postIt=SC.items.find(i=>i.type==='post');
+    const stk=SC.items.filter(i=>['gif','loc','poll','ask','count','link'].includes(i.type)||(SC.video&&(i.type==='text'||i.type==='emoji')));
+    const items=stk.map(i=>{const o={type:i.type,x:stR(i.x),y:stR(i.y),size:stR(i.size)};if(i.type==='gif')o.src=i.src;if(i.type==='loc')o.name=i.name;if(i.type==='link')o.url=i.url;if(i.type==='poll'){o.q=i.q;o.opts=i.opts}if(i.type==='ask')o.q=i.q;if(i.type==='count'){o.title=i.title;o.end=i.end}if(i.type==='emoji')o.e=i.e;if(i.type==='text'){o.t=i.t;o.color=i.color;o.bg=!!i.bg;o.font=i.font||0}return o});
+    const perm={reply:prefs.reply||'all',share:prefs.share||'all'};
+    const needOverlay=ments.length||postIt||items.length||(SC.filter&&!filterBaked)||perm.reply!=='all'||perm.share!=='all';
+    const overlay=needOverlay?{v:3,mentions:ments.map(m=>({uid:m.uid,name:m.name,x:stR(m.x),y:stR(m.y),size:m.size})),post:postIt&&SC.post?{id:SC.post.id,x:stR(postIt.x),y:stR(postIt.y),w:postIt.size}:null,items,filter:(SC.filter&&!filterBaked)?SC.filter:'',perm}:null;
+    const caption=SC.video&&!items.some(i=>i.type==='text')?SC.items.filter(i=>i.type==='text').map(i=>i.t).join('\n'):'';
+    const payload={user_id:me.id,media_url:media,media_type:SC.video?'video':'image',caption,link_url:SC.link||'',music:SC.music||'',expires_at:new Date(Date.now()+86400000).toISOString(),audience};
+    if(overlay)payload.overlay=overlay;if(postIt&&SC.post){payload.original_post_id=String(SC.post.id);if(SC.post.ownerId)payload.original_owner_id=SC.post.ownerId}
+    let r=await sb.from('stories').insert(payload).select('id').single();
+    if(r.error&&/original_owner_id/i.test(r.error.message||'')){delete payload.original_owner_id;r=await sb.from('stories').insert(payload).select('id').single()}
+    if(r.error&&/overlay|original_post_id|schema cache/i.test(r.error.message||'')){throw new Error('Para usar figurinhas, menções e publicações nos Stories, o administrador precisa rodar a atualização do banco (atualizacao-stories.sql).')}
+    if(r.error&&/audience|check constraint|violates/i.test(r.error.message||'')){
+      if(audience!=='all'){throw new Error('Para usar a privacidade "'+(ST_AUD_TXT[audience]||audience)+'", rode o atualizacao-stories.sql no Supabase.')}
+      const {audience:_a,...rest}=payload;r=await sb.from('stories').insert(rest).select('id').single();
+    }
+    if(r.error)throw r.error;
+    const sid=r.data&&r.data.id;
+    if(sid&&ments.length){const uniq=[...new Set(ments.map(m=>m.uid))].filter(u=>u&&u!==me.id);if(uniq.length){const mr=await sb.from('story_mentions').insert(uniq.map(u=>({story_id:sid,mentioned_user_id:u,created_by:me.id})));if(mr.error)console.warn('menções',mr.error)}}
+    try{musicStop()}catch(_){}
+    SC.qDone++;
+    if(SC.queue.length){
+      const next=SC.queue.shift();SC.busy=false;stSetFile(next);scRenderEdit();
+      shareToast(`Story ${SC.qDone} de ${SC.qTotal} publicado ✓`);
+      loadStories().then(refreshStoryTray);return;
+    }
+    shareToast(SC.qTotal>1?`${SC.qTotal} stories publicados! ✨`:(ments.length?'Story publicado! Avisamos quem você mencionou.':'Story publicado! ✨'));
+    scClose();await loadStories();refreshStoryTray();
+    if(window.cmCurrentPage==='profile'){const a=document.getElementById('app');if(a)a.innerHTML=profile()}
+    else if(window.cmCurrentPage!=='home')go('home');
+  }catch(e){
+    alert(storyErrPt(e));
+    if(SC){SC.busy=false}if(btn){btn.disabled=false;btn.classList.remove('busy')}
+  }
+}
+
+/* ---------- visualizador ---------- */
+function svBuild(){
+  document.getElementById('sv')?.remove();
+  document.body.classList.add('svOpen');
+  document.body.insertAdjacentHTML('beforeend',`<div id="sv" class="sv"><div class="svBox" id="svBox"><div class="svMedia" id="svMedia"></div><div class="svShade"></div><div class="svBars" id="svBars"></div><div class="svHead" id="svHead"></div><div class="svOver" id="svOver"></div><div class="svStage" id="svStage"></div><div class="svFoot" id="svFoot"></div></div></div>`);
+  const box=document.getElementById('svBox');let st=null;
+  if(!window.__svRs){window.__svRs=true;window.addEventListener('resize',()=>{const it=typeof svCur==='function'&&svCur();if(it&&document.getElementById('svStage'))svPaintOverlay(it)})}
+  box.addEventListener('pointerdown',e=>{
+    if(e.target.closest('button,a,input,form,.svFoot,.svHead,.svStk'))return;
+    st={x:e.clientX,y:e.clientY,t:Date.now(),dy:0,moved:false,hold:setTimeout(()=>{if(st){SV.holdPause=true;box.classList.add('svHold');svApplyPause()}},220)};
+    try{box.setPointerCapture(e.pointerId)}catch(_){}
+  });
+  box.addEventListener('pointermove',e=>{
+    if(!st)return;const dx=e.clientX-st.x,dy=e.clientY-st.y;
+    if(Math.abs(dx)>10||Math.abs(dy)>10)st.moved=true;
+    if(Math.abs(dy)>Math.abs(dx)){st.dy=dy;if(dy>0)box.style.transform=`translateY(${dy}px) scale(${1-Math.min(dy,300)/1500})`;else box.style.transform=`translateY(${Math.max(dy,-60)/3}px)`}
+  });
+  const end=e=>{
+    if(!st)return;clearTimeout(st.hold);const s=st;st=null;
+    box.style.transform='';box.classList.remove('svHold');
+    const wasHold=SV.holdPause;SV.holdPause=false;svApplyPause();
+    if(s.dy>110){svClose();return}
+    if(s.dy<-70){svSwipeUp();return}
+    if(e.type==='pointercancel'||wasHold||s.moved)return;
+    const r=box.getBoundingClientRect();(e.clientX-r.left<r.width*.3)?svPrev():svNext();
+  };
+  box.addEventListener('pointerup',end);box.addEventListener('pointercancel',end);
+  document.addEventListener('keydown',svKey);
+  clearInterval(ST.tick);ST.tick=setInterval(()=>{if(!document.getElementById('sv')){clearInterval(ST.tick);return}document.querySelectorAll('#svStage [data-count-end]').forEach(el=>{el.innerHTML=stCountHtml(Number(el.dataset.countEnd)||0)})},1000);
+}
+function svShow(){
+  cancelAnimationFrame(SV.raf);svStopAudio();
+  const g=SV.groups[SV.gi],it=g&&g.items[SV.si];if(!it){svClose();return}
+  SV.elapsed=0;SV.last=0;SV.ready=false;SV.dur=SV_IMG_MS;SV.holdPause=false;SV.focusPause=false;SV.menuPause=false;
+  const mine=it.owner==='me'||it.user_id===me?.id;
+  const o=it.overlay||{};const items=Array.isArray(o.items)?o.items:[];
+  document.getElementById('svBars').innerHTML=g.items.map((x,i)=>`<i><b style="width:${i<SV.si?100:0}%"></b></i>`).join('');
+  const hasSound=it.type==='video'||!!it.music;
+  const aud=it.audience&&it.audience!=='all'?(it.audience==='close'?'<em class="svStar" title="Amigos próximos">★</em>':`<em class="svStar" title="${ST_AUD_TXT[it.audience]||''}" style="color:#9fe">${it.audience==='none'?'🔒':'👥'}</em>`):'';
+  document.getElementById('svHead').innerHTML=`<div class="svUser" onclick="svOpenProfile()"><img class="avatar" src="${esc(g.photo)}" alt=""><b>${esc(mine?'Seu story':g.name)}</b><span>${timeAgo(it.created)}</span>${aud}</div><div class="svBtns">${hasSound?`<button aria-label="Som" id="svMute" onclick="svToggleMute()">${SV.muted?STI.mute:STI.vol}</button>`:''}<button aria-label="Mais opções" onclick="svMenu()">${STI.more}</button><button aria-label="Fechar" onclick="svClose()">${STI.x}</button></div>`;
+  const fcss=o.filter?`style="filter:${stFilterCss(o.filter)}"`:'';
+  const media=it.type==='video'
+    ?`<video id="svVid" src="${esc(it.image)}" playsinline preload="auto" ${SV.muted?'muted':''} ${fcss}></video>`
+    :`<img id="svImg" src="${esc(it.image)}" alt="" ${fcss} decoding="async"><img class="svBlur" src="${esc(it.image)}" alt="" ${fcss}>`;
+  const mb=document.getElementById('svMedia');mb.classList.remove('stSwitch');void mb.offsetWidth;mb.classList.add('stSwitch');mb.innerHTML=media;
+  const m=mb.firstElementChild;
+  if(it.type==='video'){m.addEventListener('loadedmetadata',()=>{SV.dur=Math.min((m.duration||5)*1000,SV_MAX_VIDEO_MS)});m.addEventListener('canplay',svReady,{once:true})}
+  else{m.addEventListener('load',svReady,{once:true})}
+  m.addEventListener('error',svReady,{once:true});
+  let over='';
+  if(it.music){const mu=musicDecode(it.music);if(it.type!=='video')SV.dur=Math.min(60,Math.max(5,mu.seg||MUSIC_SEG))*1000;over+=`<div class="svMusic">${mu.cover?`<img src="${esc(mu.cover)}" alt="">`:'🎵'}<span>${esc(mu.title)}${mu.artist?' · '+esc(mu.artist):''}</span></div>`}
+  if(it.text)over+=`<div class="svCaption">${esc(it.text)}</div>`;
+  if(it.link&&!items.some(x=>x.type==='link'))over+=`<a class="svLink" href="${esc(it.link)}" target="_blank" rel="noopener noreferrer">${STI.link.replace('<svg','<svg style="width:15px;height:15px"')} ${esc(stHost(it.link))}</a>`;
+  if(items.some(x=>x.type==='poll'||x.type==='ask'||x.type==='count')&&it.type!=='video')SV.dur=Math.max(SV.dur,9000);
+  document.getElementById('svOver').innerHTML=over;svPaintOverlay(it);
+  const canReply=stPerm(it,'reply'),canShare=mine||stPerm(it,'share');
+  document.getElementById('svFoot').innerHTML=mine
+    ?`<div class="svOwnBar"><button class="svActBtn" onclick="svViewers()"><span class="svFaces" id="svFaces"></span><b id="svViewCount">Atividade</b><small id="svLikeCount"></small></button><button class="svIconBtn" aria-label="Compartilhar" onclick="svShare()">${STI.send}</button></div><div class="svUpHint">${STI.up}Deslize para cima para ver a atividade</div>`
+    :`<div class="svReact" id="svReact">${['❤️','🙌','🔥','😢','😮','😂'].map(e=>`<button type="button" onpointerdown="event.preventDefault()" onclick="svReaction('${e}')">${e}</button>`).join('')}</div><form class="svReply" onsubmit="svSendReply(event)">${canReply?`<input id="svInput" placeholder="Enviar mensagem…" autocomplete="off" enterkeyhint="send" onfocus="svFocus(true)" onblur="svFocus(false)">`:`<div class="svLocked" style="flex:1">${STI.lock.replace('<svg','<svg style="width:14px;height:14px;vertical-align:-2px"')} Respostas desativadas</div>`}<button type="button" class="svIconBtn svHeart ${storyLikes.has(it.id)?'on':''}" id="svHeart" aria-label="Curtir" onpointerdown="event.preventDefault()" onclick="svLike()">${storyLikes.has(it.id)?STI.heartFill:STI.heart}</button>${canShare?`<button type="button" class="svIconBtn" aria-label="Compartilhar" onclick="svShare()">${STI.send}</button>`:''}</form>`;
+  svMarkSeen(it);
+  if(mine)stOwnStats(it);
+  SV.raf=requestAnimationFrame(svTick);
+}
+function svToggleMute(){
+  SV.muted=!SV.muted;
+  const v=document.getElementById('svVid');if(v)v.muted=SV.muted;if(SV.audio)SV.audio.muted=SV.muted;
+  const b=document.getElementById('svMute');if(b)b.innerHTML=SV.muted?STI.mute:STI.vol;
+}
+function svClose(){
+  cancelAnimationFrame(SV.raf);svStopAudio();clearInterval(ST.tick);
+  document.getElementById('sv')?.remove();document.body.classList.remove('svOpen');
+  document.removeEventListener('keydown',svKey);
+  refreshStoryTray();
+  if(window.cmCurrentPage==='profile'||window.cmCurrentPage==='publicProfile'){document.querySelectorAll('.pfAvatarWrap.hasStory').forEach(w=>w.classList.add('seenStory'))}
+}
+function svPaintOverlay(it){
+  const st=document.getElementById('svStage');if(!st)return;const r=svStageBox();if(!r)return;
+  Object.assign(st.style,{left:r.l+'px',top:r.t+'px',width:r.w+'px',height:r.h+'px'});
+  const o=it.overlay||{};let h='';
+  if(it.orig){const pst=o.post||{x:50,y:45,w:74};const x=postFind(it.orig);h+=`<button type="button" class="svPostCard" style="left:${pst.x}%;top:${pst.y}%;width:${pst.w}%" onclick="svOpenSharedPost('${esc(it.orig)}')" aria-label="Abrir publicação original">${storyPostCardHtml(x,true)}</button>`}
+  (o.mentions||[]).forEach(m=>{h+=`<button type="button" class="svMention" style="left:${m.x}%;top:${m.y}%;font-size:${(m.size||6)/100*r.w}px" onclick="svOpenMention('${esc(m.uid)}')">@${esc(m.name||'')}</button>`});
+  (Array.isArray(o.items)?o.items:[]).forEach((s,k)=>{
+    const pos=`left:${Number(s.x)||50}%;top:${Number(s.y)||50}%;`;const sz=Number(s.size)||10,px=sz/100*r.w;
+    if(s.type==='text'){const f=SC_FONTS[s.font||0]||SC_FONTS[0];const t=f.upper?String(s.t||'').toUpperCase():String(s.t||'');h+=`<div class="svStk svStkGif" style="${pos}font:${f.f(px).replace(/"/g,"'")};font-size:${px}px;text-align:center;line-height:1.25">${t.split('\n').map(l=>`<span class="scLine" style="${s.bg?`background:${esc(s.color)};color:${scLum(s.color||'#ffffff')>.6?'#000':'#fff'}`:`color:${esc(s.color||'#fff')};text-shadow:0 1px 6px rgba(0,0,0,.45)`}">${esc(l)||'&nbsp;'}</span>`).join('<br>')}</div>`;return}
+    if(s.type==='emoji'){h+=`<div class="svStk svStkGif" style="${pos}font-size:${px}px">${esc(s.e||'')}</div>`;return}
+    if(s.type==='gif'){h+=`<div class="svStk svStkGif" style="${pos}width:${sz}%">${stStickerHtml(s,true,it.id)}</div>`;return}
+    if(s.type==='loc'){h+=`<button type="button" class="svStk" style="${pos}font-size:${px}px;background:none;border:0;padding:0" onclick="svLocTap(${k})">${stStickerHtml(s,true,it.id)}</button>`;return}
+    if(s.type==='link'){h+=`<a class="svStk" style="${pos}font-size:${px}px;text-decoration:none" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${stStickerHtml(s,true,it.id)}</a>`;return}
+    if(ST_CARD.has(s.type)){h+=`<div class="svStk" data-k="${k}" style="${pos}width:${sz}%;font-size:${sz/100*r.w*.075}px">${stStickerHtml(s,true,it.id)}</div>`}
+  });
+  st.innerHTML=h;
+  if((o.items||[]).some(s=>s.type==='poll')&&!ST.poll[it.id])svPollLoad(it);
+}
+function svLocTap(k){const it=svCur();const s=it?.overlay?.items?.[k];if(!s)return;const c=typeof officialCity==='function'?officialCity(s.name):'';if(c){svClose();go('people',c)}else svToast('📍 '+s.name)}
+async function svPollLoad(it){
+  const loc=lsGet('cm_poll_votes',{});let data={counts:[],total:0,mine:loc[it.id]!=null?loc[it.id]:null};
+  try{const r=await sb.from('story_interactions').select('user_id,value').eq('story_id',it.id).eq('kind','poll');if(!r.error){data={counts:[],total:0,mine:null};(r.data||[]).forEach(v=>{const i=Number(v.value);data.counts[i]=(data.counts[i]||0)+1;data.total++;if(v.user_id===me.id)data.mine=i})}else if(data.mine!=null){data.counts[data.mine]=1;data.total=1}}catch(_){}
+  ST.poll[it.id]=data;const cur=svCur();if(cur&&cur.id===it.id)svPaintOverlay(cur);
+}
+async function svPollVote(i){
+  const it=svCur();if(!it)return;
+  if(it.owner==='me'||it.user_id===me?.id){svViewers('poll');return}
+  const d=ST.poll[it.id]||{counts:[],total:0,mine:null};if(d.mine===i)return;
+  if(d.mine!=null){d.counts[d.mine]=Math.max(0,(d.counts[d.mine]||1)-1);d.total--}
+  d.counts[i]=(d.counts[i]||0)+1;d.total++;d.mine=i;ST.poll[it.id]=d;svPaintOverlay(it);
+  const loc=lsGet('cm_poll_votes',{});loc[it.id]=i;lsSet('cm_poll_votes',loc);
+  try{await sb.from('story_interactions').delete().eq('story_id',it.id).eq('user_id',me.id).eq('kind','poll')}catch(_){}
+  const ok=await stInteract(it,'poll',i);
+  if(!ok){const s=(it.overlay.items||[]).find(x=>x.type==='poll');await svSendDM(`📊 Votou na sua enquete “${s?.q||''}”: ${s?.opts?.[i]||''}`)}
+}
+function svAsk(){
+  const it=svCur();if(!it)return;if(it.user_id===me?.id){svViewers('ask');return}
+  if(!stPerm(it,'reply')){svToast('Respostas desativadas neste story');return}
+  const s=(it.overlay?.items||[]).find(x=>x.type==='ask');
+  svModal(`<div class="stGrab"></div><div class="stSheetHead"><h2>${esc(s?.q||'Pergunta')}</h2><button class="close" onclick="svModalClose()">×</button></div><div class="stSheetBody"><textarea id="stAskIn" class="textarea" maxlength="300" placeholder="Escreva sua resposta…"></textarea><button class="primary" style="width:100%" onclick="svAskSend()">Enviar resposta</button><div class="small" style="margin-top:8px;opacity:.75">${esc(stFirst(it.name))} vê sua resposta com o seu nome.</div></div>`);
+  stSheetClass();setTimeout(()=>document.getElementById('stAskIn')?.focus(),80);
+}
+async function svAskSend(){
+  const it=svCur();const t=(document.getElementById('stAskIn')?.value||'').trim();if(!t||!it)return;
+  const s=(it.overlay?.items||[]).find(x=>x.type==='ask');
+  let ok=await stInteract(it,'question',t);
+  if(!ok)ok=await svSendDM(`❓ Respondeu sua pergunta “${s?.q||''}”: ${t}`);
+  svModalClose();svToast(ok?'Resposta enviada ✓':'Não foi possível enviar agora');
+}
+function stSheetClass(){document.querySelector('#modal .modalBox')?.classList.add('stSheet')}
+async function stOwnStats(it){
+  try{
+    const [v,l]=await Promise.all([sb.from('story_views').select('viewer_id',{count:'exact'}).eq('story_id',it.id).order('viewed_at',{ascending:false}).limit(3),sb.from('story_likes').select('user_id',{count:'exact',head:true}).eq('story_id',it.id)]);
+    if(svCur()?.id!==it.id)return;
+    const n=(!v.error&&typeof v.count==='number')?v.count:0;const el=document.getElementById('svViewCount');if(el)el.textContent=n+(n===1?' visualização':' visualizações');
+    const f=document.getElementById('svFaces');if(f&&v.data)f.innerHTML=v.data.map(x=>{const p=stP(x.viewer_id);return `<img src="${esc(p?.photo||avatar(p?.name||'U'))}" alt="">`}).join('');
+    const lc=document.getElementById('svLikeCount');if(lc&&!l.error&&l.count)lc.textContent='· ♥ '+l.count;
+  }catch(_){}
+}
+async function svLike(){
+  const it=svCur();if(!it||!me?.id)return;
+  const on=!storyLikes.has(it.id);
+  on?storyLikes.add(it.id):storyLikes.delete(it.id);
+  const b=document.getElementById('svHeart');if(b){b.classList.toggle('on',on);b.innerHTML=on?STI.heartFill:STI.heart}
+  if(on){const box=document.getElementById('svBox');if(box){box.insertAdjacentHTML('beforeend',`<div class="svBigHeart">${STI.heartFill.replace('<svg','<svg style="width:100%;height:100%"')}</div>`);const h=box.lastElementChild;setTimeout(()=>h&&h.remove(),950)}try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}}
+  try{
+    if(on){const r=await sb.from('story_likes').upsert({story_id:it.id,user_id:me.id},{onConflict:'story_id,user_id',ignoreDuplicates:true});if(r.error)throw r.error}
+    else{const r=await sb.from('story_likes').delete().eq('story_id',it.id).eq('user_id',me.id);if(r.error)throw r.error}
+  }catch(_){on?storyLikes.delete(it.id):storyLikes.add(it.id);if(b&&svCur()?.id===it.id){b.classList.toggle('on',!on);b.innerHTML=!on?STI.heartFill:STI.heart}svToast('Não foi possível curtir agora')}
+}
+async function svSendReply(e){
+  e.preventDefault();
+  const it=svCur();const inp=document.getElementById('svInput'),txt=(inp?.value||'').trim();if(!txt||!it)return;
+  if(!stPerm(it,'reply')){svToast('Respostas desativadas neste story');return}
+  inp.value='';inp.blur();
+  const ok=await svSendDM('↩️ Respondeu ao seu story: '+txt);
+  if(ok)stInteract(it,'reply',txt);
+  svToast(ok?'Mensagem enviada ✓':'Não foi possível enviar agora');
+}
+async function svReaction(emoji){
+  const it=svCur();if(!it)return;
+  if(!stPerm(it,'reply')){svToast('Respostas desativadas neste story');return}
+  const ok=await svSendDM(emoji+' Reagiu ao seu story');
+  if(ok){stInteract(it,'reply',emoji);const f=document.createElement('div');f.className='svFloat';f.textContent=emoji;document.getElementById('svBox')?.appendChild(f);setTimeout(()=>f.remove(),1200)}
+  else svToast('Não foi possível enviar agora');
+  document.getElementById('svInput')?.blur();
+}
+function stStoryUrl(id){return (typeof CONECTA_APP_URL!=='undefined'?CONECTA_APP_URL:location.origin+location.pathname)+'?story='+encodeURIComponent(id)}
+function svShare(){
+  const it=svCur(),g=SV.groups[SV.gi];if(!it)return;
+  if(it.user_id!==me?.id&&!stPerm(it,'share')){svToast('Este story não pode ser compartilhado');return}
+  svModal(`<div class="stGrab"></div><div class="stSheetHead"><h2>Compartilhar</h2><button class="close" onclick="svModalClose()">×</button></div><div class="stSheetBody"><div class="stSearch">${STI.search}<input id="stShQ" placeholder="Pesquisar pessoas" autocomplete="off" oninput="stShareFill()"></div><div id="stShList" class="stPeople"></div><div class="stMenu" style="margin-top:12px"><button onclick="stCopyLink()">${STI.link} Copiar link do story</button>${navigator.share?`<button onclick="stNativeShare()">${STI.send} Mais opções…</button>`:''}</div></div>`);
+  stSheetClass();stShareFill();
+}
+function stShareFill(){
+  const el=document.getElementById('stShList');if(!el)return;const it=svCur();if(!it)return;
+  const q=normText(document.getElementById('stShQ')?.value||'').trim();
+  let a=getPublicPeople().filter(p=>p.id!==it.user_id);
+  a.sort((x,y)=>Number(followCache.has(y.id))-Number(followCache.has(x.id)));
+  a=a.filter(p=>!q||normText(p.name||'').includes(q)).slice(0,40);
+  const sent=ST.sent||(ST.sent=new Set());
+  el.innerHTML=a.length?a.map(p=>`<div class="stPerson"><img src="${esc(p.photo||avatar(p.name))}" alt=""><div class="stPInfo"><b>${esc(p.name)}</b><small>${esc(personCity(p)||'Mantiqueira')}</small></div><button class="stMiniBtn ${sent.has(it.id+':'+p.id)?'done':'main'}" onclick="stShareTo('${esc(p.id)}',this)">${sent.has(it.id+':'+p.id)?'Enviado':'Enviar'}</button></div>`).join(''):'<div class="stEmptyBox">Ninguém encontrado.</div>';
+}
+async function stShareTo(uid,btn){
+  const it=svCur();if(!it||!me?.id)return;const sent=ST.sent||(ST.sent=new Set());if(sent.has(it.id+':'+uid))return;
+  if(btn){btn.disabled=true;btn.textContent='…'}
+  const who=it.user_id===me.id?'meu story':'o story de '+(it.name||'');
+  const {error}=await sb.from('messages').insert({sender_id:me.id,receiver_id:uid,body:`↗️ Compartilhou ${who}: ${stStoryUrl(it.id)}`});
+  if(error){if(btn){btn.disabled=false;btn.textContent='Enviar'}svToast('Não foi possível enviar agora');return}
+  sent.add(it.id+':'+uid);if(btn){btn.disabled=false;btn.textContent='Enviado';btn.classList.remove('main');btn.classList.add('done')}
+  if(it.user_id!==me.id)stInteract(it,'share',uid);
+}
+async function stCopyLink(){const it=svCur();if(!it)return;try{await navigator.clipboard.writeText(stStoryUrl(it.id));svToast('Link copiado ✓')}catch(_){prompt('Copie o link:',stStoryUrl(it.id))}}
+async function stNativeShare(){const it=svCur();if(!it)return;try{await navigator.share({title:'Story no Conecta Mantiqueira',url:stStoryUrl(it.id)});if(it.user_id!==me?.id)stInteract(it,'share','externo')}catch(_){}}
+function svSwipeUp(){
+  const it=svCur();if(!it)return;
+  if(it.user_id===me?.id){svViewers();return}
+  const g=SV.groups[SV.gi];
+  svModal(`<div class="stGrab"></div><div class="stSheetHead"><h2>${esc(g.name||'')}</h2><button class="close" onclick="svModalClose()">×</button></div><div class="stSheetBody"><div class="stMenu">${stPerm(it,'reply')?`<button onclick="svModalClose();setTimeout(()=>document.getElementById('svInput')?.focus(),60)">${STI.chat} Responder</button>`:''}<button onclick="svLike();svModalClose()">${STI.heart} ${storyLikes.has(it.id)?'Remover curtida':'Curtir'}</button>${stPerm(it,'share')?`<button onclick="svModalClose();svShare()">${STI.send} Compartilhar</button>`:''}<button onclick="svModalClose();svOpenProfile()">${STI.user} Ver perfil</button><button onclick="stCopyLink();svModalClose()">${STI.link} Copiar link</button><button onclick="svMuteUser('${esc(g.uid)}')">${STI.bell} Silenciar stories de ${esc(stFirst(g.name))}</button></div></div>`);
+  stSheetClass();
+}
+function svMenu(){
+  const it=svCur(),g=SV.groups[SV.gi];if(!it)return;
+  const rows=it.user_id===me?.id
+    ?`<button onclick="svModalClose();svViewers()">${STI.eye} Atividade do story</button><button onclick="svModalClose();svShare()">${STI.send} Compartilhar</button><a href="${esc(it.image)}" download target="_blank" rel="noopener">${STI.down} Salvar mídia</a><button onclick="svModalClose();svClose();storyArchive()">${STI.arch} Arquivo de stories</button><button onclick="svModalClose();svClose();closeFriendsEditor()">${STI.star} Amigos próximos</button><button onclick="svModalClose();svClose();storySettings()">${STI.lock} Privacidade dos stories</button><button class="danger" onclick="svModalClose();svDelete()">${STI.trash} Excluir story</button>`
+    :`<button onclick="svModalClose();svOpenProfile()">${STI.user} Ver perfil</button>${stPerm(it,'share')?`<button onclick="svModalClose();svShare()">${STI.send} Compartilhar</button>`:''}<button onclick="stCopyLink();svModalClose()">${STI.link} Copiar link</button><button onclick="svMuteUser('${esc(g.uid)}')">${STI.bell} Silenciar stories de ${esc(stFirst(g.name))}</button>`;
+  svModal(`<div class="stGrab"></div><div class="stSheetHead"><h2>Opções</h2><button class="close" onclick="svModalClose()">×</button></div><div class="stSheetBody"><div class="stMenu">${rows}</div></div>`);
+  stSheetClass();
+}
+
+/* ---------- atividade do story ---------- */
+let STA={tab:'views',data:null,sid:null};
+async function stSel(table,cols,colsFallback,fn){let r=await fn(sb.from(table).select(cols));if(r.error&&colsFallback)r=await fn(sb.from(table).select(colsFallback));return r}
+async function svViewers(tab){
+  const it=svCur(),g=SV.groups[SV.gi];if(!it)return;
+  STA.tab=tab||'views';STA.sid=it.id;STA.data=null;
+  const mineItems=g.items;
+  svModal(`<div class="stGrab"></div><div class="stSheetHead"><h2>Atividade do story</h2><button class="close" onclick="svModalClose()">×</button></div><div class="stSheetBody"><div class="stThumbs">${mineItems.map((x,i)=>`<button class="${i===SV.si?'on':''}" style="${x.type==='video'?'background:#123':`background-image:url('${esc(x.image)}')`}" onclick="stActPick(${i})" aria-label="Story ${i+1}">${x.type==='video'?'<span style="color:#fff">▶</span>':''}</button>`).join('')}</div><div id="stActBox"><div class="stEmptyBox">Carregando…</div></div></div>`);
+  stSheetClass();stActLoad(it);
+}
+function stActPick(i){const g=SV.groups[SV.gi];if(!g||!g.items[i])return;SV.si=i;document.querySelectorAll('.stThumbs button').forEach((b,k)=>b.classList.toggle('on',k===i));STA.sid=g.items[i].id;STA.data=null;const b=document.getElementById('stActBox');if(b)b.innerHTML='<div class="stEmptyBox">Carregando…</div>';stActLoad(g.items[i])}
+async function stActLoad(it){
+  const [v,l,s]=await Promise.allSettled([
+    stSel('story_views','viewer_id,viewed_at','viewer_id',q=>q.eq('story_id',it.id)),
+    stSel('story_likes','user_id,created_at','user_id',q=>q.eq('story_id',it.id)),
+    sb.from('story_interactions').select('user_id,kind,value,created_at').eq('story_id',it.id).order('created_at',{ascending:false})
+  ]);
+  const ok=x=>x.status==='fulfilled'&&!x.value.error;
+  const inter=ok(s)?(s.value.data||[]):null;
+  const data={it,views:ok(v)?(v.value.data||[]).map(x=>({id:x.viewer_id,at:x.viewed_at})):[],likes:ok(l)?(l.value.data||[]).map(x=>({id:x.user_id,at:x.created_at})):[],shares:inter?inter.filter(x=>x.kind==='share').map(x=>({id:x.user_id,at:x.created_at,to:x.value})):[],answers:inter?inter.filter(x=>x.kind==='question').map(x=>({id:x.user_id,at:x.created_at,t:x.value})):[],polls:inter?inter.filter(x=>x.kind==='poll'):[],interOK:!!inter,viewsOK:ok(v)};
+  data.views.sort((a,b)=>Date.parse(b.at||0)-Date.parse(a.at||0));
+  const need=[...new Set([...data.views,...data.likes,...data.shares,...data.answers].map(x=>x.id).filter(id=>id&&!stP(id)))];
+  if(need.length){try{const pr=await sb.from('profiles').select('id,name,city,photo').in('id',need);(pr.data||[]).forEach(p=>{if(!publicProfilesCache.some(x=>x.id===p.id))publicProfilesCache.push(p)})}catch(_){}}
+  if(STA.sid!==it.id)return;STA.data=data;stActPaint();
+}
+function stActPaint(){
+  const box=document.getElementById('stActBox'),d=STA.data;if(!box||!d)return;
+  const items=d.it.overlay?.items||[];const hasPoll=items.some(x=>x.type==='poll'),hasAsk=items.some(x=>x.type==='ask');
+  const tabs=[['views','Visualizações',d.views.length],['likes','Curtidas',d.likes.length],['shares','Compartilhamentos',d.shares.length]];
+  if(hasPoll)tabs.push(['poll','Enquete',d.polls.length]);if(hasAsk)tabs.push(['ask','Respostas',d.answers.length]);
+  if(!tabs.some(t=>t[0]===STA.tab))STA.tab='views';
+  box.innerHTML=`<div class="stStats"><div class="stStat"><b>${d.views.length}</b><span>${STI.eye}Visualizações</span></div><div class="stStat"><b>${d.likes.length}</b><span>${STI.heart}Curtidas</span></div><div class="stStat"><b>${d.shares.length}</b><span>${STI.send}Envios</span></div></div><div class="stTabs">${tabs.map(t=>`<button class="${STA.tab===t[0]?'on':''}" onclick="STA.tab='${t[0]}';stActPaint()">${t[1]} · ${t[2]}</button>`).join('')}</div>${['views','likes','shares'].includes(STA.tab)?`<div class="stSearch">${STI.search}<input id="stActQ" placeholder="Pesquisar" autocomplete="off" oninput="stActList()"></div>`:''}<div id="stActList"></div>`;
+  stActList();
+}
+function stActList(){
+  const el=document.getElementById('stActList'),d=STA.data;if(!el||!d)return;
+  const q=normText(document.getElementById('stActQ')?.value||'').trim();
+  const liked=new Set(d.likes.map(x=>x.id));
+  const row=(x,sub,extra)=>{const p=stP(x.id)||{name:'Usuário'};if(q&&!normText(p.name||'').includes(q))return '';return `<div class="stPerson"><img src="${esc(p.photo||avatar(p.name))}" alt="" onclick="stActProfile('${esc(x.id)}')"><div class="stPInfo" onclick="stActProfile('${esc(x.id)}')"><b>${esc(p.name)}</b><small>${sub}</small></div>${extra||''}</div>`};
+  const when=a=>a?timeAgo(Date.parse(a)):'';
+  const msgBtn=id=>`<button class="stMiniBtn" onclick="stActChat('${esc(id)}')">Mensagem</button>`;
+  let h='';
+  if(STA.tab==='views'){h=d.views.map(x=>row(x,when(x.at)||'Visualizou',`${liked.has(x.id)?'<span class="stHeartMini">♥</span>':''}<button class="stMiniBtn" onclick="stActProfile('${esc(x.id)}')">Perfil</button>`)).join('');if(!h)h=`<div class="stEmptyBox"><i>👀</i><b>${q?'Ninguém encontrado':'Ninguém viu ainda'}</b>${q?'':'Quando alguém assistir, aparece aqui.'}</div>`}
+  else if(STA.tab==='likes'){h=d.likes.map(x=>row(x,`<span style="color:#ff3b6b">♥</span> Curtiu${x.at?' · '+when(x.at):''}`,msgBtn(x.id))).join('');if(!h)h=`<div class="stEmptyBox"><i>❤️</i><b>${q?'Ninguém encontrado':'Sem curtidas ainda'}</b></div>`}
+  else if(STA.tab==='shares'){if(!d.interOK)h='<div class="stEmptyBox"><i>🛠️</i><b>Falta uma atualização do banco</b>Rode o atualizacao-stories.sql no Supabase para registrar compartilhamentos.</div>';else{h=d.shares.map(x=>{const to=stP(x.to);return row(x,`Compartilhou no bate-papo${to?' com '+esc(stFirst(to.name)):x.to==='externo'?' (fora do app)':''} · ${when(x.at)}`,`<button class="stMiniBtn main" onclick="stActChat('${esc(x.id)}')">Abrir conversa</button>`)}).join('');if(!h)h=`<div class="stEmptyBox"><i>➤</i><b>${q?'Ninguém encontrado':'Ninguém compartilhou ainda'}</b></div>`}}
+  else if(STA.tab==='poll'){const s=(d.it.overlay.items||[]).find(x=>x.type==='poll');const c=[];d.polls.forEach(v=>{const i=Number(v.value);(c[i]=c[i]||[]).push(v.user_id)});const tot=d.polls.length;h=`<div class="stPollRes"><h4>${esc(s.q)}</h4>${s.opts.map((o,i)=>{const n=(c[i]||[]).length,pc=tot?Math.round(n/tot*100):0;return `<div class="stBar"><i style="width:${pc}%"></i><span>${esc(o)}</span><em>${pc}% · ${n}</em></div>`}).join('')}</div>`+s.opts.map((o,i)=>(c[i]||[]).length?`<div class="stSecTitle">${esc(o)}</div>`+(c[i]).map(id=>row({id},'Votou')).join(''):'').join('');if(!tot)h+=d.interOK?'<div class="stEmptyBox">Ninguém votou ainda.</div>':'<div class="stEmptyBox">Votos chegam no bate-papo até rodar o atualizacao-stories.sql.</div>'}
+  else if(STA.tab==='ask'){h=d.answers.map(x=>{const p=stP(x.id)||{name:'Usuário'};return `<div class="stAnswer"><div class="stPerson" style="padding:0"><img src="${esc(p.photo||avatar(p.name))}" alt="" onclick="stActProfile('${esc(x.id)}')"><div class="stPInfo"><b>${esc(p.name)}</b><small>${when(x.at)}</small></div>${msgBtn(x.id)}</div><p>${esc(x.t)}</p></div>`}).join('');if(!h)h=d.interOK?'<div class="stEmptyBox"><i>❓</i><b>Sem respostas ainda</b></div>':'<div class="stEmptyBox">Respostas chegam no bate-papo até rodar o atualizacao-stories.sql.</div>'}
+  el.innerHTML=`<div class="stPeople">${h}</div>`;
+}
+function stActProfile(uid){closeModal();svClose();if(uid===me?.id){go('profile');return}const p=stP(uid);if(!p)return;currentPublicUser=p;go('publicProfile')}
+function stActChat(uid){const p=stP(uid);if(!p)return;closeModal();svClose();currentPublicUser=p;go('conversation')}
+
+/* ---------- arquivo de stories ---------- */
+async function storyArchive(){
+  openModal(`<div class="stGrab"></div><div class="stSheetHead"><h2>Arquivo de stories</h2><button class="close" onclick="closeModal()">×</button></div><div class="stSheetBody"><div class="small" style="opacity:.8">Só você vê. Stories saem do ar em 24 h e ficam guardados aqui.</div><div id="archiveBox"><div class="stEmptyBox">Carregando…</div></div></div>`);
+  stSheetClass();
+  try{
+    const base='id,user_id,media_url,media_type,caption,music,link_url,created_at,expires_at';
+    let r=await sb.from('stories').select(base+',audience,original_post_id,overlay').eq('user_id',me.id).order('created_at',{ascending:false}).limit(150);
+    if(r.error)r=await sb.from('stories').select(base).eq('user_id',me.id).order('created_at',{ascending:false}).limit(150);
+    if(r.error)throw r.error;
+    const box=document.getElementById('archiveBox');if(!box)return;
+    const p=profileData();ST.arch=(r.data||[]).map(x=>stMapRow(x,{name:p.name,photo:p.photo}));
+    if(!ST.arch.length){box.innerHTML='<div class="stEmptyBox"><i>🗂️</i><b>Seu arquivo está vazio</b>Os stories que você publicar aparecem aqui.</div>';return}
+    const days=new Map();ST.arch.forEach((x,i)=>{const k=new Date(x.created).toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase());if(!days.has(k))days.set(k,[]);days.get(k).push(i)});
+    box.innerHTML=[...days].map(([k,idx])=>`<div class="stArchDay">${esc(k)}</div><div class="stArchGrid">${idx.map(i=>{const x=ST.arch[i];const live=x.expires>Date.now();return `<button onclick="stArchOpen(${i})" style="${x.type==='video'?'':`background-image:url('${esc(x.image)}')`}">${x.type==='video'?`<video src="${esc(x.image)}#t=0.3" muted playsinline preload="metadata"></video><i>▶</i>`:''}<span>${live?'No ar':new Date(x.created).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span></button>`}).join('')}</div>`).join('');
+  }catch(_){const box=document.getElementById('archiveBox');if(box)box.innerHTML='<div class="stEmptyBox">Não foi possível carregar o arquivo agora.</div>'}
+}
+function stArchOpen(i){
+  const arr=(ST.arch||[]).slice().sort((a,b)=>a.created-b.created);const it=ST.arch[i];if(!it)return;
+  closeModal();document.getElementById('sc')&&scClose();
+  const p=profileData();SV.groups=[{uid:me.id,mine:true,name:p.name,photo:p.photo,items:arr,allSeen:true}];SV.gi=0;SV.si=arr.indexOf(it);SV.muted=false;svBuild();svShow();
+}
+
+/* ---------- privacidade ---------- */
+function storySettings(){
+  const pr=stPrefsOf(me?.id);
+  const muted=[...storyMutedUsers].map(id=>stP(id)||{id,name:'Usuário'});
+  const seg=(key,opts)=>`<div class="stSeg">${opts.map(o=>`<button class="${pr[key]===o?'on':''}" onclick="stPrefSet('${key}','${o}',this)">${ST_AUD_TXT[o]==='Só eu'&&key!=='view'?'Ninguém':(o==='none'?'Só eu':ST_AUD_TXT[o])}</button>`).join('')}</div>`;
+  openModal(`<div class="stGrab"></div><div class="stSheetHead"><h2>Stories · Privacidade</h2><button class="close" onclick="closeModal()">×</button></div><div class="stSheetBody"><div class="stPrivRow"><b>Quem pode ver seus stories</b><small>Vale para os próximos stories que você publicar.</small>${seg('view',['all','followers','close','none'])}</div><div class="stPrivRow"><b>Quem pode responder</b><small>Mensagens, reações, perguntas e enquetes.</small>${seg('reply',['all','followers','close','none'])}</div><div class="stPrivRow"><b>Quem pode mencionar você</b><small>Com @ nos stories de outras pessoas.</small>${seg('mention',['all','followers','close','none'])}</div><div class="stPrivRow"><b>Quem pode compartilhar seus stories</b><small>Enviar para outras pessoas no bate-papo.</small>${seg('share',['all','followers','close','none'])}</div><div class="stMenu" style="margin-top:14px"><button onclick="closeFriendsEditor()">${STI.star} Amigos próximos <small style="margin-left:auto;color:#9fb2bf">${closeFriends.size}</small></button><button onclick="storyArchive()">${STI.arch} Arquivo de stories</button>${muted.length?`<button onclick="storyUnmuteAll()">${STI.bell} Reativar silenciados <small style="margin-left:auto;color:#9fb2bf">${esc(muted.map(m=>stFirst(m.name)).join(', '))}</small></button>`:''}</div><div class="small" style="margin-top:12px;opacity:.7">“Seguidores” = quem segue você. Stories ficam 24 h no ar e depois vão para o seu arquivo.</div></div>`);
+  stSheetClass();
+}
+async function stPrefSet(key,val,btn){
+  if(!me?.id)return;const pr={...stPrefsOf(me.id),[key]:val};
+  btn?.parentElement?.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===btn));
+  try{const meta={...(me.user_metadata||{}),story_prefs:pr};const {data,error}=await sb.auth.updateUser({data:cmLite(meta)});if(error)throw error;me=data.user;upsertMyProfile({id:me.id,story_prefs:pr});if(document.getElementById('scAud'))scRenderAudience()}catch(e){alert('Não foi possível salvar agora.')}
+}
+/* ---------- notificações e link direto ---------- */
+try{Object.assign(NOTIF_TXT,{story_like:'curtiu seu Story. ❤️',story_reply:'respondeu ao seu Story. 💬',story_share:'compartilhou seu Story. ➤',story_question:'respondeu à sua pergunta no Story. ❓',story_poll:'votou na sua enquete. 📊'})}catch(_){}
+(function stDeepLink(){try{const sp=new URLSearchParams(location.search),sid=sp.get('story');if(!sid)return;sp.delete('story');const q=sp.toString();history.replaceState(null,'',location.pathname+(q?'?'+q:''));let n=0;const t=setInterval(()=>{n++;if(me?.id&&document.getElementById('app')&&window.cmCurrentPage){clearInterval(t);cmOpenStoryById(sid)}else if(n>80)clearInterval(t)},500)}catch(_){}})();
+/* ===================== fim STORIES v3 ===================== */
+
+</script>
+<script>
+/* ===== Seguidores / Seguindo em tela cheia (estilo Instagram) ===== */
+let FL={uid:null,tab:'followers',followers:[],following:[],mutual:[],busy:new Set()};
+function flP(id){if(id===me?.id){const p=profileData();return{id,name:p.name,city:p.city,photo:p.photo}}return (publicProfilesCache||[]).find(p=>p.id===id)||null}
+async function showFollowList(userId,type){
+  if(!userId||userId==='undefined')return;
+  FL={uid:userId,tab:type==='following'?'following':'followers',followers:[],following:[],mutual:[],busy:new Set()};
+  const owner=flP(userId)||(currentPublicUser&&currentPublicUser.id===userId?currentPublicUser:null);
+  document.getElementById('fl')?.remove();document.body.classList.add('svOpen');
+  document.body.insertAdjacentHTML('beforeend',`<div id="fl" class="fl"><div class="flTop"><button class="flBack" aria-label="Voltar" onclick="flClose()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><b>${esc(owner?.name||'Perfil')}</b><span></span></div><div class="flTabs" id="flTabs"></div><div class="flSearch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="flQ" placeholder="Pesquisar nome ou cidade" autocomplete="off" oninput="flPaint()"></div><div class="flList" id="flList"><div class="flSkel"></div><div class="flSkel"></div><div class="flSkel"></div></div></div>`);
+  flTabs();
+  try{
+    const [a,b]=await Promise.all([sb.from('follows').select('follower_id').eq('following_id',userId),sb.from('follows').select('following_id').eq('follower_id',userId)]);
+    if(a.error||b.error)throw (a.error||b.error);
+    FL.followers=[...new Set((a.data||[]).map(x=>x.follower_id).filter(Boolean))];
+    FL.following=[...new Set((b.data||[]).map(x=>x.following_id).filter(Boolean))];
+    if(userId!==me?.id){const fs=new Set(FL.followers);FL.mutual=[...followCache].filter(id=>fs.has(id)&&id!==userId)}
+    const all=[...new Set([...FL.followers,...FL.following])].filter(id=>!flP(id));
+    if(all.length){const r=await sb.from('profiles').select('id,name,city,photo').in('id',all);if(!r.error&&Array.isArray(r.data))r.data.forEach(p=>{if(!publicProfilesCache.some(c=>c.id===p.id))publicProfilesCache.push(p)})}
+    if(!document.getElementById('fl'))return;flTabs();flPaint();
+  }catch(e){const l=document.getElementById('flList');if(l)l.innerHTML='<div class="flEmpty"><b>Não foi possível carregar</b>Verifique sua internet e tente de novo.</div>'}
+}
+function flTabs(){
+  const el=document.getElementById('flTabs');if(!el)return;
+  const t=[];if(FL.uid!==me?.id&&FL.mutual.length)t.push(['mutual',`${FL.mutual.length} em comum`]);
+  t.push(['followers',`${FL.followers.length} seguidores`],['following',`${FL.following.length} seguindo`]);
+  el.innerHTML=t.map(x=>`<button class="${FL.tab===x[0]?'on':''}" onclick="FL.tab='${x[0]}';flTabs();flPaint()">${x[1]}</button>`).join('');
+  el.querySelector('.on')?.scrollIntoView({inline:'center',block:'nearest'});
+}
+function flBtn(id){if(id===me?.id)return '';const f=followCache.has(id);return `<button class="flFollow ${f?'on':''}" onclick="event.stopPropagation();flToggle('${esc(id)}',this)">${f?'Seguindo':'Seguir'}</button>`}
+function flPaint(){
+  const el=document.getElementById('flList');if(!el)return;
+  const q=normText(document.getElementById('flQ')?.value||'').trim();
+  const ids=FL[FL.tab]||[];
+  const rows=ids.map(flP).filter(Boolean).filter(p=>!q||normText(p.name||'').includes(q)||normText(p.city||'').includes(q));
+  rows.sort((a,b)=>(b.id===me?.id)-(a.id===me?.id));
+  const ring=id=>{try{return typeof pfStoryCls==='function'&&pfStoryCls(id)?(pfStoryCls(id).includes('seen')?' seen':' story'):''}catch(_){return ''}};
+  el.innerHTML=rows.length?rows.map(p=>`<div class="flRow" onclick="flOpen('${esc(p.id)}')"><div class="flAv${ring(p.id)}"><img src="${esc(p.photo||avatar(p.name||'Usuário'))}" alt="" loading="lazy"></div><div class="flInfo"><b>${esc(p.name||'Usuário')}${typeof vBadge==='function'?vBadge(p.id):''}</b><span>${p.id===me?.id?'Você':esc(p.city||'Serra da Mantiqueira')}</span></div>${flBtn(p.id)}</div>`).join(''):`<div class="flEmpty"><b>${q?'Ninguém encontrado':FL.tab==='followers'?'Nenhum seguidor ainda':FL.tab==='following'?'Não segue ninguém ainda':'Nada em comum'}</b>${q?'Tente outro nome.':''}</div>`;
+}
+async function flToggle(id,btn){
+  if(!me?.id||FL.busy.has(id))return;FL.busy.add(id);
+  const on=!followCache.has(id);btn.classList.toggle('on',on);btn.textContent=on?'Seguindo':'Seguir';
+  try{
+    if(on){const {error}=await sb.from('follows').insert({follower_id:me.id,following_id:id});if(error)throw error;followCache.add(id)}
+    else{const {error}=await sb.from('follows').delete().eq('follower_id',me.id).eq('following_id',id);if(error)throw error;followCache.delete(id)}
+    if(FL.uid===me?.id){if(on){if(!FL.following.includes(id))FL.following.push(id)}else FL.following=FL.following.filter(x=>x!==id);flTabs()}
+  }catch(e){btn.classList.toggle('on',!on);btn.textContent=!on?'Seguindo':'Seguir';alert('Não foi possível atualizar agora.')}
+  FL.busy.delete(id);
+}
+function flClose(){document.getElementById('fl')?.remove();document.body.classList.remove('svOpen');const pg=window.cmCurrentPage;if(pg==='profile'||pg==='publicProfile'){const a=document.getElementById('app');if(a)a.innerHTML=pg==='profile'?profile():publicProfileScreen()}}
+function flOpen(id){document.getElementById('fl')?.remove();document.body.classList.remove('svOpen');if(id===me?.id){go('profile');return}const p=flP(id);if(!p)return;currentPublicUser=p;go('publicProfile')}
+
+</script>
 </body></html>
