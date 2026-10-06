@@ -526,7 +526,8 @@ html,body{width:100%;max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:1
 .stUseRow button{flex:1}
 
 /* ---------- editor ---------- */
-.scStageWrap{gap:10px;padding:0 10px calc(10px + env(safe-area-inset-bottom))}
+.scStageWrap{gap:10px;padding:calc(max(env(safe-area-inset-top),20px) + 6px) 10px calc(10px + env(safe-area-inset-bottom))}
+.sc .scStage{max-height:100%}
 .scStage{border-radius:22px;box-shadow:0 20px 50px rgba(0,0,0,.55)}
 .stEdTop{position:absolute;left:0;right:0;top:0;z-index:7;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:10px;background:linear-gradient(rgba(0,0,0,.42),transparent)}
 .stEdTools{display:flex;gap:6px}
