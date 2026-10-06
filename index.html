@@ -772,6 +772,9 @@ html,body{width:100%;max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:1
 .lightTheme .cfgSec{border-bottom-color:#e2eaed}.lightTheme .cfgTop{background:#f3f7f8}
 </style>
 <link rel="preconnect" href="https://www.youtube.com"><link rel="preconnect" href="https://i.ytimg.com"><link rel="preconnect" href="https://s.ytimg.com"><link rel="preconnect" href="https://www.google.com"><link rel="dns-prefetch" href="https://googlevideo.com">
+<style id="reelGestStyle">.reelGest{position:absolute;inset:0;z-index:4;touch-action:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+.reelsRoot.social .reelGest{display:none}
+</style>
 </head>
 <body><div id="app"></div>
 <script>
@@ -5031,6 +5034,34 @@ window.setupVideoFeed=function(){
 };
 /* capa vertical dos Shorts (mais nítida) com fallback */
 (function(){const old=reelSlide;window.reelSlide=function(x,i){let h=old(x,i);if(!x.social&&rlIsShort(x)&&x.youtubeId&&/^[\w-]{11}$/.test(x.youtubeId)){const v=`https://i.ytimg.com/vi/${x.youtubeId}/oardefault.jpg`;h=h.replace('<img src="','<img data-fb="1" onerror="if(this.dataset.fb){this.dataset.fb=\'\';this.src=this.getAttribute(\'data-src0\')}" src="'+v+'" data-src0="')}return h}})();
+
+</script>
+<script>
+/* ===== VÍDEOS: camada de gesto (deslizar funciona também nos Shorts) ===== */
+const RG={on:false,y0:0,x0:0,t0:0,st0:0,dy:0,dx:0,id:null,wheelT:0};
+function reelGo(i){const box=document.getElementById('reelsFeed');const el=document.querySelector(`.reel[data-i="${i}"]`);if(!box)return;if(el){box.scrollTo({top:el.offsetTop,behavior:'smooth'})}else if(i>RL.cur){reelNext()}}
+function reelGestSetup(){
+  const wrap=document.querySelector('#reelsRoot .reelsWrap');if(!wrap||document.getElementById('reelGest'))return;
+  wrap.insertAdjacentHTML('beforeend','<div id="reelGest" class="reelGest"></div>');
+  const g=document.getElementById('reelGest'),box=()=>document.getElementById('reelsFeed');
+  g.addEventListener('pointerdown',e=>{const b=box();if(!b)return;RG.on=true;RG.id=e.pointerId;RG.y0=e.clientY;RG.x0=e.clientX;RG.t0=Date.now();RG.st0=b.scrollTop;RG.dy=0;RG.dx=0;b.style.scrollSnapType='none';b.style.scrollBehavior='auto';try{g.setPointerCapture(e.pointerId)}catch(_){}reelTapDown(e)});
+  g.addEventListener('pointermove',e=>{if(!RG.on||e.pointerId!==RG.id)return;RG.dy=e.clientY-RG.y0;RG.dx=e.clientX-RG.x0;if(Math.abs(RG.dy)>6){const b=box();if(b)b.scrollTop=RG.st0-RG.dy;document.getElementById('reelsRoot')?.classList.add('moving')}});
+  const end=e=>{
+    if(!RG.on||e.pointerId!==RG.id)return;RG.on=false;const b=box();if(!b)return;
+    const h=b.clientHeight||1,dt=Math.max(1,Date.now()-RG.t0),v=RG.dy/dt;
+    let target=RL.cur;
+    if(Math.abs(RG.dy)>10){if(RG.dy<-h*.18||v<-.45)target=RL.cur+1;else if(RG.dy>h*.18||v>.45)target=Math.max(0,RL.cur-1)}
+    b.style.scrollSnapType='';b.style.scrollBehavior='';
+    setTimeout(()=>document.getElementById('reelsRoot')?.classList.remove('moving'),180);
+    if(Math.abs(RG.dy)<=10&&Math.abs(RG.dx)<=10&&e.type==='pointerup'){b.scrollTop=RG.st0;reelTapUp(e,RL.cur);return}
+    const el=document.querySelector(`.reel[data-i="${target}"]`);
+    if(el)b.scrollTo({top:el.offsetTop,behavior:'smooth'});else if(target>RL.cur){b.scrollTo({top:RG.st0,behavior:'smooth'});reelNext()}else b.scrollTo({top:RG.st0,behavior:'smooth'});
+  };
+  g.addEventListener('pointerup',end);g.addEventListener('pointercancel',end);
+  g.addEventListener('wheel',e=>{e.preventDefault();if(Date.now()-RG.wheelT<550||Math.abs(e.deltaY)<18)return;RG.wheelT=Date.now();reelGo(e.deltaY>0?RL.cur+1:Math.max(0,RL.cur-1))},{passive:false});
+  document.addEventListener('keydown',e=>{if(!document.getElementById('reelGest')||/INPUT|TEXTAREA/.test(e.target.tagName))return;if(e.key==='ArrowDown'){e.preventDefault();reelGo(RL.cur+1)}else if(e.key==='ArrowUp'){e.preventDefault();reelGo(Math.max(0,RL.cur-1))}});
+}
+(function(){const prev=window.setupVideoFeed;window.setupVideoFeed=function(){prev();reelGestSetup()}})();
 
 </script>
 </body></html>
