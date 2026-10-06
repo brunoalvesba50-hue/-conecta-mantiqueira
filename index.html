@@ -892,6 +892,56 @@ html,body{width:100%;max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:1
 .nuSteps{text-align:left;margin:12px 0 16px;padding-left:22px;color:#e9f2f5;font-size:15px;line-height:1.55}.nuSteps li{margin:6px 0}
 .nuList{list-style:none;padding:0;margin:10px auto 16px;text-align:left;max-width:280px;font-size:15px;line-height:1.9}
 </style>
+<style id="in2Style">.instBubble{display:none!important}
+.in2Bub{position:fixed;z-index:22;width:66px;height:74px;border:0;background:none;padding:0;cursor:pointer;animation:stPop .3s ease;-webkit-tap-highlight-color:transparent}
+.in2Bub img{position:absolute;left:50%;top:50%;width:52px;height:62px;object-fit:cover;border-radius:34%/30%;border:2.5px solid #fff;box-shadow:0 8px 18px rgba(0,0,0,.45);transform:translate(-50%,-50%) translateX(calc((var(--k) - 1)*6px)) rotate(calc((var(--k) - 1)*9deg));background:#173848}
+.in2Bub.empty{width:56px;height:56px;border-radius:34%;background:rgba(10,24,34,.82);border:1.5px solid rgba(32,223,154,.55);box-shadow:0 8px 22px rgba(0,0,0,.4),0 0 18px rgba(32,223,154,.25);display:grid;place-items:center;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.in2Cam{color:#20df9a;display:grid}.in2Cam svg{width:26px;height:26px}
+.in2Badge{position:absolute;right:-2px;top:-4px;min-width:22px;height:22px;border-radius:999px;background:#ff3b5c;color:#fff;font-size:12px;display:grid;place-items:center;padding:0 6px;border:2px solid #06131d;z-index:3}
+.in2,.in2Arch,.in2One{position:fixed;inset:0;z-index:165;display:flex;flex-direction:column;color:#fff;background:radial-gradient(120% 60% at 50% 30%,#0f2a38 0%,#06131d 55%,#03080d 100%);animation:stFade .2s ease}
+.in2Arch{z-index:168}.in2One{z-index:172;background:rgba(3,8,13,.96);align-items:center}
+.in2Top{display:grid;grid-template-columns:44px 1fr 44px 44px;gap:6px;align-items:center;padding:calc(10px + env(safe-area-inset-top)) 14px 6px;width:100%;box-sizing:border-box}
+.in2Arch .in2Top,.in2One .in2Top{grid-template-columns:44px 1fr 44px}
+.in2Top b{text-align:center;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.in2Ico{width:42px;height:42px;border-radius:50%;border:0;background:none;color:#fff;display:grid;place-items:center;padding:0;cursor:pointer}.in2Ico svg{width:25px;height:25px}
+.in2Ico:active{background:rgba(255,255,255,.1)}
+.in2Body{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;padding:4px 20px calc(14px + env(safe-area-inset-bottom))}
+.in2Deck{position:relative;width:min(78vw,340px);aspect-ratio:1/1.08;margin-top:4vh;flex:none}
+.in2Card{position:absolute;inset:0;border-radius:32%/29%;overflow:hidden;background:#0f1d27;box-shadow:0 22px 50px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.06)}
+.in2Card img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;user-select:none;-webkit-user-select:none}
+.in2Card.back{transform:translate(calc(var(--k)*-10px),calc(var(--k)*-12px)) rotate(calc(var(--k)*-6deg)) scale(calc(1 - var(--k)*.03));filter:brightness(.7)}
+.in2Card.front{touch-action:none;cursor:grab;animation:stPop .28s cubic-bezier(.2,.8,.3,1)}
+.in2Card.solo{position:relative;width:min(86vw,380px);aspect-ratio:1/1.12;margin:auto 0 10px}
+.in2Who{display:flex;align-items:center;gap:8px;margin-top:22px;font-size:14px}
+.in2Who img{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(255,255,255,.8);cursor:pointer}
+.in2Who b{font-weight:800}.in2Who span{opacity:.6}.in2Who em{font-style:normal;color:#b8f53a}
+.in2Who button{background:none;border:0;color:#fff;opacity:.7;width:30px;height:30px;padding:0;cursor:pointer}.in2Who button svg{width:18px;height:18px}
+.in2React{position:relative;width:240px;height:150px;margin-top:16px;flex:none}
+.in2React button{position:absolute;left:50%;top:0;width:58px;height:58px;margin-left:-29px;border-radius:50%;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.1);font-size:28px;padding:0;cursor:pointer;transform:translate(var(--x),var(--y));transition:transform .15s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:grid;place-items:center;color:#fff}
+.in2React button.big{width:64px;height:64px;margin-left:-32px;font-size:31px}
+.in2React button.plus svg{width:26px;height:26px}
+.in2React button:active{transform:translate(var(--x),var(--y)) scale(1.25)}
+.in2Reply{display:flex;align-items:center;gap:8px;width:min(100%,420px);margin-top:auto;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:4px 4px 4px 18px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.in2Reply input{flex:1;min-width:0;background:none;border:0;outline:none;color:#fff;font-size:15.5px;padding:11px 0}.in2Reply input::placeholder{color:rgba(255,255,255,.65)}
+.in2Reply button{width:42px;height:42px;border-radius:50%;border:0;background:linear-gradient(135deg,#2ff0b0,#13c98a);color:#03251a;display:grid;place-items:center;padding:0;cursor:pointer;flex:none}.in2Reply button svg{width:20px;height:20px}
+.in2Dots{display:flex;gap:5px;justify-content:center;margin-top:12px}.in2Dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.25)}.in2Dots i.on{background:#20df9a;width:16px;border-radius:6px}.in2Dots i.seen{background:rgba(255,255,255,.55)}
+.in2Empty{margin:auto;text-align:center;color:#b9c9d2;font-size:14.5px;line-height:1.55;max-width:300px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.in2Empty i{font-style:normal;font-size:40px}.in2Empty b{color:#fff;font-size:18px}
+.in2EmptyArt{position:relative;width:120px;height:130px;margin-bottom:14px}.in2EmptyArt span{position:absolute;inset:0;border-radius:32%/29%;background:linear-gradient(160deg,#173848,#0d2230);border:2px solid rgba(255,255,255,.12)}
+.in2EmptyArt span:nth-child(1){transform:rotate(-12deg) translateX(-14px)}.in2EmptyArt span:nth-child(2){transform:rotate(9deg) translateX(12px)}.in2EmptyArt span:nth-child(3){display:grid;place-items:center;color:#20df9a;border-color:rgba(32,223,154,.5);background:linear-gradient(160deg,#12394a,#0b2230)}.in2EmptyArt span svg{width:40px;height:40px}
+.in2Shoot{position:relative;width:76px;height:76px;margin-top:18px;border-radius:50%;border:4px solid #fff;background:rgba(255,255,255,.12);padding:0;cursor:pointer}.in2Shoot i{position:absolute;inset:6px;border-radius:50%;background:linear-gradient(135deg,#2ff0b0,#13c98a)}.in2Shoot:active{transform:scale(.93)}
+.in2Empty small{font-weight:800;opacity:.8}
+.in2EmoGrid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.in2EmoGrid button{background:rgba(255,255,255,.06);border:0;border-radius:16px;font-size:30px;padding:10px 0;cursor:pointer}
+.in2ArchBody{flex:1;overflow-y:auto;padding:0 12px calc(100px + env(safe-area-inset-bottom))}
+.in2ArchBody h3{margin:16px 6px 10px;font-size:15px;font-weight:800}
+.in2Grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.in2Grid button{position:relative;aspect-ratio:1/1.05;border:0;padding:0;border-radius:32%/29%;background:#0f1d27 center/cover;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.35);animation:stPop .25s ease both}
+.in2Grid button:active{transform:scale(.95)}
+.in2Grid .live{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);background:rgba(32,223,154,.9);color:#04140f;font-size:10px;font-weight:900;border-radius:999px;padding:2px 7px}
+.in2Grid em{position:absolute;right:10px;top:8px;font-style:normal;color:#b8f53a;text-shadow:0 1px 4px #000}
+.in2Resumo{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(22px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:13px 22px;background:#fff;color:#06131d;font-weight:800;font-size:15px;box-shadow:0 12px 30px rgba(0,0,0,.5);cursor:pointer;z-index:2}.in2Resumo svg{width:20px;height:20px;color:#13c98a}
+.in2OneMeta{color:#b9c9d2;font-size:13.5px;margin-bottom:calc(30px + env(safe-area-inset-bottom))}
+</style>
 </head>
 <body><div id="app"></div>
 <script>
@@ -5555,6 +5605,88 @@ async function cmNudgeAsk(btn){if(btn){btn.disabled=true;btn.textContent='Ativan
 (function(){try{const h=localStorage.getItem('cm_push_banner_hide');const t=Number(localStorage.getItem('cm_push_banner_hide_at')||0);if(h==='1'&&!t)localStorage.setItem('cm_push_banner_hide_at',String(Date.now()));else if(h==='1'&&Date.now()-t>7*86400e3){localStorage.removeItem('cm_push_banner_hide');localStorage.removeItem('cm_push_banner_hide_at')}}catch(_){}})();
 setTimeout(()=>{if(window.cmCurrentPage==='home')cmPushNudge(false)},4500);
 (function(){const g=window.go;window.go=async function(page,arg){const r=await g(page,arg);if(page==='home'){clearTimeout(window.__nuT);window.__nuT=setTimeout(()=>{if(window.cmCurrentPage==='home')cmPushNudge(false)},3500)}return r}})();
+
+</script>
+<script>
+/* ===== INSTANTES v2: visual estilo Instagram com o tema do Conecta ===== */
+const IN2={
+grid:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="3.5" width="7" height="7" rx="2.2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2.2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2.2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2.2"/></svg>',
+back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+spark:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5l1.2 3.3 3.3 1.2-3.3 1.2L12 16.5l-1.2-3.3L7.5 12l3.3-1.2z"/></svg>',
+trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>'
+};
+/* bolinha: em cima do botão de nova conversa, sem sobrepor */
+function instBubble(){
+  document.getElementById('instBubble')?.remove();
+  if(window.cmCurrentPage!=='chat'||!me?.id||instSnoozed())return;
+  const fab=document.querySelector('.cmFab');const nav=document.querySelector('.nav');
+  let bottom;if(fab){const r=fab.getBoundingClientRect();bottom=window.innerHeight-r.top+14}else bottom=(nav?nav.offsetHeight:70)+16;
+  const right=fab?Math.max(12,window.innerWidth-fab.getBoundingClientRect().right-4):16;
+  const items=INST.list.slice(0,3);
+  const inner=items.length?items.map((x,k)=>`<img src="${esc(x.media_url)}" alt="" style="--k:${k}" loading="lazy">`).reverse().join(''):`<span class="in2Cam">${INI.cam}</span>`;
+  document.body.insertAdjacentHTML('beforeend',`<button id="instBubble" class="in2Bub${items.length?'':' empty'}" style="bottom:${bottom}px;right:${right}px" onclick="instOpen()" aria-label="Instantes">${inner}${INST.list.length?`<b class="in2Badge">${INST.list.length>9?'9+':INST.list.length}</b>`:''}</button>`);
+}
+window.addEventListener('resize',()=>{if(document.getElementById('instBubble'))instBubble()});
+/* visualizador */
+function instOpen(){
+  document.getElementById('instBubble')?.remove();
+  document.getElementById('inst')?.remove();document.body.classList.add('svOpen');
+  document.body.insertAdjacentHTML('beforeend',`<div id="inst" class="in2"><div class="in2Top"><button class="in2Ico" aria-label="Fechar" onclick="instClose()">${INI.x}</button><span></span><button class="in2Ico" aria-label="Seus instantes" onclick="instArchive()">${IN2.grid}</button><button class="in2Ico" aria-label="Tirar um instante" onclick="instCamOpen()">${INI.cam}</button></div><div id="instBody" class="in2Body"><div class="in2Empty">Carregando…</div></div></div>`);
+  INST.i=0;(INST.loaded?Promise.resolve():instLoad(true)).then(instPaint);
+}
+function instPaint(){
+  const box=document.getElementById('instBody');if(!box)return;
+  if(INST.missing){box.innerHTML=`<div class="in2Empty"><i>🛠️</i><b>Falta uma atualização do banco</b>O administrador precisa rodar o atualizacao-instantes.sql no Supabase.</div>`;return}
+  const x=INST.list[INST.i];
+  if(!x){box.innerHTML=`<div class="in2Empty"><div class="in2EmptyArt"><span></span><span></span><span>${INI.cam}</span></div><b>${INST.i?'Você viu todos os instantes':'Nenhum instante novo'}</b>Fotos na hora, sem filtro. Cada pessoa vê uma vez e somem em 24 h.<button class="in2Shoot" onclick="instCamOpen()"><i></i></button><small>Tirar um instante</small></div>`;return}
+  const p=instP(x.user_id)||{name:'Alguém'};const next=INST.list.slice(INST.i+1,INST.i+3);
+  box.innerHTML=`<div class="in2Deck">${next.map((n,k)=>`<div class="in2Card back" style="--k:${k+1}"><img src="${esc(n.media_url)}" alt=""></div>`).reverse().join('')}<div class="in2Card front" id="instFront"><img src="${esc(x.media_url)}" alt="" draggable="false"></div></div><div class="in2Who"><img src="${esc(p.photo||avatar(p.name))}" alt="" onclick="instClose();postOpenProfile&&postOpenProfile('${esc(x.user_id)}')"><b>${esc(stFirst?stFirst(p.name):p.name)}</b><span>${timeAgo(Date.parse(x.created_at))}</span>${x.audience==='close'?'<em>★</em>':''}<button aria-label="Opções" onclick="instWhoMenu()">${INI.more}</button></div><div class="in2React"><button style="--x:-78px;--y:14px" onclick="instReact('😂')">😂</button><button class="big" style="--x:0px;--y:-8px" onclick="instReact('❤️')">❤️</button><button style="--x:78px;--y:14px" class="plus" onclick="instMoreEmoji()">${IN2.plus}</button><button style="--x:-38px;--y:74px" onclick="instReact('🥹')">🥹</button><button style="--x:38px;--y:74px" onclick="instReact('🔥')">🔥</button></div><form class="in2Reply" onsubmit="instReply(event)"><input id="instIn" placeholder="Responder a ${esc(stFirst?stFirst(p.name):p.name)}…" autocomplete="off" enterkeyhint="send"><button type="submit" aria-label="Enviar">${INI.send}</button></form>${INST.list.length>1?`<div class="in2Dots">${INST.list.slice(0,12).map((_,k)=>`<i class="${k===INST.i?'on':k<INST.i?'seen':''}"></i>`).join('')}</div>`:''}`;
+  instMarkSeen(x);instBindSwipe();
+}
+function instMoreEmoji(){const a=['😍','😮','😢','👏','🙌','🤣','😎','🤩','💚','🌄','☕','🍺'];openModal(`<div class="stGrab"></div><div class="stSheetBody"><div class="in2EmoGrid">${a.map(e=>`<button onclick="closeModal();instReact('${e}')">${e}</button>`).join('')}</div></div>`);document.querySelector('#modal .modalBox')?.classList.add('stSheet')}
+function instWhoMenu(){const x=INST.list[INST.i];if(!x)return;const p=instP(x.user_id)||{name:''};openModal(`<div class="stGrab"></div><div class="stSheetHead"><h2>${esc(p.name)}</h2><button class="close" onclick="closeModal()">×</button></div><div class="stSheetBody"><div class="stMenu"><button onclick="closeModal();instClose();postOpenProfile('${esc(x.user_id)}')">${STI?STI.user:''} Ver perfil</button><button onclick="closeModal();instNext(-1)">${INI.send} Pular este instante</button><button onclick="closeModal();instSnoozeMenu()">${INI.zz} Modo soneca</button></div></div>`);document.querySelector('#modal .modalBox')?.classList.add('stSheet')}
+/* arquivo: tela cheia em grade */
+async function instArchive(){
+  document.getElementById('instArch')?.remove();
+  document.body.insertAdjacentHTML('beforeend',`<div id="instArch" class="in2Arch"><div class="in2Top"><button class="in2Ico" aria-label="Voltar" onclick="document.getElementById('instArch').remove()">${IN2.back}</button><b>Seus instantes</b><button class="in2Ico" aria-label="Tirar um instante" onclick="instCamOpen()">${INI.cam}</button></div><div id="instArchBody" class="in2ArchBody"><div class="in2Empty">Carregando…</div></div><button class="in2Resumo hidden" id="instResumo" onclick="instResumo()">${IN2.spark} Criar resumo</button></div>`);
+  document.body.classList.add('svOpen');
+  const r=await sb.from('instants').select('id,media_url,audience,created_at,expires_at').eq('user_id',me.id).order('created_at',{ascending:false}).limit(300);
+  const el=document.getElementById('instArchBody');if(!el)return;
+  if(r.error){el.innerHTML='<div class="in2Empty"><i>🛠️</i><b>Falta uma atualização do banco</b>Rode o atualizacao-instantes.sql no Supabase.</div>';return}
+  INST.arch=r.data||[];
+  if(!INST.arch.length){el.innerHTML=`<div class="in2Empty"><div class="in2EmptyArt"><span></span><span></span><span>${INI.cam}</span></div><b>Nenhum instante ainda</b>Os instantes que você tirar ficam guardados aqui. Só você vê.<button class="in2Shoot" onclick="instCamOpen()"><i></i></button></div>`;return}
+  const now=new Date(),d0=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
+  const grp=x=>{const t=Date.parse(x.created_at);if(t>=d0)return 'Hoje';if(t>=d0-6*86400e3)return 'Esta semana';if(t>=d0-29*86400e3)return 'Este mês';return new Date(t).toLocaleDateString('pt-BR',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase())};
+  const g=new Map();INST.arch.forEach((x,i)=>{const k=grp(x);if(!g.has(k))g.set(k,[]);g.get(k).push(i)});
+  el.innerHTML=[...g].map(([k,ids])=>`<h3>${esc(k)}</h3><div class="in2Grid">${ids.map(i=>{const x=INST.arch[i];return `<button onclick="instArchOne(${i})" style="background-image:url('${esc(x.media_url)}')">${Date.parse(x.expires_at)>Date.now()?'<span class="live">No ar</span>':''}${x.audience==='close'?'<em>★</em>':''}</button>`}).join('')}</div>`).join('');
+  const week=INST.arch.filter(x=>Date.parse(x.created_at)>Date.now()-7*86400e3);document.getElementById('instResumo')?.classList.toggle('hidden',week.length<2);
+}
+function instArchOne(i){
+  const x=INST.arch[i];if(!x)return;const live=Date.parse(x.expires_at)>Date.now();
+  document.getElementById('instOne')?.remove();
+  document.body.insertAdjacentHTML('beforeend',`<div id="instOne" class="in2One" onclick="if(event.target===this)this.remove()"><div class="in2Top"><button class="in2Ico" onclick="document.getElementById('instOne').remove()">${INI.x}</button><b>${esc(new Date(x.created_at).toLocaleString('pt-BR',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}))}</b><button class="in2Ico" aria-label="Apagar" onclick="instArchDel(${i})">${IN2.trash}</button></div><div class="in2Card solo"><img src="${esc(x.media_url)}" alt=""></div><div class="in2OneMeta">${live?'🟢 No ar · some em '+Math.max(1,Math.round((Date.parse(x.expires_at)-Date.now())/3600e3))+' h':'Guardado no seu arquivo'} · ${x.audience==='close'?'★ Amigos próximos':'Seguidores'}</div></div>`);
+}
+async function instArchDel(i){const x=INST.arch[i];if(!x||!confirm('Apagar este instante?'))return;const r=await sb.from('instants').delete().eq('id',x.id).eq('user_id',me.id);if(r.error){alert('Não foi possível apagar agora.');return}document.getElementById('instOne')?.remove();instArchive()}
+async function instResumo(){
+  const week=(INST.arch||[]).filter(x=>Date.parse(x.created_at)>Date.now()-7*86400e3).slice(0,9);if(week.length<2)return;
+  const b=document.getElementById('instResumo');if(b){b.disabled=true;b.innerHTML='Montando…'}
+  try{
+    const imgs=await Promise.all(week.map(x=>new Promise((res,rej)=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>res(im);im.onerror=rej;im.src=x.media_url})));
+    const W=1080,H=1920,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
+    const bg=g.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#0d2431');bg.addColorStop(1,'#03080d');g.fillStyle=bg;g.fillRect(0,0,W,H);
+    g.fillStyle='#fff';g.font='900 78px Inter,system-ui,sans-serif';g.textAlign='center';g.fillText('Minha semana',W/2,210);g.fillStyle='#20df9a';g.font='800 54px Inter,system-ui,sans-serif';g.fillText('na serra 🏔️',W/2,290);
+    const n=imgs.length,cols=n<=4?2:3,rows=Math.ceil(n/cols),gap=26,cw=(W-120-gap*(cols-1))/cols,ch=Math.min(cw*1.25,(H-520-gap*(rows-1))/rows);
+    imgs.forEach((im,k)=>{const cx=60+(k%cols)*(cw+gap),cy=380+Math.floor(k/cols)*(ch+gap),rot=((k*37)%9-4)*Math.PI/180;g.save();g.translate(cx+cw/2,cy+ch/2);g.rotate(rot);const r=cw*.24;g.beginPath();if(g.roundRect)g.roundRect(-cw/2,-ch/2,cw,ch,r);else g.rect(-cw/2,-ch/2,cw,ch);g.closePath();g.fillStyle='#fff';g.shadowColor='rgba(0,0,0,.45)';g.shadowBlur=30;g.fill();g.shadowBlur=0;g.save();g.clip();const s=Math.max(cw/im.width,ch/im.height);g.drawImage(im,-im.width*s/2,-im.height*s/2,im.width*s,im.height*s);g.restore();g.lineWidth=10;g.strokeStyle='#fff';g.stroke();g.restore()});
+    g.fillStyle='rgba(255,255,255,.7)';g.font='700 36px Inter,system-ui,sans-serif';g.fillText('Conecta Mantiqueira',W/2,H-110);
+    const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.9));if(!blob)throw 0;
+    document.getElementById('instArch')?.remove();document.getElementById('inst')?.remove();
+    newStory();SC.queue=[];SC.qTotal=1;SC.qDone=0;stSetFile(new File([blob],'resumo.jpg',{type:'image/jpeg'}));scRenderEdit();
+    shareToast('Resumo pronto! Publique nos seus Stories ✨');
+  }catch(_){if(b){b.disabled=false;b.innerHTML=IN2.spark+' Criar resumo'}alert('Não foi possível montar o resumo agora.')}
+}
+/* câmera dos instantes no visual novo */
+function instCamClose(){instCamStop();if(INST.cam.url)URL.revokeObjectURL(INST.cam.url);INST.cam.shot=null;INST.cam.url='';document.getElementById('instCam')?.remove()}
 
 </script>
 </body></html>
