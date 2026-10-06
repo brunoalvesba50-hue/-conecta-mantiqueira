@@ -775,6 +775,54 @@ html,body{width:100%;max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:1
 <style id="reelGestStyle">.reelGest{position:absolute;inset:0;z-index:4;touch-action:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 .reelsRoot.social .reelGest{display:none}
 </style>
+<style id="instStyle">.instBubble{position:fixed;right:14px;z-index:60;width:74px;height:86px;border:0;background:none;padding:0;cursor:pointer;animation:stPop .3s ease}
+.instBubble img{position:absolute;right:calc(var(--k)*7px);top:calc(var(--k)*4px);width:58px;height:78px;object-fit:cover;border-radius:14px;border:2.5px solid #fff;box-shadow:0 8px 20px rgba(0,0,0,.45);transform:rotate(calc(-8deg + var(--k)*8deg));background:#173848}
+.instBubble.empty{width:60px;height:60px;border-radius:20px;background:linear-gradient(135deg,#2ff0b0,#13c98a);box-shadow:0 10px 24px rgba(32,223,154,.4);display:grid;place-items:center}
+.instBubCam{color:#03251a;display:grid}.instBubCam svg{width:28px;height:28px}
+.instBadge{position:absolute;right:-4px;top:-6px;min-width:22px;height:22px;border-radius:999px;background:#ff3b5c;color:#fff;font-size:12px;display:grid;place-items:center;padding:0 6px;border:2px solid var(--bg,#06131d);z-index:2}
+.inst{position:fixed;inset:0;z-index:165;display:flex;flex-direction:column;background:radial-gradient(120% 70% at 50% 0%,#0d2431 0%,#05101a 55%,#03080d 100%);color:#fff;animation:stFade .2s ease}
+.instTop{display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top)) 14px 6px}
+.instTop b{font-size:18px}
+.instIco{width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;padding:0;cursor:pointer}
+.instIco svg{width:21px;height:21px}
+.instBody{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 18px;gap:12px}
+.instDeck{position:relative;width:min(100%,360px);flex:1;min-height:0;max-height:560px}
+.instCard{position:absolute;inset:0;border-radius:26px;overflow:hidden;background:#0f1d27;box-shadow:0 18px 40px rgba(0,0,0,.5);border:3px solid #fff}
+.instCard img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;user-select:none;-webkit-user-select:none}
+.instCard.back{transform:translateY(calc(var(--k)*-10px)) scale(calc(1 - var(--k)*.05)) rotate(calc(var(--k)*3deg));opacity:.7}
+.instCard.front{touch-action:none;cursor:grab;animation:stPop .25s ease}
+.instWho{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:10px;padding:40px 14px 14px;background:linear-gradient(transparent,rgba(0,0,0,.65))}
+.instWho img{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid #fff}
+.instWho b{display:block;font-size:15px}.instWho small{font-size:12px;opacity:.85}
+.instCount{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.5);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:800}
+.instReact{display:flex;gap:10px;justify-content:center}
+.instReact button{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:50%;width:46px;height:46px;font-size:24px;padding:0;cursor:pointer;transition:transform .15s}
+.instReact button:active{transform:scale(1.25)}
+.instReply{display:flex;gap:8px;width:min(100%,360px)}
+.instReply input{flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:999px;padding:12px 16px;font-size:15px;outline:none}
+.instReply button{width:46px;height:46px;border-radius:50%;border:0;background:linear-gradient(135deg,#2ff0b0,#13c98a);color:#03251a;display:grid;place-items:center;padding:0;cursor:pointer}
+.instReply button svg{width:22px;height:22px}
+.instHint{font-size:12px;opacity:.6}
+.instBottom{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0 calc(16px + env(safe-area-inset-bottom))}
+.instBottom small{font-size:12px;opacity:.75;font-weight:700}
+.instShutterBig{position:relative;width:74px;height:74px;border-radius:50%;border:4px solid #fff;background:rgba(255,255,255,.15);padding:0;cursor:pointer}
+.instShutterBig i{position:absolute;inset:6px;border-radius:50%;background:linear-gradient(135deg,#2ff0b0,#13c98a)}
+.instShutterBig:active{transform:scale(.93)}
+.instEmpty{text-align:center;color:#c9d6de;font-size:14.5px;line-height:1.55;max-width:320px}
+.instEmpty i{display:block;font-style:normal;font-size:44px;margin-bottom:8px}
+.instEmpty b{display:block;color:#fff;font-size:18px;margin-bottom:6px}
+.instFloat{position:fixed;left:50%;top:50%;font-size:70px;transform:translate(-50%,-50%);animation:stBurst 1s ease forwards;pointer-events:none;z-index:170}
+.instCam{z-index:175}
+.instCamTip{text-align:center;color:#fff;font-weight:700;font-size:13px;margin-bottom:14px;opacity:.9}
+.instAud{display:flex;gap:8px;margin-bottom:12px}
+.instAud button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.45);color:#fff;font-weight:800;font-size:13px;padding:11px 6px;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.instAud button svg{width:16px;height:16px}
+.instAud button.on{border-color:#20df9a;background:rgba(32,223,154,.2)}
+.instAud button.on.close{border-color:#b8f53a;background:rgba(184,245,58,.2)}
+.instArchGrid a{position:relative;aspect-ratio:9/16;border-radius:12px;background:#0f1d27 center/cover;display:block}
+.instArchGrid a span{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;font-weight:800;border-radius:999px;padding:2px 7px}
+.instArchGrid a i{position:absolute;right:6px;top:6px;color:#b8f53a;font-style:normal}
+</style>
 </head>
 <body><div id="app"></div>
 <script>
@@ -5062,6 +5110,156 @@ function reelGestSetup(){
   document.addEventListener('keydown',e=>{if(!document.getElementById('reelGest')||/INPUT|TEXTAREA/.test(e.target.tagName))return;if(e.key==='ArrowDown'){e.preventDefault();reelGo(RL.cur+1)}else if(e.key==='ArrowUp'){e.preventDefault();reelGo(Math.max(0,RL.cur-1))}});
 }
 (function(){const prev=window.setupVideoFeed;window.setupVideoFeed=function(){prev();reelGestSetup()}})();
+
+</script>
+<script>
+/* ===================== INSTANTES (fotos espontâneas, visualização única) ===================== */
+const INI={
+cam:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.6"/></svg>',
+x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+flip:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 15a8 8 0 0 1-14 3l-2-2"/><path d="M20 4v4h-4M4 20v-4h4"/></svg>',
+more:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
+send:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4z"/></svg>',
+zz:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h6l-6 7h6M13 12h7l-7 8h7"/></svg>',
+arch:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3 4v4h4M12 7.5V12l3 2"/></svg>',
+star:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>',
+users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 19.5c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.8a3.5 3.5 0 0 1 0 6.4M18.5 13.8c1.8.8 3 2.8 3 5.7"/></svg>'
+};
+let INST={list:[],mine:[],seen:new Set(),i:0,loaded:false,missing:false,loading:null,cam:{stream:null,facing:'user',shot:null,url:'',aud:'followers'}};
+function instSnoozed(){const t=Number(localStorage.getItem('cm_inst_snooze')||0);return t>Date.now()}
+function instP(id){try{return (typeof stP==='function'&&stP(id))||personById(id)||null}catch(_){return null}}
+async function instLoad(force){
+  if(!me?.id)return;if(INST.loading&&!force)return INST.loading;
+  INST.loading=(async()=>{
+    try{
+      INST.seen=new Set(lsGet('cm_inst_seen',[]));
+      const now=new Date().toISOString();
+      const r=await sb.from('instants').select('id,user_id,media_url,audience,created_at,expires_at').gt('expires_at',now).order('created_at',{ascending:false}).limit(200);
+      if(r.error){INST.missing=/does not exist|schema cache|relation/i.test(r.error.message||'');INST.list=[];INST.loaded=true;return}
+      INST.missing=false;
+      if(typeof followCache!=='undefined'&&!followCache.size&&typeof loadFollowState==='function'){try{await loadFollowState()}catch(_){}}
+      const rows=r.data||[];
+      const others=rows.filter(x=>x.user_id!==me.id&&(x.audience==='close'?(typeof closeOf!=='undefined'&&closeOf.has(x.user_id)):followCache.has(x.user_id)));
+      if(others.length){try{const v=await sb.from('instant_views').select('instant_id').eq('viewer_id',me.id).in('instant_id',others.map(x=>x.id));if(!v.error)(v.data||[]).forEach(x=>INST.seen.add(x.instant_id))}catch(_){}}
+      const need=[...new Set(others.map(x=>x.user_id))].filter(id=>!instP(id));
+      if(need.length){try{const pr=await sb.from('profiles').select('id,name,photo,city').in('id',need);(pr.data||[]).forEach(p=>{if(!publicProfilesCache.some(c=>c.id===p.id))publicProfilesCache.push(p)})}catch(_){}}
+      INST.list=others.filter(x=>!INST.seen.has(x.id)).reverse();
+      INST.mine=rows.filter(x=>x.user_id===me.id);
+      INST.loaded=true;
+    }catch(_){INST.loaded=true}
+    finally{INST.loading=null}
+  })();
+  return INST.loading;
+}
+/* bolinha flutuante no Bate-papo */
+function instBubble(){
+  document.getElementById('instBubble')?.remove();
+  if(window.cmCurrentPage!=='chat'||!me?.id||instSnoozed())return;
+  const items=INST.list.slice(0,3);
+  const nav=document.querySelector('.nav');const bottom=(nav?nav.offsetHeight:70)+14;
+  const stack=items.length?items.map((x,k)=>`<img src="${esc(x.media_url)}" alt="" style="--k:${k}" loading="lazy">`).reverse().join(''):`<span class="instBubCam">${INI.cam}</span>`;
+  document.body.insertAdjacentHTML('beforeend',`<button id="instBubble" class="instBubble${items.length?'':' empty'}" style="bottom:calc(${bottom}px + env(safe-area-inset-bottom))" onclick="instOpen()" aria-label="Instantes">${stack}${INST.list.length?`<b class="instBadge">${INST.list.length>9?'9+':INST.list.length}</b>`:''}</button>`);
+}
+async function instRefreshBubble(){if(window.cmCurrentPage!=='chat'){document.getElementById('instBubble')?.remove();return}await instLoad(true);instBubble()}
+(function(){const g=window.go;window.go=async function(page,arg){document.getElementById('instBubble')?.remove();const r=await g(page,arg);if(page==='chat')instRefreshBubble();return r}})();
+/* visualizador */
+function instOpen(){
+  document.getElementById('instBubble')?.remove();
+  document.getElementById('inst')?.remove();document.body.classList.add('svOpen');
+  document.body.insertAdjacentHTML('beforeend',`<div id="inst" class="inst"><div class="instTop"><button class="instIco" aria-label="Fechar" onclick="instClose()">${INI.x}</button><b>Instantes</b><button class="instIco" aria-label="Opções" onclick="instMenu()">${INI.more}</button></div><div id="instBody" class="instBody"><div class="instEmpty">Carregando…</div></div><div class="instBottom"><button class="instShutterBig" aria-label="Tirar um instante" onclick="instCamOpen()"><i></i></button><small>Tirar um instante</small></div></div>`);
+  INST.i=0;
+  (INST.loaded?Promise.resolve():instLoad(true)).then(instPaint);
+}
+function instClose(){instCamClose();document.getElementById('inst')?.remove();if(!document.getElementById('sv')&&!document.getElementById('sc')&&!document.getElementById('cfg'))document.body.classList.remove('svOpen');instRefreshBubble()}
+function instPaint(){
+  const box=document.getElementById('instBody');if(!box)return;
+  if(INST.missing){box.innerHTML=`<div class="instEmpty"><i>🛠️</i><b>Falta uma atualização do banco</b>O administrador precisa rodar o atualizacao-instantes.sql no Supabase.</div>`;return}
+  const x=INST.list[INST.i];
+  if(!x){box.innerHTML=`<div class="instEmpty"><i>📸</i><b>${INST.i?'Você viu todos os instantes':'Nenhum instante novo'}</b>Instantes são fotos na hora, sem filtro, que somem depois de vistas ou em 24 h.<br>Que tal mandar o seu?</div>`;return}
+  const p=instP(x.user_id)||{name:'Alguém'};
+  const next=INST.list.slice(INST.i+1,INST.i+3);
+  box.innerHTML=`<div class="instDeck">${next.map((n,k)=>`<div class="instCard back" style="--k:${k+1}"><img src="${esc(n.media_url)}" alt=""></div>`).reverse().join('')}<div class="instCard front" id="instFront"><img src="${esc(x.media_url)}" alt="" draggable="false"><div class="instWho"><img src="${esc(p.photo||avatar(p.name))}" alt=""><span><b>${esc(p.name)}</b><small>${timeAgo(Date.parse(x.created_at))}${x.audience==='close'?' · ★ Amigos próximos':''}</small></span></div><div class="instCount">${INST.i+1}/${INST.list.length}</div></div></div><div class="instReact">${['❤️','😂','😮','🔥','👏','😍'].map(e=>`<button onclick="instReact('${e}')">${e}</button>`).join('')}</div><form class="instReply" onsubmit="instReply(event)"><input id="instIn" placeholder="Responder a ${esc(stFirst?stFirst(p.name):p.name)}…" autocomplete="off" enterkeyhint="send"><button type="submit" aria-label="Enviar">${INI.send}</button></form><div class="instHint">Deslize para o lado para ver o próximo</div>`;
+  instMarkSeen(x);instBindSwipe();
+}
+function instMarkSeen(x){
+  if(INST.seen.has(x.id))return;INST.seen.add(x.id);lsSet('cm_inst_seen',[...INST.seen].slice(-800));
+  try{sb.from('instant_views').upsert({instant_id:x.id,viewer_id:me.id},{onConflict:'instant_id,viewer_id',ignoreDuplicates:true}).then(()=>{},()=>{})}catch(_){}
+}
+function instNext(dir){
+  const f=document.getElementById('instFront');
+  const go=()=>{INST.i=Math.min(INST.list.length,INST.i+1);instPaint()};
+  if(f){f.style.transition='transform .28s ease,opacity .28s';f.style.transform=`translateX(${dir<0?-120:120}%) rotate(${dir<0?-14:14}deg)`;f.style.opacity='0';setTimeout(go,240)}else go();
+}
+function instBindSwipe(){
+  const f=document.getElementById('instFront');if(!f)return;let st=null;
+  f.addEventListener('pointerdown',e=>{st={x:e.clientX,y:e.clientY};f.style.transition='none';try{f.setPointerCapture(e.pointerId)}catch(_){}});
+  f.addEventListener('pointermove',e=>{if(!st)return;const dx=e.clientX-st.x;f.style.transform=`translateX(${dx}px) rotate(${dx/18}deg)`});
+  const end=e=>{if(!st)return;const dx=e.clientX-st.x;st=null;if(Math.abs(dx)>70)instNext(dx<0?-1:1);else if(Math.abs(dx)<8){instNext(-1)}else{f.style.transition='transform .2s';f.style.transform=''}};
+  f.addEventListener('pointerup',end);f.addEventListener('pointercancel',()=>{st=null;f.style.transform=''});
+}
+async function instDM(body){const x=INST.list[INST.i];if(!x||!me?.id)return false;const {error}=await sb.from('messages').insert({sender_id:me.id,receiver_id:x.user_id,body});return !error}
+async function instReact(e){const ok=await instDM(e+' Reagiu ao seu instante');const f=document.createElement('div');f.className='instFloat';f.textContent=e;document.getElementById('inst')?.appendChild(f);setTimeout(()=>f.remove(),1100);if(!ok)shareToast('Não foi possível enviar agora')}
+async function instReply(ev){ev.preventDefault();const i=document.getElementById('instIn');const t=(i?.value||'').trim();if(!t)return;i.value='';i.blur();const ok=await instDM('📸 Respondeu ao seu instante: '+t);shareToast(ok?'Resposta enviada no bate-papo ✓':'Não foi possível enviar agora')}
+function instMenu(){
+  const sn=instSnoozed();
+  openModal(`<div class="stGrab"></div><div class="stSheetHead"><h2>Instantes</h2><button class="close" onclick="closeModal()">×</button></div><div class="stSheetBody"><div class="stMenu"><button onclick="closeModal();instArchive()">${INI.arch} Seus instantes (arquivo)</button><button onclick="closeModal();closeFriendsEditor()">${INI.star} Amigos próximos</button>${sn?`<button onclick="instSnooze(0)">${INI.zz} Reativar instantes</button>`:`<button onclick="instSnoozeMenu()">${INI.zz} Modo soneca</button>`}</div><div class="small" style="margin-top:12px;opacity:.75">Instantes são fotos tiradas na hora, sem edição. Cada pessoa vê uma vez, e eles somem em 24 h. Você não vê quem visualizou.</div></div>`);
+  document.querySelector('#modal .modalBox')?.classList.add('stSheet');
+}
+function instSnoozeMenu(){openModal(`<div class="stGrab"></div><div class="stSheetHead"><h2>Modo soneca</h2><button class="close" onclick="closeModal()">×</button></div><div class="stSheetBody"><div class="small" style="opacity:.8;margin-bottom:10px">Esconde a bolinha de Instantes do Bate-papo por um tempo.</div><div class="stMenu"><button onclick="instSnooze(1)">${INI.zz} Por 1 hora</button><button onclick="instSnooze(8)">${INI.zz} Por 8 horas</button><button onclick="instSnooze(24)">${INI.zz} Por 24 horas</button><button onclick="instSnooze(24*7)">${INI.zz} Por 7 dias</button></div></div>`);document.querySelector('#modal .modalBox')?.classList.add('stSheet')}
+function instSnooze(h){if(h)localStorage.setItem('cm_inst_snooze',String(Date.now()+h*3600e3));else localStorage.removeItem('cm_inst_snooze');closeModal();shareToast(h?'Instantes em modo soneca 💤':'Instantes reativados');if(h)instClose();else instRefreshBubble()}
+async function instArchive(){
+  openModal(`<div class="stGrab"></div><div class="stSheetHead"><h2>Seus instantes</h2><button class="close" onclick="closeModal()">×</button></div><div class="stSheetBody"><div class="small" style="opacity:.8">Só você vê este arquivo.</div><div id="instArch"><div class="stEmptyBox">Carregando…</div></div></div>`);
+  document.querySelector('#modal .modalBox')?.classList.add('stSheet');
+  const r=await sb.from('instants').select('id,media_url,audience,created_at,expires_at').eq('user_id',me.id).order('created_at',{ascending:false}).limit(150);
+  const el=document.getElementById('instArch');if(!el)return;
+  if(r.error){el.innerHTML='<div class="stEmptyBox">Rode o atualizacao-instantes.sql no Supabase para usar os Instantes.</div>';return}
+  const a=r.data||[];if(!a.length){el.innerHTML='<div class="stEmptyBox"><i>📸</i><b>Nenhum instante ainda</b>Os que você mandar ficam guardados aqui.</div>';return}
+  const days=new Map();a.forEach(x=>{const k=new Date(x.created_at).toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'long'}).replace(/^./,c=>c.toUpperCase());if(!days.has(k))days.set(k,[]);days.get(k).push(x)});
+  el.innerHTML=[...days].map(([k,xs])=>`<div class="stArchDay">${esc(k)}</div><div class="stArchGrid instArchGrid">${xs.map(x=>`<a href="${esc(x.media_url)}" target="_blank" rel="noopener" style="background-image:url('${esc(x.media_url)}')"><span>${Date.parse(x.expires_at)>Date.now()?'No ar':new Date(x.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span>${x.audience==='close'?'<i>★</i>':''}</a>`).join('')}</div>`).join('');
+}
+/* câmera: só foto, na hora, sem galeria e sem filtro */
+function instCamOpen(){
+  if(INST.missing){alert('Para usar os Instantes, o administrador precisa rodar o atualizacao-instantes.sql no Supabase.');return}
+  document.getElementById('instCam')?.remove();
+  document.body.insertAdjacentHTML('beforeend',`<div id="instCam" class="stCam instCam"><video id="instV" playsinline autoplay muted></video><div id="instMsg" class="stCamMsg">Abrindo a câmera…</div><div class="stCamFlashFx" id="instFx"></div><div class="stCamTop"><button class="stIco" aria-label="Fechar" onclick="instCamClose()">${INI.x}</button><b style="color:#fff">Instante</b><span style="width:42px"></span></div><div class="stCamBot" id="instCamBot"></div></div>`);
+  INST.cam.shot=null;instCamBot();instCamStart();
+}
+function instCamBot(){
+  const b=document.getElementById('instCamBot');if(!b)return;const c=INST.cam;
+  if(c.shot){b.innerHTML=`<div class="instAud"><button class="${c.aud==='followers'?'on':''}" onclick="INST.cam.aud='followers';instCamBot()">${INI.users} Seguidores</button><button class="${c.aud==='close'?'on close':''}" onclick="INST.cam.aud='close';instCamBot();if(!closeFriends.size)closeFriendsEditor()">${INI.star} Amigos próximos</button></div><div class="stUseRow"><button class="secondary" onclick="instRetake()">Tirar outra</button><button class="primary" id="instSendBtn" onclick="instSend()">Enviar instante ➤</button></div>`;return}
+  b.innerHTML=`<div class="instCamTip">Sem filtros, sem edição. Só o momento. ✨</div><div class="stCamRow"><span style="width:42px"></span><button class="stShutter" aria-label="Tirar foto" onclick="instShoot()"><i></i></button><button class="stIco" aria-label="Trocar câmera" onclick="INST.cam.facing=INST.cam.facing==='user'?'environment':'user';instCamStart()">${INI.flip}</button></div>`;
+}
+async function instCamStart(){
+  instCamStop();const v=document.getElementById('instV'),m=document.getElementById('instMsg');if(!v)return;
+  if(!navigator.mediaDevices?.getUserMedia){if(m)m.innerHTML='<div><b style="color:#fff">Câmera indisponível neste navegador</b><br>Abra o Conecta pelo Safari ou Chrome.</div>';return}
+  try{const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:INST.cam.facing,width:{ideal:1920},height:{ideal:1080}},audio:false});if(!document.getElementById('instCam')){s.getTracks().forEach(t=>t.stop());return}INST.cam.stream=s;v.srcObject=s;v.classList.toggle('mirror',INST.cam.facing==='user');await v.play().catch(()=>{});if(m)m.style.display='none'}
+  catch(_){if(m){m.style.display='grid';m.innerHTML='<div><b style="color:#fff;font-size:17px">Permita o acesso à câmera</b><br>Os Instantes só aceitam foto tirada na hora.<br>Libere a câmera nas configurações do navegador e tente de novo.</div>'}}
+}
+function instCamStop(){const s=INST.cam.stream;if(s){s.getTracks().forEach(t=>{try{t.stop()}catch(_){}});INST.cam.stream=null}}
+function instCamClose(){instCamStop();if(INST.cam.url)URL.revokeObjectURL(INST.cam.url);INST.cam.shot=null;INST.cam.url='';document.getElementById('instCam')?.remove()}
+async function instShoot(){
+  const v=document.getElementById('instV');if(!v||!INST.cam.stream)return;
+  const vw=v.videoWidth||1080,vh=v.videoHeight||1440,box=document.getElementById('instCam');const ar=box&&box.clientHeight?box.clientWidth/box.clientHeight:9/16;
+  let sw=vw,sh=vh;if(vw/vh>ar)sw=vh*ar;else sh=vw/ar;const sx=(vw-sw)/2,sy=(vh-sh)/2;const sc=Math.min(1,1600/Math.max(sw,sh)),w=Math.round(sw*sc),h=Math.round(sh*sc);
+  const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');if(INST.cam.facing==='user'){x.translate(w,0);x.scale(-1,1)}x.drawImage(v,sx,sy,sw,sh,0,0,w,h);
+  const fx=document.getElementById('instFx');if(fx){fx.classList.add('on');setTimeout(()=>fx.classList.remove('on'),90)}
+  const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.88));if(!blob)return;
+  INST.cam.shot=new File([blob],'instante.jpg',{type:'image/jpeg'});if(INST.cam.url)URL.revokeObjectURL(INST.cam.url);INST.cam.url=URL.createObjectURL(blob);
+  instCamStop();v.style.display='none';const bx=document.getElementById('instCam');bx.querySelector('.stCamShot')?.remove();bx.insertAdjacentHTML('afterbegin',`<img class="stCamShot" src="${INST.cam.url}" alt="">`);instCamBot();
+}
+function instRetake(){document.querySelector('#instCam .stCamShot')?.remove();const v=document.getElementById('instV');if(v)v.style.display='';INST.cam.shot=null;instCamBot();instCamStart()}
+async function instSend(){
+  const c=INST.cam;if(!c.shot)return;if(c.aud==='close'&&!closeFriends.size){alert('Adicione pessoas aos Amigos próximos primeiro.');closeFriendsEditor();return}
+  const b=document.getElementById('instSendBtn');if(b){b.disabled=true;b.textContent='Enviando…'}
+  try{
+    const url=await uploadMedia(c.shot,'instants','story');
+    const r=await sb.from('instants').insert({user_id:me.id,media_url:url,audience:c.aud,expires_at:new Date(Date.now()+86400000).toISOString()}).select('id').single();
+    if(r.error)throw r.error;
+    instCamClose();shareToast(c.aud==='close'?'Instante enviado para os Amigos próximos ✨':'Instante enviado para seus seguidores ✨');
+    instLoad(true).then(()=>{if(document.getElementById('inst'))instPaint()});
+  }catch(e){if(b){b.disabled=false;b.textContent='Enviar instante ➤'}alert(/does not exist|schema cache|relation/i.test(String(e?.message||''))?'Para usar os Instantes, rode o atualizacao-instantes.sql no Supabase.':(typeof storyErrPt==='function'?storyErrPt(e):'Não foi possível enviar agora.'))}
+}
+/* ===================== fim INSTANTES ===================== */
 
 </script>
 </body></html>
