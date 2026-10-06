@@ -942,6 +942,20 @@ html,body{width:100%;max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:1
 .in2Resumo{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(22px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:13px 22px;background:#fff;color:#06131d;font-weight:800;font-size:15px;box-shadow:0 12px 30px rgba(0,0,0,.5);cursor:pointer;z-index:2}.in2Resumo svg{width:20px;height:20px;color:#13c98a}
 .in2OneMeta{color:#b9c9d2;font-size:13.5px;margin-bottom:calc(30px + env(safe-area-inset-bottom))}
 </style>
+<style id="cgStyle">.cgWrap{position:fixed;inset:0;z-index:300;background:rgba(3,10,16,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:flex-end;justify-content:center;animation:stFade .2s ease}
+.cgBox{width:100%;max-width:520px;max-height:92vh;display:flex;flex-direction:column;background:#0b1720;border:1px solid rgba(140,220,210,.14);border-radius:26px 26px 0 0;padding:20px 18px calc(18px + env(safe-area-inset-bottom));color:#fff;text-align:center;animation:stUp .28s ease}
+@media(min-width:600px){.cgWrap{align-items:center}.cgBox{border-radius:26px}}
+.cgHero{font-size:40px;width:76px;height:76px;margin:0 auto 6px;border-radius:24px;display:grid;place-items:center;background:radial-gradient(circle,rgba(32,223,154,.25),rgba(32,223,154,.05))}
+.cgBox h2{margin:4px 0;font-size:22px}.cgBox p{color:#c2d1d9;font-size:14.5px;line-height:1.5;margin:4px 0 12px}
+.cgSearch{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border-radius:14px;padding:0 14px;margin-bottom:10px}.cgSearch svg{width:19px;height:19px;color:#9fb2bf;flex:none}.cgSearch input{flex:1;background:none;border:0;outline:none;color:#fff;font-size:16px;padding:13px 0}
+.cgList{flex:1;min-height:120px;max-height:42vh;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin-bottom:12px;text-align:left}
+.cgList button{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#fff;border-radius:14px;padding:13px 14px;font-size:15px;font-weight:700;text-align:left;cursor:pointer}
+.cgList button.on{border-color:#20df9a;background:rgba(32,223,154,.15);color:#20df9a}
+.cgNone{color:#9fb2bf;font-size:14px;text-align:center;padding:20px}
+.cgFoot{font-size:12px;color:#8ea2ae;margin-top:10px}
+</style>
+<style>#cgBtn:disabled{opacity:.45;filter:grayscale(.4)}</style>
+<style>.cgList .cgOwn{border-color:rgba(32,223,154,.45);border-style:dashed}.cgList .cgOwn small{display:block;font-weight:500;font-size:12px;color:#9fb2bf;margin-top:2px}</style>
 </head>
 <body><div id="app"></div>
 <script>
@@ -2614,7 +2628,7 @@ async function submitAuth(){if(cmAuthBusy)return;const errEl=document.getElement
     const email=(document.getElementById('email')?.value||'').trim().toLowerCase(),password=document.getElementById('password')?.value||'';
     if(mode==='register'){
       const name=String(document.getElementById('name')?.value||'').replace(/\s+/g,' ').trim().slice(0,60),confirm=document.getElementById('confirmPassword')?.value||'';
-      if(!name)throw cmV('Digite seu nome.');
+      if(!name)throw cmV('Digite seu nome.');const regCity=cmCityClean(document.getElementById('regCity')?.value||'');if(!regCity)throw cmV('Digite sua cidade.');
       if(!email)throw cmV('Digite seu e-mail.');
       if(!CM_EMAIL_RE.test(email))throw cmV('Digite um e-mail válido.');
       if(!password)throw cmV('Digite uma senha.');
@@ -2622,7 +2636,7 @@ async function submitAuth(){if(cmAuthBusy)return;const errEl=document.getElement
       if(!confirm)throw cmV('Confirme sua senha.');
       if(password!==confirm)throw cmV('As senhas não coincidem. Digite a mesma senha nos dois campos.');
       cmAuthBusy=true;if(btn){btn.disabled=true;btn.textContent='Criando conta…'}
-      const {data,error}=await sb.auth.signUp({email,password,options:{data:{name},emailRedirectTo:CONECTA_APP_URL}});
+      const {data,error}=await sb.auth.signUp({email,password,options:{data:{name,city:regCity},emailRedirectTo:CONECTA_APP_URL}});
       if(error)throw error;
       if(!data?.user)throw new Error('Não foi possível criar a conta.');
       if(!data.session){ // Supabase pediu confirmação por e-mail
@@ -5587,7 +5601,7 @@ function cmNudgeState(){
   return 'ask';
 }
 function cmPushNudge(force){
-  const st=cmNudgeState();if(!st||document.getElementById('modal')||document.getElementById('sv')||document.getElementById('sc'))return;
+  const st=cmNudgeState();if(!st||document.getElementById('cityGate')||(typeof cmHasCity==='function'&&!cmHasCity())||window.cmCurrentPage!=='home'||document.getElementById('modal')||document.getElementById('sv')||document.getElementById('sc'))return;
   const last=Number(localStorage.getItem('cm_push_nudge_at')||0);
   if(!force&&Date.now()-last<(st==='denied'?7:2)*86400e3)return;
   localStorage.setItem('cm_push_nudge_at',String(Date.now()));
@@ -5687,6 +5701,38 @@ async function instResumo(){
 }
 /* câmera dos instantes no visual novo */
 function instCamClose(){instCamStop();if(INST.cam.url)URL.revokeObjectURL(INST.cam.url);INST.cam.shot=null;INST.cam.url='';document.getElementById('instCam')?.remove()}
+
+</script>
+<script>
+/* ===== Cidade obrigatória ===== */
+function cmCityClean(v){v=String(v||'').replace(/\s+/g,' ').trim().slice(0,50);if(v.length<2||/não informada/i.test(v))return '';const o=officialCity(v);if(o)return o;const low=['de','da','do','das','dos','e'];return v.toLowerCase().split(' ').map((w,i)=>i&&low.includes(w)?w:w.charAt(0).toUpperCase()+w.slice(1)).join(' ')}
+function cmHasCity(){return !!cmCityClean(me?.user_metadata?.city)}
+function cmCityGate(){
+  if(!me?.id||cmHasCity()||document.getElementById('cityGate'))return;
+  document.body.classList.add('svOpen');
+  document.body.insertAdjacentHTML('beforeend',`<div id="cityGate" class="cgWrap"><div class="cgBox"><div class="cgHero">📍</div><h2>De qual cidade você é?</h2><p>No Conecta Mantiqueira as pessoas se encontram pela cidade. Escolha a sua para aparecer no balão dela e achar seus vizinhos.</p><div class="cgSearch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="cgQ" placeholder="Digite o nome da sua cidade" autocomplete="off" oninput="cmCityFill()"></div><div id="cgList" class="cgList"></div><div id="cgErr" class="error"></div><button id="cgBtn" class="primary" style="width:100%" disabled onclick="cmCitySave()">Escolha uma cidade</button><div class="cgFoot">Não achou na lista? É só digitar o nome da sua cidade e tocar em “Usar”.</div></div></div>`);
+  window.__cgSel='';cmCityFill();setTimeout(()=>document.getElementById('cgQ')?.focus(),200);
+}
+function cmCityFill(){
+  const el=document.getElementById('cgList');if(!el)return;const q=normText(document.getElementById('cgQ')?.value||'').trim();
+  const a=cities.filter(c=>!q||normText(c).includes(q)).slice(0,q?40:cities.length);
+  const typed=cmCityClean(document.getElementById('cgQ')?.value||'');const exact=typed&&a.some(c=>normText(c)===normText(typed));
+  el.innerHTML=(typed&&!exact?`<button type="button" class="cgOwn ${window.__cgSel===typed?'on':''}" data-c="${esc(typed)}" onclick="cmCityPick(this.dataset.c)">✏️ Usar “${esc(typed)}”<small>Minha cidade não está na lista</small></button>`:'')+a.map(c=>`<button type="button" class="${window.__cgSel===c?'on':''}" data-c="${esc(c)}" onclick="cmCityPick(this.dataset.c)">📍 ${esc(c)}</button>`).join('')+(!a.length&&!typed?'<div class="cgNone">Digite o nome da sua cidade.</div>':'');
+}
+function cmCityPick(c){window.__cgSel=c;const b=document.getElementById('cgBtn');if(b){b.disabled=false;b.textContent='Confirmar '+c}cmCityFill()}
+async function cmCitySave(){
+  const c=cmCityClean(window.__cgSel);const b=document.getElementById('cgBtn'),err=document.getElementById('cgErr');if(!c)return;
+  if(b){b.disabled=true;b.textContent='Salvando…'}
+  try{const {data,error}=await sb.auth.updateUser({data:{...(me.user_metadata||{}),city:c}});if(error)throw error;if(data?.user)me=data.user;
+    const p=profileData();await upsertMyProfile({id:me.id,name:p.name,city:c,photo:me.user_metadata?.photo||me.user_metadata?.avatar_url||me.user_metadata?.picture||''});
+    document.getElementById('cityGate')?.remove();document.body.classList.remove('svOpen');shareToast('Bem-vindo(a) a '+c+'! 🏔️');
+    try{await loadPublicProfiles()}catch(_){}go(window.cmCurrentPage&&window.cmCurrentPage!=='auth'?window.cmCurrentPage:'home');
+  }catch(e){if(err)err.textContent='Não foi possível salvar agora. Verifique a internet e tente de novo.';if(b){b.disabled=false;b.textContent='Confirmar '+c}}
+}
+(function(){const g=window.go;window.go=async function(page,arg){const r=await g(page,arg);if(me?.id&&!cmHasCity())setTimeout(cmCityGate,300);return r}})();
+(function(){let n=0;const t=setInterval(()=>{n++;if(me?.id&&window.cmCurrentPage&&window.cmCurrentPage!=='auth'){if(!cmHasCity())cmCityGate();clearInterval(t)}else if(n>120)clearInterval(t)},1000)})();
+/* campo de cidade no cadastro */
+(function(){const a=window.authScreen;window.authScreen=function(){a();const rf=document.getElementById('registerFields');if(rf&&!document.getElementById('regCity')){rf.insertAdjacentHTML('beforeend',`<input id="regCity" class="field" list="regCityList" autocomplete="off" placeholder="Sua cidade (obrigatório) — escolha ou digite"><datalist id="regCityList">${cities.map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`)}}})();
 
 </script>
 </body></html>
