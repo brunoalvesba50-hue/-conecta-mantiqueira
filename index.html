@@ -823,6 +823,69 @@ html,body{width:100%;max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:1
 .instArchGrid a span{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;font-weight:800;border-radius:999px;padding:2px 7px}
 .instArchGrid a i{position:absolute;right:6px;top:6px;color:#b8f53a;font-style:normal}
 </style>
+<style id="serraStyle">.srChip{position:relative;border-color:rgba(32,223,154,.55)!important;background:linear-gradient(135deg,rgba(32,223,154,.22),rgba(25,198,214,.14))!important;color:#fff!important;box-shadow:0 0 16px rgba(32,223,154,.25)}
+.srChip i{font-style:normal;font-size:10px;font-weight:900;background:#20df9a;color:#04140f;border-radius:999px;padding:2px 6px;margin-left:2px;animation:srPulse 1.8s ease-in-out infinite}
+@keyframes srPulse{50%{box-shadow:0 0 0 5px rgba(32,223,154,0)}0%{box-shadow:0 0 0 0 rgba(32,223,154,.6)}}
+.sr{margin:-14px -4px 0}
+.srTop{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.srTop h1{margin:0;font-size:28px;line-height:1.1}
+.srCityBtn{display:flex;align-items:center;gap:4px;background:none;border:0;color:var(--muted);font-size:14px;padding:2px 0;cursor:pointer}
+.srCityBtn svg{width:15px;height:15px}.srCityBtn svg:last-child{width:13px;height:13px;transform:rotate(90deg)}
+.srWx{border-radius:24px;background-size:cover;background-position:center;padding:18px;min-height:190px;color:#fff;box-shadow:0 16px 36px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);display:flex;flex-direction:column;justify-content:flex-end;gap:12px}
+.srWxLoading{margin:auto;text-align:center;opacity:.85;display:flex;flex-direction:column;gap:10px;align-items:center}
+.srWxMain{display:flex;align-items:center;gap:14px}
+.srWxNow{display:flex;align-items:center;gap:6px}.srWxIco{font-size:40px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4))}.srWxNow b{font-size:52px;line-height:1;font-weight:800;text-shadow:0 4px 16px rgba(0,0,0,.4)}
+.srWxTxt b{display:block;font-size:17px}.srWxTxt span{display:block;font-size:12.5px;opacity:.9}
+.srWxChips{display:flex;gap:6px;flex-wrap:wrap}.srWxChips span{background:rgba(0,0,0,.38);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.srWxDays{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.srWxDays div{background:rgba(0,0,0,.32);border-radius:14px;padding:8px 4px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1px}.srWxDays small{font-size:11.5px;opacity:.85;text-transform:capitalize}.srWxDays span{font-size:20px}.srWxDays b{font-size:14px}.srWxDays em{font-style:normal;font-size:12px;opacity:.7}
+.srAlert{display:flex;align-items:center;gap:12px;width:100%;margin-top:12px;padding:12px 14px;border-radius:18px;border:1px solid rgba(255,159,67,.45);background:linear-gradient(135deg,rgba(255,159,67,.16),rgba(255,107,107,.08));color:var(--text);text-align:left;cursor:pointer}
+.srAlert.calm{border-color:var(--line);background:rgba(255,255,255,.04)}
+.srAlert>i{font-style:normal;width:38px;height:38px;flex:none;border-radius:12px;display:grid;place-items:center;background:rgba(255,159,67,.2);color:#ffb067}.srAlert.calm>i{background:rgba(32,223,154,.12)}
+.srAlert>i svg{width:22px;height:22px}.srAlert span{flex:1;min-width:0}.srAlert b{display:block;font-size:14.5px}.srAlert small{color:var(--muted);font-size:12.5px}.srAlert>svg{width:18px;height:18px;color:var(--muted)}
+.srNotice{margin-top:12px;padding:12px 14px;border-radius:16px;background:rgba(32,223,154,.08);border:1px solid rgba(32,223,154,.2);font-size:13.5px;color:var(--muted)}
+.srGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.srTile{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:14px 12px;border-radius:20px;border:1px solid var(--line);background:linear-gradient(160deg,rgba(19,38,52,.9),rgba(14,28,38,.9));color:var(--text);text-align:left;cursor:pointer;min-height:118px;transition:transform .15s}
+.srTile:active{transform:scale(.96)}
+.srTile i{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:rgba(32,223,154,.14);color:var(--green);margin-bottom:4px}.srTile i svg{width:22px;height:22px}
+.srTile b{font-size:13.5px;line-height:1.2}.srTile small{font-size:11px;color:var(--muted);line-height:1.3}.srTile small em{font-style:normal;color:var(--green);font-weight:800}
+.srSecHead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:22px 2px 10px}.srSecHead h2{margin:0;font-size:18px}.srSecHead small{color:var(--muted);font-size:12px}
+.srPhoto{position:relative;height:260px;border-radius:22px;background:#0f1d27 center/cover;overflow:hidden;cursor:pointer;border:1px solid var(--line)}
+.srCrown{position:absolute;left:12px;top:12px;background:rgba(0,0,0,.5);color:#ffd36b;font-weight:800;font-size:12px;border-radius:999px;padding:5px 10px;backdrop-filter:blur(6px)}
+.srPhotoBar{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:10px;padding:30px 12px 12px;background:linear-gradient(transparent,rgba(0,0,0,.7));color:#fff}
+.srPhotoBar img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #fff}.srPhotoBar span{flex:1;min-width:0}.srPhotoBar b{display:block;font-size:14px}.srPhotoBar small{font-size:12px;opacity:.85}
+.srLike{display:flex;align-items:center;gap:6px;border:0;border-radius:999px;background:rgba(255,255,255,.18);color:#fff;padding:8px 12px;font-weight:800;cursor:pointer}.srLike svg{width:18px;height:18px}.srLike.on{background:#ff3b6b}
+.srEvRow{display:flex;gap:10px;overflow-x:auto;margin:0 -18px;padding:0 18px 4px;scrollbar-width:none}.srEvRow::-webkit-scrollbar{display:none}
+.srEv{flex:none;width:200px;border-radius:20px;border:1px solid var(--line);background:rgba(15,29,39,.9);padding:8px;cursor:pointer}
+.srEvImg{position:relative;height:110px;border-radius:14px;background:#0f1d27 center/cover;margin-bottom:8px}
+.srEvDate{position:absolute;left:8px;top:8px;background:#fff;color:#0c3b2e;border-radius:12px;padding:4px 9px;text-align:center;font-size:11px;font-weight:800;text-transform:uppercase;line-height:1.1}.srEvDate b{display:block;font-size:18px}
+.srEv>b{display:block;font-size:14px;margin:0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.srEv>small{display:block;color:var(--muted);font-size:12px;margin:2px 4px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.srGo{width:100%;border:0;border-radius:12px;padding:9px;font-weight:800;background:linear-gradient(135deg,#2ff0b0,#13c98a);color:#03251a;cursor:pointer}.srGo.on{background:rgba(32,223,154,.15);color:var(--green);box-shadow:inset 0 0 0 1px rgba(32,223,154,.4)}
+.srGo.sm{width:auto;flex:none;padding:8px 12px;align-self:center}
+.srEmptyCard{width:100%;padding:16px;border-radius:18px;border:1px dashed rgba(32,223,154,.4);background:rgba(32,223,154,.06);color:var(--muted);font-size:14px;text-align:left;cursor:pointer}.srEmptyCard b{color:var(--green)}
+.srRank{border-radius:20px;border:1px solid var(--line);background:rgba(15,29,39,.85);padding:6px 14px}
+.srRankRow{display:flex;align-items:center;gap:10px;padding:9px 0}.srRankRow+.srRankRow{border-top:1px solid var(--line)}
+.srMedal{width:26px;text-align:center;font-weight:800;color:var(--muted)}.srRankName{width:46%;font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.srRankBar{flex:1;height:8px;border-radius:8px;background:rgba(255,255,255,.07);overflow:hidden}.srRankBar i{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,#20df9a,#19c6d6)}
+.srFoot{text-align:center;color:var(--muted);font-size:11.5px;margin:22px 0 8px;opacity:.7}
+.srMapGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.srMapGrid a{padding:16px 12px;border-radius:16px;border:1px solid var(--stLine,var(--line));background:rgba(255,255,255,.04);color:#fff;text-decoration:none;font-weight:800;font-size:14px;text-align:center}
+.srList .flList{padding-bottom:110px}
+.srFilt{display:flex;gap:8px;overflow-x:auto;padding:4px 14px 8px;scrollbar-width:none}.srFilt::-webkit-scrollbar{display:none}
+.srFilt button{flex:none;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);font-weight:700;font-size:13px;padding:8px 13px;cursor:pointer}.srFilt button.on{background:var(--green);border-color:var(--green);color:#04140f}
+.srCard{display:flex;gap:12px;padding:10px;border-radius:18px;border:1px solid var(--line);background:rgba(15,29,39,.8);margin-bottom:10px;cursor:pointer;animation:stUp .2s ease both}
+.srCardImg{width:84px;height:84px;flex:none;border-radius:14px;background:#0f1d27 center/cover}.srCardImg.ico{display:grid;place-items:center;color:var(--green);background:rgba(32,223,154,.1)}.srCardImg.ico svg{width:32px;height:32px}
+.srCardTxt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.srCardTxt b{font-size:15px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.srCardTxt small{color:var(--muted);font-size:12.5px}
+.srSub{align-self:flex-start;font-size:10.5px;font-weight:900;text-transform:uppercase;letter-spacing:.4px;color:var(--green);background:rgba(32,223,154,.12);border-radius:6px;padding:2px 6px}
+.srPrice{font-style:normal;font-weight:900;color:#ffd36b;font-size:14px}.srPrice.big{font-size:20px}
+.srBy{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-top:2px}.srBy img{width:18px;height:18px;border-radius:50%;object-fit:cover}
+.srFab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:14px 22px;font-weight:900;font-size:15px;background:linear-gradient(135deg,#2ff0b0,#13c98a);color:#03251a;box-shadow:0 12px 28px rgba(32,223,154,.4);cursor:pointer;z-index:3;white-space:nowrap}.srFab svg{width:20px;height:20px}
+.srDet h2{margin:4px 0;font-size:21px}.srDetImg{width:100%;max-height:300px;object-fit:cover;border-radius:18px;margin:8px 0}
+.srDetMeta{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.srDetMeta span{background:rgba(255,255,255,.06);border-radius:999px;padding:6px 10px;font-size:12.5px;font-weight:700}
+.srDetBody{white-space:pre-line;line-height:1.5;color:#dbe6ec;font-size:15px;overflow-wrap:anywhere}
+.srDetBy{display:flex;align-items:center;gap:10px;padding:10px;border-radius:14px;background:rgba(255,255,255,.04);margin:10px 0;cursor:pointer}.srDetBy img{width:40px;height:40px;border-radius:50%;object-fit:cover}.srDetBy b{display:block}.srDetBy small{color:var(--muted)}
+.srDetAct{display:flex;flex-direction:column;gap:8px}.srDetAct>*{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;text-align:center}.srDetAct svg{width:18px;height:18px}.srDetAct .danger{color:#ff8a95;border-color:#7d3440}.srDetAct .on{border-color:var(--green);color:var(--green)}
+.srForm label{display:block;font-size:12.5px;font-weight:800;color:var(--muted);margin:10px 2px 4px}.srForm .field,.srForm .textarea{margin:0}.srForm .stSeg{margin:2px 0 4px}
+.srPrevImg{width:100%;max-height:200px;object-fit:cover;border-radius:14px;margin-top:8px}
+@media(max-width:370px){.srGrid{grid-template-columns:repeat(2,1fr)}}
+</style>
 </head>
 <body><div id="app"></div>
 <script>
@@ -5260,6 +5323,197 @@ async function instSend(){
   }catch(e){if(b){b.disabled=false;b.textContent='Enviar instante ➤'}alert(/does not exist|schema cache|relation/i.test(String(e?.message||''))?'Para usar os Instantes, rode o atualizacao-instantes.sql no Supabase.':(typeof storyErrPt==='function'?storyErrPt(e):'Não foi possível enviar agora.'))}
 }
 /* ===================== fim INSTANTES ===================== */
+
+</script>
+<script>
+/* ===================== ABA SERRA (Explorar → Serra) ===================== */
+const SRI={
+back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+warn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.1"/></svg>',
+cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>',
+tag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/></svg>',
+cart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2.5 3.5h3l2.5 12h11l2-8H7"/></svg>',
+map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6.5v13.5L9 17.5l6 2.5 6-2.5V4L15 6.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg>',
+car:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 16V11l2-5h10l2 5v5"/><path d="M3 16h18v3H3z"/><circle cx="7.5" cy="16" r="1"/><circle cx="16.5" cy="16" r="1"/></svg>',
+search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>',
+plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+heart:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-8-4.7-8-11a4.6 4.6 0 0 1 8-3.1 4.6 4.6 0 0 1 8 3.1c0 6.3-8 11-8 11z"/></svg>',
+chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>'
+};
+const SR_KINDS={
+ alert:{t:'Alertas da serra',s:'Estrada, luz, chuva, bicho solto…',ico:'warn',days:1,cta:'Avisar a região'},
+ event:{t:'Agenda',s:'Festas, cavalgadas, missas e shows',ico:'cal',cta:'Divulgar evento'},
+ classified:{t:'Classificados',s:'Vendo, compro, alugo, empregos',ico:'cart',days:30,cta:'Anunciar',subs:['Vendo','Compro','Alugo','Emprego','Serviços','Troco']},
+ offer:{t:'Ofertas do dia',s:'Somem à meia-noite',ico:'tag',cta:'Publicar oferta'},
+ ride:{t:'Caronas',s:'Combine viagens entre as cidades',ico:'car',cta:'Oferecer carona',subs:['Ofereço carona','Procuro carona']},
+ lost:{t:'Achados e perdidos',s:'Documentos, chaves, animais',ico:'search',days:30,cta:'Publicar',subs:['Perdi','Achei']}
+};
+let SR={city:'',wx:null,items:[],rsvp:new Map(),mine:new Set(),missing:false,view:'',filter:'mine',q:''};
+const SR_WX={0:['☀️','Céu limpo'],1:['🌤️','Quase limpo'],2:['⛅','Parcialmente nublado'],3:['☁️','Nublado'],45:['🌫️','Neblina'],48:['🌫️','Neblina com geada'],51:['🌦️','Garoa fraca'],53:['🌦️','Garoa'],55:['🌧️','Garoa forte'],61:['🌧️','Chuva fraca'],63:['🌧️','Chuva'],65:['🌧️','Chuva forte'],66:['🌧️','Chuva congelante'],67:['🌧️','Chuva congelante'],71:['🌨️','Neve fraca'],73:['🌨️','Neve'],75:['🌨️','Neve forte'],80:['🌦️','Pancadas de chuva'],81:['🌧️','Pancadas fortes'],82:['⛈️','Temporal'],95:['⛈️','Trovoadas'],96:['⛈️','Trovoadas com granizo'],99:['⛈️','Trovoadas com granizo']};
+function srWx(c){return SR_WX[c]||['🌡️','Tempo instável']}
+function srCity(){return SR.city||localStorage.getItem('cm_serra_city')||(profileData().city&&!/não informada/i.test(profileData().city)?profileData().city:'Campos do Jordão')}
+async function srWeather(force){
+  const city=srCity(),key='cm_wx_'+city;
+  try{const c=JSON.parse(localStorage.getItem(key)||'null');if(!force&&c&&Date.now()-c.t<30*60e3){SR.wx=c.d;return c.d}}catch(_){}
+  try{
+    const g=await (await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=5&language=pt&countryCode=BR`)).json();
+    const r=(g.results||[]).find(x=>/Minas Gerais|São Paulo|Rio de Janeiro/.test(x.admin1||''))||(g.results||[])[0];if(!r)throw 0;
+    const u=`https://api.open-meteo.com/v1/forecast?latitude=${r.latitude}&longitude=${r.longitude}&current=temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m,apparent_temperature&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=America%2FSao_Paulo&forecast_days=4`;
+    const d=await (await fetch(u)).json();if(!d.current)throw 0;
+    SR.wx=d;localStorage.setItem(key,JSON.stringify({t:Date.now(),d}));return d;
+  }catch(_){SR.wx=null;return null}
+}
+function srFrost(min){return min<=1?['Alta','#7fd3ff']:min<=4?['Média','#bfe8ff']:['Baixa','#9fb2bf']}
+async function srLoad(){
+  try{
+    const r=await sb.from('serra_posts').select('*').gt('expires_at',new Date().toISOString()).order('created_at',{ascending:false}).limit(400);
+    if(r.error){SR.missing=/does not exist|schema cache|relation/i.test(r.error.message||'');SR.items=[];return}
+    SR.missing=false;SR.items=r.data||[];
+    const ev=SR.items.filter(x=>x.kind==='event').map(x=>x.id);SR.rsvp=new Map();SR.mine=new Set();
+    if(ev.length){const v=await sb.from('serra_rsvp').select('post_id,user_id').in('post_id',ev);if(!v.error)(v.data||[]).forEach(x=>{SR.rsvp.set(x.post_id,(SR.rsvp.get(x.post_id)||0)+1);if(x.user_id===me?.id)SR.mine.add(x.post_id)})}
+    const need=[...new Set(SR.items.map(x=>x.user_id))].filter(id=>!srP(id));
+    if(need.length){try{const pr=await sb.from('profiles').select('id,name,photo,city').in('id',need);(pr.data||[]).forEach(p=>{if(!publicProfilesCache.some(c=>c.id===p.id))publicProfilesCache.push(p)})}catch(_){}}
+  }catch(_){SR.items=[]}
+}
+function srP(id){if(id===me?.id){const p=profileData();return{id,name:p.name,photo:p.photo,city:p.city}}try{return personById(id)||(publicProfilesCache||[]).find(p=>p.id===id)||null}catch(_){return null}}
+function srSameCity(a,b){return normText(a||'')===normText(b||'')}
+function srWhen(t){const d=new Date(t);const today=new Date();const tm=new Date();tm.setDate(today.getDate()+1);const hm=d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});if(d.toDateString()===today.toDateString())return 'Hoje · '+hm;if(d.toDateString()===tm.toDateString())return 'Amanhã · '+hm;return d.toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short'}).replace(/^./,c=>c.toUpperCase())+' · '+hm}
+/* -------- tela principal -------- */
+function serraScreen(){
+  const city=srCity();
+  return screen(`<div class="sr"><div class="srTop"><button class="flBack" onclick="go('explore')" aria-label="Voltar">${SRI.back}</button><div><h1>Serra</h1><button class="srCityBtn" onclick="srPickCity()">${SRI.pin}<span id="srCityTxt">${esc(city)}</span>${SRI.chev}</button></div></div><div id="srWx" class="srWx" style="background-image:linear-gradient(180deg,rgba(4,16,24,.15),rgba(4,16,24,.82)),var(--cm-hero-image)"><div class="srWxLoading">Carregando o tempo na serra…</div></div><div id="srAlerts"></div><div class="srGrid">${['event','classified','offer','map','ride','lost'].map(k=>k==='map'?`<button class="srTile" onclick="srMap()"><i>${SRI.map}</i><b>Mapa da Serra</b><small>Cachoeiras, trilhas e mirantes</small></button>`:`<button class="srTile" onclick="srOpen('${k}')"><i>${SRI[SR_KINDS[k].ico]}</i><b>${SR_KINDS[k].t}</b><small id="srCnt_${k}">${SR_KINDS[k].s}</small></button>`).join('')}</div><div id="srPhoto"></div><div id="srEvents"></div><div id="srRank"></div><div class="srFoot">Conteúdo publicado pela comunidade da Mantiqueira. Tempo: Open-Meteo.</div></div>`,'explore');
+}
+async function serraInit(){
+  localStorage.setItem('cm_serra_seen','1');
+  srWeather().then(srPaintWx);
+  srPaintPhoto();srPaintRank();
+  await srLoad();srPaintAlerts();srPaintEvents();srPaintCounts();
+}
+function srPaintWx(){
+  const el=document.getElementById('srWx');if(!el)return;const d=SR.wx;
+  if(!d){el.innerHTML=`<div class="srWxLoading">Não consegui carregar o tempo agora.<button class="stMiniBtn" onclick="srWeather(true).then(srPaintWx)">Tentar de novo</button></div>`;return}
+  const c=d.current,dl=d.daily,w=srWx(c.weather_code),fr=srFrost(dl.temperature_2m_min[0]);const fog=[45,48].includes(c.weather_code)||dl.weather_code.slice(0,1).some(x=>x===45||x===48);
+  const days=['Hoje','Amanhã'];
+  el.innerHTML=`<div class="srWxMain"><div class="srWxNow"><span class="srWxIco">${w[0]}</span><b>${Math.round(c.temperature_2m)}°</b></div><div class="srWxTxt"><b>${w[1]}</b><span>Sensação ${Math.round(c.apparent_temperature)}° · Umidade ${c.relative_humidity_2m}%</span><span>Hoje: ${Math.round(dl.temperature_2m_min[0])}° a ${Math.round(dl.temperature_2m_max[0])}°</span></div></div><div class="srWxChips"><span>🌫️ ${fog?'Neblina prevista':'Sem neblina forte'}</span><span style="color:${fr[1]}">❄️ Geada: ${fr[0]}</span><span>☔ ${dl.precipitation_probability_max[0]??0}% de chuva</span></div><div class="srWxDays">${dl.time.slice(1,4).map((t,i)=>{const ww=srWx(dl.weather_code[i+1]);return `<div><small>${i===0?days[1]:new Date(t+'T12:00').toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','')}</small><span>${ww[0]}</span><b>${Math.round(dl.temperature_2m_max[i+1])}°</b><em>${Math.round(dl.temperature_2m_min[i+1])}°</em></div>`}).join('')}</div>`;
+}
+function srPickCity(){
+  const list=[...new Set([profileData().city,...(typeof cities!=='undefined'?cities:[])].filter(c=>c&&!/não informada/i.test(c)))];
+  openModal(`<div class="stGrab"></div><div class="stSheetHead"><h2>Escolha a cidade</h2><button class="close" onclick="closeModal()">×</button></div><div class="stSheetBody"><div class="stSearch">${SRI.search}<input id="srCQ" placeholder="Buscar cidade" oninput="srCityFill()" autocomplete="off"></div><div id="srCList" class="stList" style="max-height:55vh"></div></div>`);
+  document.querySelector('#modal .modalBox')?.classList.add('stSheet');window.__srCities=list;srCityFill();
+}
+function srCityFill(){const q=normText(document.getElementById('srCQ')?.value||'');const el=document.getElementById('srCList');if(!el)return;el.innerHTML=(window.__srCities||[]).filter(c=>!q||normText(c).includes(q)).slice(0,60).map(c=>`<button onclick="srSetCity(this.dataset.c)" data-c="${esc(c)}">📍 ${esc(c)}</button>`).join('')}
+function srSetCity(c){SR.city=c;localStorage.setItem('cm_serra_city',c);closeModal();const t=document.getElementById('srCityTxt');if(t)t.textContent=c;const w=document.getElementById('srWx');if(w)w.innerHTML='<div class="srWxLoading">Carregando o tempo na serra…</div>';srWeather().then(srPaintWx);srPaintAlerts();srPaintEvents()}
+function srPaintAlerts(){
+  const el=document.getElementById('srAlerts');if(!el)return;
+  if(SR.missing){el.innerHTML=`<div class="srNotice">🛠️ Para liberar Alertas, Agenda, Classificados e Caronas, o administrador precisa rodar o <b>atualizacao-serra.sql</b> no Supabase.</div>`;return}
+  const city=srCity();const a=SR.items.filter(x=>x.kind==='alert').sort((x,y)=>Number(srSameCity(y.city,city))-Number(srSameCity(x.city,city)));
+  el.innerHTML=a.length?`<button class="srAlert" onclick="srOpen('alert')"><i>${SRI.warn}</i><span><b>${esc(a[0].title)}</b><small>${esc(a[0].city)} · ${timeAgo(Date.parse(a[0].created_at))}${a.length>1?` · +${a.length-1} alerta${a.length>2?'s':''}`:''}</small></span>${SRI.chev}</button>`:`<button class="srAlert calm" onclick="srOpen('alert')"><i>✅</i><span><b>Nenhum alerta na serra agora</b><small>Viu algo na estrada? Toque para avisar a região</small></span>${SRI.chev}</button>`;
+}
+function srPaintCounts(){Object.keys(SR_KINDS).forEach(k=>{const n=SR.items.filter(x=>x.kind===k).length;const el=document.getElementById('srCnt_'+k);if(el&&n)el.innerHTML=`<em>${n} ${n===1?'ativo':'ativos'}</em> · ${SR_KINDS[k].s}`})}
+function srPaintEvents(){
+  const el=document.getElementById('srEvents');if(!el||SR.missing)return;
+  const ev=SR.items.filter(x=>x.kind==='event'&&x.event_at&&Date.parse(x.event_at)>Date.now()-3*3600e3).sort((a,b)=>Date.parse(a.event_at)-Date.parse(b.event_at)).slice(0,10);
+  el.innerHTML=`<div class="srSecHead"><h2>Próximos eventos</h2><button class="link" onclick="srOpen('event')">Ver agenda</button></div>`+(ev.length?`<div class="srEvRow">${ev.map(x=>{const d=new Date(x.event_at);return `<div class="srEv" onclick="srDetail('${x.id}')"><div class="srEvImg" style="${x.photo?`background-image:url('${esc(x.photo)}')`:'background-image:var(--cm-hero-image)'}"><span class="srEvDate"><b>${d.getDate()}</b>${d.toLocaleDateString('pt-BR',{month:'short'}).replace('.','')}</span></div><b>${esc(x.title)}</b><small>${esc(srWhen(x.event_at).split(' · ')[1]||'')} · ${esc(x.city)}</small><button class="srGo ${SR.mine.has(x.id)?'on':''}" onclick="event.stopPropagation();srRsvp('${x.id}',this)">${SR.mine.has(x.id)?'✓ Vou':'Vou!'}${SR.rsvp.get(x.id)?` · ${SR.rsvp.get(x.id)}`:''}</button></div>`}).join('')}</div>`:`<button class="srEmptyCard" onclick="srForm('event')">📅 Nenhum evento divulgado ainda. <b>Divulgue o primeiro!</b></button>`);
+}
+function srPaintPhoto(){
+  const el=document.getElementById('srPhoto');if(!el)return;
+  const since=Date.now()-48*3600e3;const ps=(typeof getPosts==='function'?getPosts():[]).filter(x=>x.image&&x.type!=='video'&&(x.created||0)>since);
+  const best=ps.sort((a,b)=>(b.likes||0)-(a.likes||0)||(b.created||0)-(a.created||0))[0];
+  if(!best){el.innerHTML=`<div class="srSecHead"><h2>Foto do dia da Serra</h2></div><button class="srEmptyCard" onclick="newPost()">📸 Publique uma foto da região. A mais curtida em 48 h vira a <b>Foto do dia</b>!</button>`;return}
+  el.innerHTML=`<div class="srSecHead"><h2>Foto do dia da Serra</h2><small>a mais curtida em 48 h</small></div><div class="srPhoto" onclick="postShowOne('${esc(best.id)}')" style="background-image:url('${esc(best.image)}')"><div class="srPhotoBar"><img src="${esc(best.photo||avatar(best.name))}" alt=""><span><b>${esc(best.name)}</b><small>${esc(best.city||'')}</small></span><button class="srLike ${best.likedByMe?'on':''}" onclick="event.stopPropagation();postLike('${esc(best.id)}');setTimeout(srPaintPhoto,700)">${SRI.heart}<b>${best.likes||0}</b></button></div><span class="srCrown">🏆 Foto do dia</span></div>`;
+}
+function srPaintRank(){
+  const el=document.getElementById('srRank');if(!el)return;
+  const since=Date.now()-7*86400e3;const m=new Map();(typeof getPosts==='function'?getPosts():[]).filter(x=>(x.created||0)>since&&x.city&&!/Mantiqueira/.test(x.city)).forEach(x=>m.set(x.city,(m.get(x.city)||0)+1+(x.likes||0)*.3));
+  const r=[...m].sort((a,b)=>b[1]-a[1]).slice(0,5);if(!r.length){el.innerHTML='';return}
+  const max=r[0][1];el.innerHTML=`<div class="srSecHead"><h2>Ranking das cidades</h2><small>mais ativas na semana</small></div><div class="srRank">${r.map(([c,v],i)=>`<div class="srRankRow"><span class="srMedal">${['🥇','🥈','🥉','4º','5º'][i]}</span><span class="srRankName">${esc(c)}</span><span class="srRankBar"><i style="width:${Math.max(8,v/max*100)}%"></i></span></div>`).join('')}</div>`;
+}
+function srMap(){
+  const c=srCity();const q=[['💧 Cachoeiras','cachoeiras'],['🥾 Trilhas','trilhas'],['🌄 Mirantes','mirantes'],['🏡 Pousadas','pousadas'],['🍽️ Restaurantes','restaurantes'],['⛪ Pontos turísticos','pontos turísticos']];
+  openModal(`<div class="stGrab"></div><div class="stSheetHead"><h2>Mapa da Serra</h2><button class="close" onclick="closeModal()">×</button></div><div class="stSheetBody"><div class="small" style="opacity:.8;margin-bottom:10px">Abre o mapa com os lugares perto de <b>${esc(c)}</b>.</div><div class="srMapGrid">${q.map(([l,k])=>`<a target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(k+' perto de '+c+', Serra da Mantiqueira')}">${l}</a>`).join('')}</div></div>`);
+  document.querySelector('#modal .modalBox')?.classList.add('stSheet');
+}
+/* -------- listas -------- */
+function srOpen(kind){
+  if(SR.missing){alert('O administrador precisa rodar o atualizacao-serra.sql no Supabase para liberar esta parte.');return}
+  SR.view=kind;SR.filter='mine';SR.q='';const K=SR_KINDS[kind];
+  document.getElementById('srList')?.remove();document.body.classList.add('svOpen');
+  document.body.insertAdjacentHTML('beforeend',`<div id="srList" class="fl srList"><div class="cfgTop"><button class="flBack" onclick="srClose()" aria-label="Voltar">${SRI.back}</button><b>${K.t}</b><span></span></div><div class="flSearch">${SRI.search}<input placeholder="Buscar em ${esc(K.t.toLowerCase())}" oninput="SR.q=this.value;srListPaint()" autocomplete="off"></div><div class="srFilt" id="srFilt"></div><div class="flList" id="srItems"></div><button class="srFab" onclick="srForm('${kind}')">${SRI.plus}<span>${K.cta}</span></button></div>`);
+  srListPaint();
+}
+function srClose(){document.getElementById('srList')?.remove();if(!document.getElementById('cfg')&&!document.getElementById('fl'))document.body.classList.remove('svOpen');srPaintAlerts();srPaintEvents();srPaintCounts()}
+function srListPaint(){
+  const kind=SR.view,K=SR_KINDS[kind],city=srCity();const f=document.getElementById('srFilt'),el=document.getElementById('srItems');if(!el)return;
+  const subs=K.subs||[];
+  if(f)f.innerHTML=[['mine','📍 '+city],['all','Toda a serra'],...subs.map(s=>['s:'+s,s])].map(([k,l])=>`<button class="${SR.filter===k?'on':''}" onclick="SR.filter='${esc(k)}';srListPaint()">${esc(l)}</button>`).join('');
+  const q=normText(SR.q||'').trim();
+  let a=SR.items.filter(x=>x.kind===kind);
+  if(SR.filter==='mine')a=a.filter(x=>srSameCity(x.city,city)||srSameCity(x.place_to,city));else if(SR.filter.startsWith('s:'))a=a.filter(x=>x.sub===SR.filter.slice(2));
+  if(q)a=a.filter(x=>normText([x.title,x.body,x.city,x.place_to,x.sub].join(' ')).includes(q));
+  if(kind==='event'||kind==='ride')a.sort((x,y)=>Date.parse(x.event_at||x.created_at)-Date.parse(y.event_at||y.created_at));
+  el.innerHTML=a.length?a.map(srCard).join(''):`<div class="flEmpty"><b>${SR.filter==='mine'?'Nada em '+esc(city)+' ainda':'Nada por aqui ainda'}</b>${SR.filter==='mine'?'Toque em “Toda a serra” para ver as outras cidades, ou publique o primeiro.':'Seja o primeiro a publicar.'}</div>`;
+}
+function srCard(x){
+  const p=srP(x.user_id)||{name:'Alguém'};const mine=x.user_id===me?.id;
+  const meta=x.kind==='ride'?`${esc(x.city)} → ${esc(x.place_to||'?')} · ${x.event_at?esc(srWhen(x.event_at)):''}${x.seats?` · ${x.seats} vaga${x.seats>1?'s':''}`:''}`:x.kind==='event'&&x.event_at?`${esc(srWhen(x.event_at))} · ${esc(x.city)}`:`${esc(x.city)} · ${timeAgo(Date.parse(x.created_at))}`;
+  return `<div class="srCard" onclick="srDetail('${x.id}')">${x.photo?`<div class="srCardImg" style="background-image:url('${esc(x.photo)}')"></div>`:`<div class="srCardImg ico">${SRI[SR_KINDS[x.kind].ico]}</div>`}<div class="srCardTxt">${x.sub?`<span class="srSub">${esc(x.sub)}</span>`:''}<b>${esc(x.title)}</b><small>${meta}</small>${x.price?`<em class="srPrice">${esc(x.price)}</em>`:''}<span class="srBy"><img src="${esc(p.photo||avatar(p.name))}" alt="">${esc(mine?'Você':p.name)}</span></div>${x.kind==='event'?`<button class="srGo sm ${SR.mine.has(x.id)?'on':''}" onclick="event.stopPropagation();srRsvp('${x.id}',this)">${SR.mine.has(x.id)?'✓ Vou':'Vou!'}</button>`:''}</div>`;
+}
+function srDetail(id){
+  const x=SR.items.find(i=>i.id===id);if(!x)return;const p=srP(x.user_id)||{name:'Alguém'};const mine=x.user_id===me?.id;
+  const wa=x.contact?String(x.contact).replace(/\D/g,''):'';
+  openModal(`<div class="stGrab"></div><div class="stSheetBody srDet">${x.photo?`<img class="srDetImg" src="${esc(x.photo)}" alt="">`:''}<div class="srDetHead">${x.sub?`<span class="srSub">${esc(x.sub)}</span>`:''}<h2>${esc(x.title)}</h2>${x.price?`<em class="srPrice big">${esc(x.price)}</em>`:''}</div><div class="srDetMeta">${x.kind==='ride'?`<span>🚗 ${esc(x.city)} → ${esc(x.place_to||'')}</span>`:`<span>📍 ${esc(x.city)}</span>`}${x.event_at?`<span>🗓️ ${esc(srWhen(x.event_at))}</span>`:''}${x.seats?`<span>💺 ${x.seats} vaga${x.seats>1?'s':''}</span>`:''}${x.kind==='event'?`<span>🙋 ${SR.rsvp.get(x.id)||0} vão</span>`:''}<span>🕒 publicado ${timeAgo(Date.parse(x.created_at))}</span></div>${x.body?`<p class="srDetBody">${esc(x.body)}</p>`:''}<div class="srDetBy" onclick="closeModal();srClose();${mine?"go('profile')":`currentPublicUser=srP('${x.user_id}');go('publicProfile')`}"><img src="${esc(p.photo||avatar(p.name))}" alt=""><span><b>${esc(mine?'Você':p.name)}</b><small>${esc(p.city||'')}</small></span></div><div class="srDetAct">${mine?`<button class="secondary danger" onclick="srDelete('${x.id}')">${SRI.trash} Apagar</button>`:`<button class="primary" onclick="closeModal();srClose();currentPublicUser=srP('${x.user_id}');go('conversation')">${SRI.chat} Chamar no bate-papo</button>${wa?`<a class="secondary" href="https://wa.me/${wa.length<=11?'55'+wa:wa}" target="_blank" rel="noopener">💬 WhatsApp</a>`:''}`}${x.kind==='event'?`<button class="secondary ${SR.mine.has(x.id)?'on':''}" onclick="srRsvp('${x.id}',this)">${SR.mine.has(x.id)?'✓ Vou':'Vou!'}</button>`:''}</div></div>`);
+  document.querySelector('#modal .modalBox')?.classList.add('stSheet');
+}
+async function srRsvp(id,btn){
+  const on=!SR.mine.has(id);on?SR.mine.add(id):SR.mine.delete(id);SR.rsvp.set(id,Math.max(0,(SR.rsvp.get(id)||0)+(on?1:-1)));
+  if(btn){btn.classList.toggle('on',on);btn.textContent=on?'✓ Vou':'Vou!'}
+  try{const r=on?await sb.from('serra_rsvp').insert({post_id:id,user_id:me.id}):await sb.from('serra_rsvp').delete().eq('post_id',id).eq('user_id',me.id);if(r.error)throw r.error;if(on)shareToast('Presença confirmada! 🎉')}catch(_){on?SR.mine.delete(id):SR.mine.add(id);if(btn){btn.classList.toggle('on',!on);btn.textContent=!on?'✓ Vou':'Vou!'}shareToast('Não foi possível agora')}
+}
+async function srDelete(id){if(!confirm('Apagar esta publicação?'))return;const r=await sb.from('serra_posts').delete().eq('id',id).eq('user_id',me.id);if(r.error){alert('Não foi possível apagar agora.');return}SR.items=SR.items.filter(x=>x.id!==id);closeModal();srListPaint();srPaintAlerts();srPaintEvents();srPaintCounts()}
+/* -------- formulário -------- */
+function srForm(kind){
+  if(SR.missing){alert('O administrador precisa rodar o atualizacao-serra.sql no Supabase.');return}
+  const K=SR_KINDS[kind],city=srCity();
+  const cityOpts=`<datalist id="srCities">${(typeof cities!=='undefined'?cities:[]).map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`;
+  const dt=new Date(Date.now()+86400e3);dt.setMinutes(0,0,0);const dv=new Date(dt.getTime()-dt.getTimezoneOffset()*60000).toISOString().slice(0,16);
+  const ph={alert:'Ex.: Neblina forte na subida da serra',event:'Nome do evento',classified:'O que você está anunciando?',offer:'Ex.: Pão de queijo 1kg',ride:'',lost:'Ex.: Cachorro caramelo perdido'}[kind];
+  openModal(`<div class="stGrab"></div><div class="stSheetHead"><h2>${esc(K.cta)}</h2><button class="close" onclick="closeModal()">×</button></div><div class="stSheetBody srForm">${K.subs?`<div class="stSeg" id="srSubSeg">${K.subs.map((s,i)=>`<button class="${i===0?'on':''}" onclick="this.parentElement.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===this))">${esc(s)}</button>`).join('')}</div>`:''}${kind==='ride'?`<label>Saindo de</label><input id="srCity" class="field" list="srCities" value="${esc(city)}"><label>Indo para</label><input id="srTo" class="field" list="srCities" placeholder="Cidade de destino"><label>Quando</label><input id="srAt" class="field" type="datetime-local" value="${dv}"><label>Vagas</label><input id="srSeats" class="field" type="number" min="1" max="8" value="2">`:`<label>Título</label><input id="srTitle" class="field" maxlength="120" placeholder="${esc(ph)}"><label>Cidade</label><input id="srCity" class="field" list="srCities" value="${esc(city)}">`}${kind==='event'?`<label>Data e hora</label><input id="srAt" class="field" type="datetime-local" value="${dv}">`:''}${['classified','offer'].includes(kind)?`<label>Preço</label><input id="srPrice" class="field" maxlength="40" placeholder="${kind==='offer'?'Ex.: de R$ 30 por R$ 22':'Ex.: R$ 150'}">`:''}<label>${kind==='ride'?'Detalhes (horário de volta, ponto de encontro…)':'Detalhes'}</label><textarea id="srBody" class="textarea" maxlength="1000" placeholder="Escreva mais informações (opcional)"></textarea>${['classified','offer','ride','lost','event'].includes(kind)?`<label>WhatsApp para contato (opcional)</label><input id="srContact" class="field" inputmode="tel" placeholder="(12) 99999-9999">`:''}${kind!=='ride'?`<button class="photoAdd" type="button" onclick="document.getElementById('srPhotoIn').click()">📷 ${kind==='alert'?'Foto (opcional)':'Adicionar foto'}</button><input id="srPhotoIn" class="hidden" type="file" accept="image/*" onchange="srPrev(this)"><img id="srPrevImg" class="srPrevImg hidden" alt="">`:''}${cityOpts}<div class="small" style="opacity:.7;margin:8px 0">${kind==='offer'?'A oferta some sozinha à meia-noite.':kind==='alert'?'O alerta fica 24 h no ar.':kind==='event'?'O evento sai da agenda depois que acontecer.':kind==='ride'?'A carona sai da lista depois do horário.':'O anúncio fica 30 dias no ar.'}</div><button class="primary" id="srSend" style="width:100%" onclick="srSave('${kind}')">Publicar</button></div>`);
+  document.querySelector('#modal .modalBox')?.classList.add('stSheet');
+}
+function srPrev(inp){const f=inp.files&&inp.files[0];const im=document.getElementById('srPrevImg');if(!f||!im)return;im.src=URL.createObjectURL(f);im.classList.remove('hidden')}
+async function srSave(kind){
+  const v=id=>(document.getElementById(id)?.value||'').trim();const K=SR_KINDS[kind];
+  const sub=document.querySelector('#srSubSeg button.on')?.textContent||'';
+  let city=v('srCity');if(typeof officialCity==='function')city=officialCity(city)||city;
+  const row={user_id:me.id,kind,sub,city,body:v('srBody'),price:v('srPrice'),contact:v('srContact')};
+  if(kind==='ride'){row.place_to=(typeof officialCity==='function'&&officialCity(v('srTo')))||v('srTo');row.seats=Number(v('srSeats'))||null;row.title=`${city} → ${row.place_to}`;const at=Date.parse(v('srAt'));if(!row.place_to||!at){alert('Preencha o destino e o horário.');return}row.event_at=new Date(at).toISOString();row.expires_at=new Date(at+2*3600e3).toISOString()}
+  else{row.title=v('srTitle');if(row.title.length<2){alert('Escreva um título.');return}}
+  if(!city){alert('Escolha a cidade.');return}
+  if(kind==='event'){const at=Date.parse(v('srAt'));if(!at||at<Date.now()-3600e3){alert('Escolha uma data futura.');return}row.event_at=new Date(at).toISOString();row.expires_at=new Date(at+6*3600e3).toISOString()}
+  if(kind==='offer'){const m=new Date();m.setHours(23,59,59,0);row.expires_at=m.toISOString()}
+  if(K.days&&!row.expires_at)row.expires_at=new Date(Date.now()+K.days*86400e3).toISOString();
+  const b=document.getElementById('srSend');if(b){b.disabled=true;b.textContent='Publicando…'}
+  try{
+    const f=document.getElementById('srPhotoIn')?.files?.[0];if(f)row.photo=await uploadMedia(f,'serra','post');
+    const r=await sb.from('serra_posts').insert(row).select('*').single();if(r.error)throw r.error;
+    SR.items.unshift(r.data||row);closeModal();shareToast(kind==='alert'?'Alerta publicado. Obrigado por avisar! 🙏':'Publicado na Serra! ✨');
+    if(document.getElementById('srList'))srListPaint();srPaintAlerts();srPaintEvents();srPaintCounts();
+  }catch(e){if(b){b.disabled=false;b.textContent='Publicar'}alert(/does not exist|schema cache|relation/i.test(String(e?.message||''))?'Rode o atualizacao-serra.sql no Supabase.':'Não foi possível publicar agora.')}
+}
+/* -------- integração: aba "Serra" no Explorar e rota -------- */
+(function(){
+  const g=window.go;
+  window.go=async function(page,arg){
+    if(page==='serra'){document.getElementById('cartBar')?.remove();document.getElementById('instBubble')?.remove();window.cmCurrentPage='serra';const a=document.getElementById('app');if(!a)return;a.classList.remove('isHome');a.innerHTML=serraScreen();window.scrollTo(0,0);serraInit();return}
+    return g(page,arg);
+  };
+  const ex=window.explore;
+  window.explore=function(){let h=ex();const fresh=!localStorage.getItem('cm_serra_seen');return h.replace(/(<button type="button" class="on">Feed<\/button>)/,`$1<button type="button" class="srChip" onclick="go('serra')">🏔️ Serra${fresh?'<i>Novo</i>':''}</button>`)};
+})();
+/* ===================== fim ABA SERRA ===================== */
 
 </script>
 </body></html>
