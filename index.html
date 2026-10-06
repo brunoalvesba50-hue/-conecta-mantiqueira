@@ -886,6 +886,12 @@ html,body{width:100%;max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:1
 .srPrevImg{width:100%;max-height:200px;object-fit:cover;border-radius:14px;margin-top:8px}
 @media(max-width:370px){.srGrid{grid-template-columns:repeat(2,1fr)}}
 </style>
+<style id="nuStyle">.nuBox{text-align:center;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+.nuHero{font-size:46px;width:84px;height:84px;margin:6px auto 8px;border-radius:26px;display:grid;place-items:center;background:radial-gradient(circle,rgba(32,223,154,.25),rgba(32,223,154,.05));box-shadow:0 0 30px rgba(32,223,154,.25)}
+.nuBox h2{margin:4px 0 6px;font-size:21px}.nuBox p{color:#c9d6de;font-size:15px;line-height:1.5;margin:6px 0}
+.nuSteps{text-align:left;margin:12px 0 16px;padding-left:22px;color:#e9f2f5;font-size:15px;line-height:1.55}.nuSteps li{margin:6px 0}
+.nuList{list-style:none;padding:0;margin:10px auto 16px;text-align:left;max-width:280px;font-size:15px;line-height:1.9}
+</style>
 </head>
 <body><div id="app"></div>
 <script>
@@ -5519,5 +5525,36 @@ async function srSave(kind){
 <script>
 try{Object.assign(NOTIF_TXT,{serra_alert:'publicou um alerta na sua cidade. ⚠️'})}catch(_){}
 (function(){const g=window.cmNotifGo;window.cmNotifGo=async function(id){const n=(CM_NOTIF.list||[]).find(x=>x.id===id);if(n&&n.kind==='serra_alert'){closeModal();go('serra');return}return g(id)}})();
+</script>
+<script>
+/* ===== Convite para ativar notificações (aparece no Início) ===== */
+function cmNudgeState(){
+  if(!me?.id)return '';
+  if(cmIsIOS()&&!cmStandalone())return 'install';
+  if(!cmPushSupported())return '';
+  if(Notification.permission==='granted')return '';
+  if(Notification.permission==='denied')return 'denied';
+  return 'ask';
+}
+function cmPushNudge(force){
+  const st=cmNudgeState();if(!st||document.getElementById('modal')||document.getElementById('sv')||document.getElementById('sc'))return;
+  const last=Number(localStorage.getItem('cm_push_nudge_at')||0);
+  if(!force&&Date.now()-last<(st==='denied'?7:2)*86400e3)return;
+  localStorage.setItem('cm_push_nudge_at',String(Date.now()));
+  const shareIco='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>';
+  const body=st==='install'
+   ?`<div class="nuHero">📲</div><h2>Instale o Conecta no iPhone</h2><p>Assim você recebe na hora mensagens, curtidas e alertas da serra, <b>mesmo com o app fechado</b>, igual ao Instagram.</p><ol class="nuSteps"><li>Toque em <b>Compartilhar</b> ${shareIco} na barra do Safari</li><li>Role e toque em <b>Adicionar à Tela de Início</b></li><li>Toque em <b>Adicionar</b> e abra o Conecta <b>pelo ícone</b></li><li>Toque em <b>Permitir</b> nas notificações</li></ol><button class="primary" style="width:100%" onclick="closeModal()">Entendi</button>`
+   :st==='denied'
+   ?`<div class="nuHero">🔕</div><h2>Notificações bloqueadas</h2><p>Você está perdendo mensagens e alertas da serra.</p><p class="small">${cmIsIOS()?'Vá em <b>Ajustes do iPhone → Notificações → Conecta</b> e ative “Permitir Notificações”.':'Toque no <b>cadeado</b> ao lado do endereço do site → <b>Permissões</b> → <b>Notificações</b> → <b>Permitir</b>.'}</p><button class="primary" style="width:100%" onclick="closeModal()">Ok, vou liberar</button>`
+   :`<div class="nuHero">🔔</div><h2>Não perca nada da serra</h2><p>Ative as notificações e saiba na hora quando:</p><ul class="nuList"><li>💬 chegar uma mensagem</li><li>❤️ curtirem ou responderem seu story</li><li>@ mencionarem você</li><li>⚠️ tiver alerta na sua cidade</li></ul><button class="primary" style="width:100%" onclick="cmNudgeAsk(this)">Ativar notificações</button><button class="ghost" style="width:100%;margin-top:6px" onclick="closeModal()">Agora não</button>`;
+  openModal(`<div class="nuBox">${body}</div>`);
+  document.querySelector('#modal .modalBox')?.classList.add('stSheet');
+}
+async function cmNudgeAsk(btn){if(btn){btn.disabled=true;btn.textContent='Ativando…'}const ok=await cmPushEnable();closeModal();if(ok)shareToast('Pronto! Você vai receber os avisos no celular 🔔')}
+/* o aviso do Bate-papo volta depois de 7 dias se ainda não ativou */
+(function(){try{const h=localStorage.getItem('cm_push_banner_hide');const t=Number(localStorage.getItem('cm_push_banner_hide_at')||0);if(h==='1'&&!t)localStorage.setItem('cm_push_banner_hide_at',String(Date.now()));else if(h==='1'&&Date.now()-t>7*86400e3){localStorage.removeItem('cm_push_banner_hide');localStorage.removeItem('cm_push_banner_hide_at')}}catch(_){}})();
+setTimeout(()=>{if(window.cmCurrentPage==='home')cmPushNudge(false)},4500);
+(function(){const g=window.go;window.go=async function(page,arg){const r=await g(page,arg);if(page==='home'){clearTimeout(window.__nuT);window.__nuT=setTimeout(()=>{if(window.cmCurrentPage==='home')cmPushNudge(false)},3500)}return r}})();
+
 </script>
 </body></html>
