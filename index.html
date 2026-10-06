@@ -771,6 +771,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:1
 .cfgStats b{display:block;font-size:22px}.cfgStats span{font-size:12.5px;color:var(--muted)}
 .lightTheme .cfgSec{border-bottom-color:#e2eaed}.lightTheme .cfgTop{background:#f3f7f8}
 </style>
+<link rel="preconnect" href="https://www.youtube.com"><link rel="preconnect" href="https://i.ytimg.com"><link rel="preconnect" href="https://s.ytimg.com"><link rel="preconnect" href="https://www.google.com"><link rel="dns-prefetch" href="https://googlevideo.com">
 </head>
 <body><div id="app"></div>
 <script>
@@ -4948,6 +4949,88 @@ async function cfgMeta(btn,key){const sw=btn.querySelector('[data-sw]');if(!sw)r
 function cfgTheme(btn){const sw=btn.querySelector('[data-sw]');sw.classList.toggle('on');const on=sw.classList.contains('on');document.body.classList.toggle('lightTheme',!on);localStorage.setItem('cm_theme',on?'dark':'light')}
 async function cfgPushToggle(btn){const sw=btn.querySelector('[data-sw]'),sm=btn.querySelector('small');if(sw.classList.contains('on')){localStorage.setItem('cm_notifications','off');sw.classList.remove('on');if(sm)sm.textContent='Desativadas';return}let ok=false;try{ok=typeof cmPushEnable==='function'?await cmPushEnable():false}catch(_){}localStorage.setItem('cm_notifications',ok===false?'off':'on');sw.classList.toggle('on',ok!==false);if(sm)sm.textContent=ok!==false?'Ativadas':'Não foi possível ativar neste aparelho'}
 function cfgLogout(){if(!confirm('Sair do Conecta Mantiqueira neste aparelho?'))return;cfgClose();logout()}
+
+</script>
+<script>
+/* ===== VÍDEOS: correções de fluidez e som (v3) ===== */
+window.CM_SND=window.CM_SND||false; /* som já liberado nesta sessão */
+function reelCreateFrame(x,forceMuted){
+  const st=document.getElementById('reelStage');if(!st)return;
+  if(RL.ifr){RL.ifr.remove();RL.ifr=null}
+  clearInterval(RL.lsT);
+  if(forceMuted){RL.muted=true;RL.pill=RL.want}
+  const f=document.createElement('iframe');f.className='reelFrame';f.src=reelEmbed(x.youtubeId,RL.muted);f.title='Vídeo';f.allow='autoplay; encrypted-media; picture-in-picture';f.setAttribute('tabindex','-1');f.setAttribute('loading','eager');
+  const listen=()=>{try{f.contentWindow&&f.contentWindow.postMessage(JSON.stringify({event:'listening',id:1,channel:'widget'}),'*')}catch(_){}};
+  f.addEventListener('load',()=>{listen();let n=0;clearInterval(RL.lsT);RL.lsT=setInterval(()=>{if(RL.ready||RL.ifr!==f||++n>40){clearInterval(RL.lsT);return}listen()},150)});
+  st.appendChild(f);RL.ifr=f;RL.ready=false;RL.pending=null;RL.loadedId=x.youtubeId;
+  reelPaintSound();
+}
+function reelPlay(x){
+  if(x.social){reelSocialPlay(x);return}
+  reelSocialUnmount();
+  clearTimeout(RL.wd);clearTimeout(RL.wd2);clearTimeout(RL.wd3);
+  if(!RL.ifr)reelCreateFrame(x);
+  else if(!RL.ready){if(RL.loadedId!==x.youtubeId)RL.pending=x}
+  else{RL.loadedId=x.youtubeId;reelCmd('loadVideoById',[x.youtubeId,0])}
+  /* 1ª tentativa falhou? recarrega uma vez antes de desistir */
+  RL.wd3=setTimeout(()=>{if(RL.state!==1&&RL.items[RL.cur]===x){if(RL.ready){reelCmd('loadVideoById',[x.youtubeId,0]);reelCmd('playVideo')}else reelCreateFrame(x,RL.muted)}},4500);
+  RL.wd=setTimeout(()=>{if(RL.state!==1&&RL.items[RL.cur]===x)reelFail(false)},11000);
+  if(!RL.muted&&!RL.soundOK)RL.wd2=setTimeout(()=>{if(RL.state!==1&&RL.items[RL.cur]===x&&!RL.soundOK){RL.pill=RL.want;window.CM_SND=false;reelCreateFrame(x,true)}},2500);
+}
+/* hard=true: o YouTube disse que o vídeo não pode ser incorporado -> nunca mais mostra.
+   hard=false: só demorou (internet) -> pula sem bloquear para sempre. */
+function reelFail(hard){
+  clearTimeout(RL.wd);clearTimeout(RL.wd3);const x=RL.items[RL.cur];if(!x)return;
+  if(hard===true){const bad=rlGet('cm_reels_bad',[]);if(!bad.includes(x.youtubeId)){bad.push(x.youtubeId);rlSet('cm_reels_bad',bad.slice(-500))}}
+  const e=document.getElementById('reelErr');if(e){e.textContent=hard===true?'Este vídeo não pode ser exibido aqui. Passando para o próximo…':'Conexão lenta. Indo para o próximo vídeo…';e.classList.add('on')}
+  setTimeout(()=>{if(RL.items[RL.cur]===x)reelNext()},hard===true?700:900);
+}
+function reelsMessage(ev){
+  if(!RL.ifr||ev.source!==RL.ifr.contentWindow)return;
+  let d=ev.data;if(typeof d==='string'){try{d=JSON.parse(d)}catch(_){return}}
+  if(!d||typeof d!=='object')return;
+  if(!RL.ready&&(d.event==='onReady'||d.event==='infoDelivery'||d.event==='initialDelivery')){
+    RL.ready=true;clearInterval(RL.lsT);
+    if(RL.pending){const p=RL.pending;RL.pending=null;RL.loadedId=p.youtubeId;reelCmd('loadVideoById',[p.youtubeId,0])}
+    if(!RL.muted){reelCmd('unMute');reelCmd('setVolume',[100])}
+  }
+  if(d.event==='onError'){const c=Number(d.info);reelFail([2,5,100,101,150].includes(c));return}
+  const info=d.info;
+  if(d.event==='infoDelivery'&&info){
+    if(typeof info.duration==='number'&&info.duration>0)RL.dur=info.duration;
+    if(info.muted===true&&!RL.muted&&RL.state===1&&!RL._remute&&(RL._remuteN=(RL._remuteN||0)+1)<=4){RL._remute=1;reelCmd('unMute');reelCmd('setVolume',[100]);setTimeout(()=>{RL._remute=0},1500)}
+    if(typeof info.currentTime==='number'){RL.t=info.currentTime;const p=document.querySelector('#reelUI .reelProg i');if(p&&RL.dur&&RL._seek==null)p.style.width=Math.min(100,RL.t/RL.dur*100)+'%'}
+    if(typeof info.playerState==='number'){
+      const s=info.playerState;RL.state=s;
+      if(s===1){
+        clearTimeout(RL.wd);clearTimeout(RL.wd2);clearTimeout(RL.wd3);RL.paused=false;if(!RL.muted){RL.soundOK=true;window.CM_SND=true}
+        document.getElementById('reelStage')?.classList.add('on');document.getElementById('reelErr')?.classList.remove('on');
+        if(RL.speed!==1&&RL._spFor!==RL.cur){RL._spFor=RL.cur;reelCmd('setPlaybackRate',[RL.speed])}
+      }else if(s===2){RL.paused=true}
+      else if(s===0){if(RL.autonext)reelNext();else{reelCmd('seekTo',[0,true]);reelCmd('playVideo')}}
+    }
+  }
+}
+function reelUnmute(){
+  RL.muted=false;RL.want=true;RL.pill=false;RL._remuteN=0;window.CM_SND=true;rlSet('cm_reels_muted',false);
+  document.querySelectorAll('.reel.px video,.reel.cm video').forEach(v=>{v.muted=false});
+  reelDmRemount();
+  reelCmd('unMute');reelCmd('setVolume',[100]);if(RL.state!==1)reelCmd('playVideo');
+  reelPaintSound();reelSyncSw();
+}
+const __setupVideoFeedV2=window.setupVideoFeed;
+window.setupVideoFeed=function(){
+  /* limpa bloqueios antigos causados só por lentidão (a lista “com defeito” antiga misturava as duas coisas) */
+  if(!rlGet('cm_reels_bad_v3',false)){rlSet('cm_reels_bad',[]);rlSet('cm_reels_bad_v3',true)}
+  __setupVideoFeedV2();
+  /* som: se já foi liberado nesta sessão, continua com som sem pedir de novo */
+  RL.muted=!RL.want||(RL.ios&&!window.CM_SND);RL.pill=RL.want&&RL.muted;RL.soundOK=false;
+  reelPaintSound();
+  const root=document.getElementById('reelsRoot');
+  if(root&&!root.__snd){root.__snd=true;root.addEventListener('pointerup',e=>{if(RL.pill&&RL.muted&&!e.target.closest('.reelRail,.reelsTop,#reelSheet'))reelUnmute()},true)}
+};
+/* capa vertical dos Shorts (mais nítida) com fallback */
+(function(){const old=reelSlide;window.reelSlide=function(x,i){let h=old(x,i);if(!x.social&&rlIsShort(x)&&x.youtubeId&&/^[\w-]{11}$/.test(x.youtubeId)){const v=`https://i.ytimg.com/vi/${x.youtubeId}/oardefault.jpg`;h=h.replace('<img src="','<img data-fb="1" onerror="if(this.dataset.fb){this.dataset.fb=\'\';this.src=this.getAttribute(\'data-src0\')}" src="'+v+'" data-src0="')}return h}})();
 
 </script>
 </body></html>
