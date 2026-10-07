@@ -1099,7 +1099,7 @@ async function postsLoad(){
     const posts=new Map(),likes=[],comments=[];
     (data||[]).forEach(r=>{if(r.item_type==='post'){const d=postJ(r);const owner=personById(r.user_id)||(r.user_id===me.id?{name:profileData().name,city:profileData().city,photo:profileData().photo}:null);const media=Array.isArray(d.media)?d.media.filter(m=>m&&m.u).slice(0,20):[];const vis=['public','followers','private'].includes(d.vis)?d.vis:'public';if(r.user_id!==me.id&&(vis==='private'||(vis==='followers'&&!followCache.has(r.user_id))))return;posts.set(String(r.id),{id:String(r.id),ownerId:r.user_id,name:owner?.name||d.n||'Pessoa da região',city:personCity(owner||{city:d.c})||d.c||'Mantiqueira',photo:owner?.photo||d.ph||'',text:d.text||'',image:r.image_url||media[0]?.u||'',type:d.type||(media[0]?.t==='video'?'video':'image'),media,thumb:d.th||media[0]?.th||'',vis,loc:d.loc||'',tags:Array.isArray(d.tags)?d.tags:[],men:(d.men&&typeof d.men==='object')?d.men:{},tg:Array.isArray(d.tg)?d.tg:[],_d:d,promo:!!d.promo,biz:d.biz?String(d.biz):'',bizName:d.bizName||'',created:Date.parse(r.created_at)||Date.now(),likes:0,likedByMe:false,myLikeId:null,comments:[]})}else if(r.item_type==='post_like')likes.push(r);else comments.push(r)});
     likes.forEach(l=>{const x=posts.get(String(l.link_url));if(!x)return;x.likes++;if(l.user_id===me.id){x.likedByMe=true;x.myLikeId=l.id}});
-    comments.forEach(c=>{const x=posts.get(String(c.link_url));if(!x)return;const d=postJ(c);const who=personById(c.user_id);x.comments.push({id:c.id,ownerId:c.user_id,name:who?.name||d.n||'Pessoa',text:d.text||'',created:Date.parse(c.created_at)||0})});
+    comments.forEach(c=>{const x=posts.get(String(c.link_url));if(!x)return;const d=postJ(c);const who=personById(c.user_id);x.comments.push({id:c.id,ownerId:c.user_id,name:who?.name||d.n||'Pessoa',text:d.text||'',created:Date.parse(c.created_at)||0,re:d.re?String(d.re):''})});
     await postsLoadExtras();
     const list=[...posts.values()];list.forEach(x=>{x.collabs=POSTS.collabs.get(x.id)||[];x.collabPend=POSTS.pend.get(x.id)||[]});
     const sig=list.map(x=>x.id+':'+x.likes+':'+x.comments.length+':'+x.likedByMe+':'+x.collabs.length+':'+POSTS.saved.has(x.id)).join('|');
@@ -1151,7 +1151,7 @@ function renderPeopleList(list,q){return list.length?list.map(p=>`<div class="pe
 function colFromError(err){const msg=String((err&&err.message)||'')+' '+String((err&&err.details)||'');const m=msg.match(/column ["']?(?:[A-Za-z0-9_]+\.)?["']?([A-Za-z0-9_]+)["']? (?:of '[A-Za-z0-9_]+' )?(?:does not exist|in the schema cache)/i)||msg.match(/'([A-Za-z0-9_]+)' column/i)||msg.match(/profiles\.([A-Za-z0-9_]+)/);return m?m[1].toLowerCase():''}
 let profilesLoadError='';
 async function loadPublicProfiles(){
-  const all=['id','name','city','bio','photo','cover','interests','links','whatsapp','showcaseEnabled','aboutPublic','story_prefs','created_at'];
+  const all=['id','name','city','bio','photo','cover','interests','links','whatsapp','showcaseEnabled','aboutPublic','story_prefs','is_private','created_at'];
   let cols=[...all],r=null;
   try{
     for(let k=0;k<14;k++){
@@ -2403,7 +2403,7 @@ function profileTab(i){pfShowTab(i)}
 function pubTab(i){pfShowTab(i)}
 function pfStatsHtml(o){return `<div class="pfStats"><button type="button" class="pfStat" onclick="showFollowList('${o.id}','followers')">${PFI.users}<div><b id="${o.fid}">0</b><span>Seguidores</span></div></button><button type="button" class="pfStat" onclick="showFollowList('${o.id}','following')">${PFI.userPlus}<div><b id="${o.gid}">${o.following||0}</b><span>Seguindo</span></div></button><button type="button" class="pfStat" onclick="pfShowTab(0);document.getElementById('pfTabs')?.scrollIntoView({behavior:'smooth',block:'start'})">${PFI.doc}<div><b>${o.posts}</b><span>Publicações</span></div></button></div>`}
 function pfHeadHtml(o){return `<div class="pfCover" style="background-image:url('${esc(o.cover)}')">${o.back?`<button type="button" class="pfCoverBtn l" onclick="${o.back}" aria-label="Voltar">${PFI.back}</button>`:''}${o.admin?`<button type="button" class="pfCoverBtn r" onclick="admOpen()" aria-label="Painel">${PFI.crown}</button>`:''}</div><div class="pfHead"><div class="pfAvatarWrap ${userVerified(o.id)?'premium':''} ${typeof pfStoryCls==='function'?pfStoryCls(o.id):''}"><img class="pfAvatar" src="${esc(o.photo)}" onerror="this.src=avatar('${esc(o.name).replace(/'/g,'')}')" ${o.avatarClick?`onclick="${o.avatarClick}"`:''} alt="">${vBadge(o.id)}</div><div class="pfNameRow"><h1 class="pfName">${esc(o.name)}</h1>${o.follow||''}</div>${creatorTag(o.id)}<div class="pfCity">${PFI.pin}<span>${esc(o.city||'Serra da Mantiqueira')}</span></div>${o.bio?`<div class="pfBio">${esc(o.bio)}</div>`:''}${o.contact||''}<div class="pfActions">${o.actions}</div>${pfStatsHtml(o)}${o.extra||''}</div>`}
-function profile(){const p=profileData(),posts=getPosts().filter(x=>x.ownerId===me?.id||(x.collabs||[]).includes(me?.id)),showcase=p.showcaseEnabled;setTimeout(async()=>{const c=await followCounts(me?.id);const a=document.getElementById("profileFollowers"),b=document.getElementById("profileFollowing");if(a)a.textContent=c.followers;if(b)b.textContent=c.following;if(showcase){await loadVitrine(me.id);const el=document.getElementById("profileShowcase");if(el)el.innerHTML=showcaseHtml()}},0);const bio=/Ainda não adicionou/.test(p.bio)?'':p.bio;const hl=`<div class="highlightBar"><span class="highlightLabel">Destaques</span><div class="highlightRow compact"><div class="highlight"><div class="highlightCircle highlightAdd" onclick="addHighlight()">+</div></div>${p.highlights.map(h=>`<div class="highlight" onclick="viewHighlight(${JSON.stringify(h.images||[h.image]).replace(/"/g,"&quot;")},${JSON.stringify(h.name).replace(/"/g,"&quot;")})"><img class="highlightCircle" src="${esc(h.image)}"><div>${esc(h.name)}</div></div>`).join('')}</div><button class="publishMini" onclick="newPost()" title="Nova publicação">+</button></div>`;const head=pfHeadHtml({id:me?.id,name:p.name,city:p.city,bio,photo:p.photo,cover:p.cover,menu:'settingsScreen()',admin:cmIsAdmin(),avatarClick:'openMyStoryOrNew()',contact:profileContactHtml(p,true),actions:`<button type="button" class="pfBtn main" onclick="editProfile()">${PFI.edit}<span>Editar perfil</span></button><button type="button" class="pfBtn" onclick="profileShare('me')">${PFI.share}<span>Compartilhar</span></button><button type="button" class="pfBtn round" onclick="pfOwnMenu()" aria-label="Mais">${PFI.dots}</button>`,fid:'profileFollowers',gid:'profileFollowing',following:followCache.size,posts:posts.length,extra:hl});const postsHtml=posts.length?posts.slice().sort((a,b)=>b.created-a.created).map(postHtml).join(''):pfEmpty('photos','Você ainda não publicou nada.','Compartilhe fotos, vídeos e novidades com a sua região.',`<button type="button" class="pfBtn main" onclick="newPost()">${PFI.plus}<span>Nova publicação</span></button>`);return screen(`<div class="pf">${head}${pfTabsHtml('profileTab',showcase)}<div id="pfPages" class="pfPages"><div class="pfPage" id="profilePages">${postsHtml}</div><div class="pfPage hidden">${profVideosHtml(me?.id,true)}</div><div class="pfPage hidden"><button class="photoAdd" onclick="newPhoto()">＋ Publicar nova foto</button>${profPhotosHtml(me?.id)}</div>${showcase?`<div class="pfPage hidden"><div class="card"><div class="showcaseHead"><div><h3 style="margin:0">Vitrine</h3><div class="small">Produtos, serviços, preços e links</div></div><button class="publishMini" onclick="newProduct()" title="Adicionar produto">+</button></div><div id="profileShowcase">${showcaseHtml()}</div></div></div>`:''}</div></div>`,'profile')}
+function profile(){const p=profileData(),posts=getPosts().filter(x=>x.ownerId===me?.id||(x.collabs||[]).includes(me?.id)),showcase=p.showcaseEnabled;setTimeout(async()=>{const c=await followCounts(me?.id);const a=document.getElementById("profileFollowers"),b=document.getElementById("profileFollowing");if(a)a.textContent=c.followers;if(b)b.textContent=c.following;if(showcase){await loadVitrine(me.id);const el=document.getElementById("profileShowcase");if(el)el.innerHTML=showcaseHtml()}},0);const bio=/Ainda não adicionou/.test(p.bio)?'':p.bio;const hl=`<div class="highlightBar"><span class="highlightLabel">Destaques</span><div class="highlightRow compact"><div class="highlight"><div class="highlightCircle highlightAdd" onclick="addHighlight()">+</div></div>${p.highlights.map(h=>`<div class="highlight" onclick="viewHighlight(${JSON.stringify(h.images||[h.image]).replace(/"/g,"&quot;")},${JSON.stringify(h.name).replace(/"/g,"&quot;")})"><img class="highlightCircle" src="${esc(h.image)}"><div>${esc(h.name)}</div></div>`).join('')}</div><button class="publishMini" onclick="newPost()" title="Nova publicação">+</button></div>`;const head=pfHeadHtml({id:me?.id,name:p.name,city:p.city,bio,photo:p.photo,cover:p.cover,menu:'settingsScreen()',admin:cmIsAdmin(),avatarClick:'openMyStoryOrNew()',contact:profileContactHtml(p,true),actions:`<button type="button" class="pfBtn main" onclick="editProfile()">${PFI.edit}<span>Editar perfil</span></button><button type="button" class="pfBtn" onclick="profileShare('me')">${PFI.share}<span>Compartilhar</span></button><button type="button" class="pfBtn round" onclick="pfOwnMenu()" aria-label="Mais">${PFI.dots}</button>`,fid:'profileFollowers',gid:'profileFollowing',following:followCache.size,posts:posts.length,extra:hl});const postsHtml=posts.length?ppPinSort(posts).map(postHtml).join(''):pfEmpty('photos','Você ainda não publicou nada.','Compartilhe fotos, vídeos e novidades com a sua região.',`<button type="button" class="pfBtn main" onclick="newPost()">${PFI.plus}<span>Nova publicação</span></button>`);return screen(`<div class="pf">${head}${pfTabsHtml('profileTab',showcase)}<div id="pfPages" class="pfPages"><div class="pfPage" id="profilePages">${postsHtml}</div><div class="pfPage hidden">${profVideosHtml(me?.id,true)}</div><div class="pfPage hidden"><button class="photoAdd" onclick="newPhoto()">＋ Publicar nova foto</button>${profPhotosHtml(me?.id)}</div>${showcase?`<div class="pfPage hidden"><div class="card"><div class="showcaseHead"><div><h3 style="margin:0">Vitrine</h3><div class="small">Produtos, serviços, preços e links</div></div><button class="publishMini" onclick="newProduct()" title="Adicionar produto">+</button></div><div id="profileShowcase">${showcaseHtml()}</div></div></div>`:''}</div></div>`,'profile')}
 function pfOwnMenu(){openModal(`<div class="modalHead"><h2>Meu perfil</h2><button class="close" onclick="closeModal()">×</button></div><div class="pfMenu"><button onclick="closeModal();newPost()">${PFI.plus}<span>Nova publicação</span></button><button onclick="pfSavedModal()">${PFI.bookmark}<span>Salvos<small>Publicações que você guardou</small></span></button><button onclick="pfAboutModal()">${PFI.info}<span>Sobre<small>Cidade, bio, interesses e contato</small></span></button><button onclick="settingsScreen()">${PFI.gear}<span>Configurações<small>Vitrine, Sobre, tema e conta</small></span></button></div>`)}
 function pfSavedModal(){openModal(`<div class="modalHead"><h2>Salvos</h2><button class="close" onclick="closeModal()">×</button></div>${profSavedHtml()}`)}
 function pfAboutModal(){const p={...profileData(),id:me?.id,created_at:me?.created_at};openModal(`<div class="modalHead"><h2>Sobre</h2><button class="close" onclick="settingsScreen()" aria-label="Voltar">‹</button></div>${profAboutHtml(p,true)}<div class="settingRow" style="margin-top:14px"><span><b>Deixar a seção Sobre pública</b><small>Ligado: outras pessoas veem bio, interesses e links pelo menu ⋯ do seu perfil.</small></span><button type="button" class="switch ${p.aboutPublic?'on':''}" onclick="pfToggleMeta(this,'aboutPublic')"><i></i></button></div><button class="secondary" style="width:100%;margin-top:12px" onclick="closeModal()">Fechar</button>`)}
@@ -6925,6 +6925,963 @@ setInterval(()=>{const v=PPVM.v;if(!v)return;if(!v.isConnected||!v.getAttribute(
   const cvc=window.cmVidViewerClose;if(cvc)window.cmVidViewerClose=function(){ppVMStop();return cvc.apply(this,arguments)};
 })();
 /* ===================== fim MÚSICA EM VÍDEOS ===================== */
+
+</script>
+<style id="igcss">/* ===== Conversas estilo Instagram ===== */
+.cvxIcons{display:inline-flex;gap:4px;align-items:center;margin-left:6px;margin-right:auto;flex:none;color:#9fb2bf}
+.cvxIco svg{width:14px;height:14px;display:block}.cvxIco.pin{color:var(--green)}
+.chatAv{position:relative}
+.cvxNoteMini{position:absolute;left:-6px;top:-14px;max-width:84px;padding:3px 7px;border-radius:10px;background:#1d3a4a;color:#fff;font-size:10.5px;font-style:normal;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 8px rgba(0,0,0,.35);z-index:2}
+.cvxTabs{display:flex;gap:8px;margin:2px 0 12px}
+.cvxTabs button{flex:1;padding:10px;border-radius:14px;border:1px solid var(--line);background:rgba(8,31,44,.7);color:#c3d3db;font-weight:800;font-size:14.5px}
+.cvxTabs button.on{background:var(--green);border-color:var(--green);color:#04261a}
+.cvxTabs b{display:inline-grid;place-items:center;min-width:20px;height:20px;border-radius:10px;background:#ff4d6d;color:#fff;font-size:11.5px;margin-left:4px;padding:0 5px}
+.cvxReqHint{color:#9fb2bf;font-size:13px;margin:0 4px 12px;line-height:1.4}
+/* notas */
+.cvxNotes{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 12px;margin-bottom:6px;scrollbar-width:none}.cvxNotes::-webkit-scrollbar{display:none}
+.cvxNote{position:relative;flex:0 0 92px;display:flex;flex-direction:column;align-items:center;gap:4px;border:0;background:none;color:#fff;padding:0}
+.cvxNote img{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.15)}
+.cvxNote small{font-size:12px;color:#c3d3db;max-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cvxNote>i{position:absolute;top:82px;right:14px;width:22px;height:22px;border-radius:50%;background:var(--green);color:#04261a;display:grid;place-items:center;border:2px solid #06131d}.cvxNote>i svg{width:13px;height:13px}
+.cvxBubble{position:relative;min-height:38px;width:92px;padding:6px 8px;border-radius:14px;background:#1d3a4a;color:#fff;font-size:11.5px;font-weight:700;line-height:1.25;display:flex;align-items:center;justify-content:center;text-align:center;box-shadow:0 3px 10px rgba(0,0,0,.35);overflow:hidden;white-space:normal;word-break:break-word}
+.cvxBubble:after{content:"";position:absolute;left:50%;bottom:-4px;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:#1d3a4a}
+.cvxBubble.empty{color:#9fb2bf;font-weight:600}
+.cvxBubble.big{width:auto;max-width:100%;min-height:0;font-size:17px;padding:14px 18px;border-radius:20px;display:block}
+.cvxNoteEd{display:grid;justify-items:center;gap:6px;margin:16px 0}
+.cvxNoteEd textarea{width:min(280px,72vw);border:0;outline:0;resize:none;background:transparent;color:#fff;font:inherit;font-size:17px;font-weight:700;text-align:center}
+.cvxNoteEd small{color:#9fb2bf}
+.cvxNoteView{display:grid;justify-items:center;gap:8px;text-align:center;padding:6px 0 14px}.cvxNoteView img{width:74px;height:74px;border-radius:50%;object-fit:cover}.cvxNoteView small{color:#9fb2bf}
+.cvxNoteReply{display:flex;gap:8px}.cvxNoteReply input{flex:1;border:1px solid var(--line);background:#102d3c;color:#fff;border-radius:22px;padding:12px 16px;outline:0;font-size:16px}.cvxNoteReply button{border:0;background:none;color:var(--green);font-weight:900;font-size:15px}
+/* bolhas: resposta, editada, reações */
+.cvxQuote{display:block;width:100%;text-align:left;border:0;margin:0 0 6px;padding:6px 10px;border-radius:12px;background:rgba(0,0,0,.18);border-left:3px solid rgba(255,255,255,.55);color:inherit;font-size:12.5px;line-height:1.3;max-width:100%}
+.bubble.mine .cvxQuote{background:rgba(0,0,0,.12);border-left-color:rgba(4,38,26,.55)}
+.cvxQuote b{display:block;font-size:12px;opacity:.85}.cvxQuote span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;opacity:.85}
+.bubble.media .cvxQuote{margin:6px 6px 6px}
+.cvxEd{font-style:normal;font-size:10.5px;opacity:.7;margin-right:4px}
+.msgRow.hasRx{margin-bottom:18px}
+.cvxRx{position:absolute;bottom:-15px;left:46px;z-index:2;display:inline-flex;align-items:center;gap:2px;padding:3px 7px;border-radius:14px;border:2px solid #06131d;background:#1d3a4a;color:#fff;font-size:14px;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.msgRow.mine .cvxRx{left:auto;right:12px}
+.cvxRx b{font-size:11.5px;margin-left:3px}.cvxRx.mine{background:#1f4a3d}
+.cvxRx.pop{animation:cvxPop .35s ease}
+@keyframes cvxPop{0%{transform:scale(.4)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+.msgRow{position:relative;will-change:transform}
+.msgRow.cvxSwipeOk:before{content:"↩";position:absolute;left:-34px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:rgba(32,223,154,.2);color:var(--green);display:grid;place-items:center;font-size:15px;font-weight:900}
+.msgRow.cvxFlash .bubble{animation:cvxFlash 1.1s ease}
+@keyframes cvxFlash{0%,100%{filter:none}30%{filter:brightness(1.6) drop-shadow(0 0 8px rgba(32,223,154,.8))}}
+.cvxRxRow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07)}.cvxRxRow img{width:38px;height:38px;border-radius:50%;object-fit:cover}.cvxRxRow b{flex:1}.cvxRxRow span{font-size:24px}.cvxRxRow button{border:0;background:none;color:#ff8a94;font-weight:800}
+/* menu ao segurar a mensagem */
+.cvxMenu{position:fixed;inset:0;z-index:150;background:rgba(2,8,13,.62);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:20px;animation:cvxFade .15s ease}
+@keyframes cvxFade{from{opacity:0}to{opacity:1}}
+.cvxMenuIn{width:min(360px,100%);display:flex;flex-direction:column;align-items:flex-start;gap:10px}.cvxMenuIn.mine{align-items:flex-end}
+.cvxEmoBar{display:flex;align-items:center;gap:2px;padding:6px 8px;border-radius:30px;background:#14303f;box-shadow:0 10px 30px rgba(0,0,0,.4);animation:cvxPop .25s ease}
+.cvxEmoBar button{border:0;background:none;font-size:27px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;transition:transform .12s}
+.cvxEmoBar button:active{transform:scale(1.3)}.cvxEmoBar button.on{background:rgba(255,255,255,.14)}
+.cvxEmoBar .more{width:34px;height:34px;background:rgba(255,255,255,.12);color:#fff}.cvxEmoBar .more svg{width:18px;height:18px}
+.cvxPrev{max-width:85%;pointer-events:none}.cvxPrev .bubble{max-width:100%}
+.cvxActs{min-width:220px;border-radius:16px;overflow:hidden;background:#14303f;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.cvxActs button{width:100%;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 16px;border:0;border-bottom:1px solid rgba(255,255,255,.07);background:none;color:#fff;font-size:15.5px;font-weight:600}
+.cvxActs button:last-child{border-bottom:0}.cvxActs svg{width:20px;height:20px}.cvxActs .danger{color:#ff6b7a}
+.cvxEmoAll{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.cvxEmoAll button{border:0;background:none;font-size:28px;padding:6px 0;border-radius:10px}
+/* barra de resposta e pedido */
+.cvxReplyBar{position:absolute;left:4px;right:4px;bottom:calc(100% + 6px);display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:16px;background:rgba(14,34,46,.97);border:1px solid rgba(32,223,154,.3);box-shadow:0 8px 24px rgba(0,0,0,.35);animation:stUp .18s ease;z-index:3}
+.cvxReplyBar>svg{width:18px;height:18px;color:var(--green);flex:none}
+.cvxReplyBar span{flex:1;min-width:0}.cvxReplyBar b{display:block;font-size:13px}.cvxReplyBar small{display:block;color:#9fb2bf;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cvxReplyBar button{border:0;background:rgba(255,255,255,.1);color:#fff;width:28px;height:28px;border-radius:50%;flex:none}
+.igComposer{position:relative}
+.cvxReq{margin:6px 12px 4px;padding:14px;border-radius:18px;background:rgba(14,34,46,.96);border:1px solid var(--line);text-align:center}
+.cvxReq b{display:block;font-size:15px}.cvxReq small{display:block;color:#9fb2bf;margin:4px 0 12px;font-size:12.5px;line-height:1.35}
+.cvxReq div{display:flex;gap:8px}.cvxReq button{flex:1;padding:11px 6px;border-radius:12px;border:1px solid var(--line);background:none;color:#fff;font-weight:800}
+.cvxReq button:first-child{color:#ff6b7a}.cvxReq .ok{background:var(--green);border-color:var(--green);color:#04261a}
+.igComposer.cvxLocked{display:none!important}
+/* ===== Publicações, perfil e feed estilo Instagram ===== */
+.igPinB{display:none;align-items:center;gap:3px;font-style:normal;color:var(--green);font-weight:800;margin-right:6px}.igPinB svg{width:12px;height:12px}
+.pf .igPinB,#profilePages .igPinB{display:inline-flex}
+.igArchB{margin:-4px -4px 8px;padding:7px 12px;border-radius:12px;background:rgba(246,200,107,.12);color:#f6c86b;font-size:12.5px;font-weight:700}
+.igLikes small{color:#9fb2bf;font-weight:600}
+.igNoC{color:#9fb2bf;font-size:12.5px;margin:6px 0}
+.igCPin{display:inline-flex;color:var(--green);margin-right:4px;vertical-align:-1px}.igCPin svg{width:12px;height:12px}
+/* comentários */
+.cmt{position:relative;align-items:flex-start}
+.cmt .cmtBody{flex:1;min-width:0}
+.cmt.rep{margin-left:44px}.cmt.rep img{width:28px;height:28px}
+.cmt.pinned{background:rgba(32,223,154,.06);border-radius:14px;padding:8px}
+.cmtPinL{display:flex;align-items:center;gap:4px;color:var(--green);font-size:11.5px;font-weight:800;margin-bottom:2px}.cmtPinL svg{width:12px;height:12px}
+.cmtMeta{display:flex;flex-wrap:wrap;gap:12px;margin-top:4px;align-items:center}
+.cmtMeta small{color:#9fb2bf;font-size:12px;margin:0}
+.cmtMeta button{border:0;background:none;color:#9fb2bf;font-size:12px;font-weight:800;padding:0}
+.cmtLike{border:0;background:none;color:#9fb2bf;width:30px;height:30px;padding:6px;flex:none;align-self:center}
+.cmtLike svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}
+.cmtLike.on{color:#ff4d6d}.cmtLike.on svg{fill:currentColor}
+.cmtReps{display:grid;gap:6px;margin:2px 0 8px}
+.cmtMore{display:flex;align-items:center;gap:10px;margin-left:44px;border:0;background:none;color:#9fb2bf;font-size:12.5px;font-weight:800;padding:2px 0}
+.cmtMore i{display:block;width:24px;height:1px;background:#4b6573}
+.cmtForm{position:relative}
+.cmtReplying{position:absolute;left:0;right:0;bottom:calc(100% + 4px);display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-radius:12px;background:#14303f;color:#c3d3db;font-size:13px}
+.cmtReplying button{border:0;background:none;color:#fff}
+/* perfil: atalhos */
+.ppxChips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}.ppxChips:empty{display:none}.ppxChips::-webkit-scrollbar{display:none}
+.ppxChips button{flex:none;display:flex;align-items:center;gap:7px;padding:9px 13px;border-radius:14px;border:1px solid var(--line);background:rgba(8,31,44,.85);color:#fff;font-weight:700;font-size:13.5px}
+.ppxChips svg{width:17px;height:17px;color:var(--green)}.ppxChips b{min-width:20px;height:20px;border-radius:10px;background:rgba(32,223,154,.18);color:var(--green);display:grid;place-items:center;font-size:12px;padding:0 6px}
+.ppxChips .blkReqChip b{background:#ff4d6d;color:#fff}
+.ppxSchRow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07);cursor:pointer}
+.ppxSchRow img,.ppxSchRow>i{width:52px;height:52px;border-radius:10px;object-fit:cover;background:#102d3c;display:grid;place-items:center;font-style:normal;flex:none}
+.ppxSchRow span{flex:1;min-width:0}.ppxSchRow b{display:block}.ppxSchRow small{display:block;color:#9fb2bf;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ppxSchRow button{border:0;border-radius:12px;padding:8px 12px;background:var(--green);color:#04261a;font-weight:800;font-size:12.5px;flex:none}
+/* rascunhos */
+.ppxAsk{display:grid;gap:6px;text-align:center;padding:6px 2px}.ppxAsk b{font-size:18px}.ppxAsk span{color:#9fb2bf;line-height:1.45;margin-bottom:6px}
+.ppxDraftBtn{border-style:dashed!important}
+.ppxDrafts{display:grid;gap:8px}
+.ppxDraft{display:flex;align-items:center;gap:8px}
+.ppxDraftOpen{flex:1;display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:16px;background:rgba(8,31,44,.85);color:#fff;padding:8px;text-align:left;min-width:0}
+.ppxDraftTh{width:58px;height:58px;border-radius:10px;background:#102d3c;display:grid;place-items:center;overflow:hidden;flex:none;font-size:24px}.ppxDraftTh img{width:100%;height:100%;object-fit:cover}
+.ppxDraftOpen span{min-width:0}.ppxDraftOpen b{display:block}.ppxDraftOpen small{display:block;color:#9fb2bf;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ppxDraftDel{border:0;background:rgba(255,92,108,.12);color:#ff8a94;width:42px;height:42px;border-radius:12px;flex:none}
+/* vídeo no carrossel */
+.ccVidDur{position:absolute;left:5px;bottom:5px;z-index:1;font-style:normal;font-size:11px;font-weight:800;padding:2px 6px;border-radius:8px;background:rgba(0,0,0,.6);color:#fff}
+.ccVidBadge{position:absolute;right:12px;bottom:12px;padding:6px 10px;border-radius:14px;background:rgba(0,0,0,.6);font-weight:800;font-size:12.5px}
+.ccVidNote{flex-basis:100%;color:#9fb2bf;font-size:12.5px;text-align:center;align-self:center}
+.ccTRow{flex-wrap:wrap}
+.ccMS video.ccTVid{position:absolute;max-width:none;object-fit:cover}
+/* bloquear / privada */
+.blkWall,.blkPriv{display:grid;justify-items:center;gap:10px;text-align:center;padding:60px 20px;color:#c3d3db}
+.blkWall svg,.blkPriv svg{width:56px;height:56px;color:#9fb2bf;padding:12px;border:2px solid #4b6573;border-radius:50%}
+.blkWall b,.blkPriv b{font-size:18px;color:#fff}.blkWall span,.blkPriv span{max-width:300px;line-height:1.45}
+.blkWall .pfBtn{min-width:180px}
+.blkRestr{margin:8px 0;padding:8px 12px;border-radius:12px;background:rgba(255,104,116,.1);color:#ffb3ba;font-size:13px}.blkRestr a{color:#fff;font-weight:800;text-decoration:underline}
+.blkReqRow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.blkReqRow img{width:46px;height:46px;border-radius:50%;object-fit:cover;flex:none}
+.blkReqRow span{flex:1;min-width:0}.blkReqRow b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.blkReqRow small{color:#9fb2bf}
+.blkReqRow button{border:1px solid var(--line);background:none;color:#fff;border-radius:12px;padding:8px 12px;font-weight:800;font-size:13px;flex:none}
+.blkReqRow button.ok{background:var(--green);border-color:var(--green);color:#04261a}
+/* sugestões */
+.sugBox{margin:14px 0;padding:14px 0 14px 14px;border-radius:22px;background:rgba(6,20,30,.72);border:1px solid rgba(255,255,255,.1)}
+.sugBox.in{animation:stUp .25s ease}
+.sugHead{display:flex;justify-content:space-between;align-items:center;padding-right:14px;margin-bottom:10px}.sugHead b{font-size:15.5px}.sugHead button{border:0;background:none;color:#9fb2bf;font-size:15px}
+.sugRow{display:flex;gap:10px;overflow-x:auto;padding-right:14px;scrollbar-width:none}.sugRow::-webkit-scrollbar{display:none}
+.sugCard{position:relative;flex:0 0 140px;display:grid;justify-items:center;gap:4px;padding:16px 10px 12px;border-radius:18px;background:rgba(16,45,60,.7);border:1px solid rgba(255,255,255,.08);text-align:center}
+.sugCard img{width:72px;height:72px;border-radius:50%;object-fit:cover;margin-bottom:4px;cursor:pointer}
+.sugCard b{font-size:13.5px;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sugCard small{color:#9fb2bf;font-size:11.5px;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sugX{position:absolute;top:6px;right:8px;border:0;background:none;color:#9fb2bf;font-size:13px}
+.sugFollow{margin-top:6px;width:100%;border:0;border-radius:12px;padding:8px;background:var(--green);color:#04261a;font-weight:900}
+.sugFollow.on{background:#163b4a;color:var(--green)}
+/* feed */
+.feedModes{display:flex;gap:8px;overflow-x:auto;margin:0 0 12px;scrollbar-width:none}.feedModes::-webkit-scrollbar{display:none}
+.feedModes button{flex:none;padding:9px 15px;border-radius:999px;border:1px solid var(--line);background:rgba(8,31,44,.9);color:#dce8ed;font-weight:800;font-size:14px}
+.feedModes button.on{background:var(--green);border-color:var(--green);color:#04261a}
+.feedModes .feedFavEdit{background:none;border-style:dashed;color:var(--green)}
+.feedDone{display:grid;justify-items:center;gap:6px;text-align:center;margin:22px 0;padding:22px 16px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.feedDoneIco{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font-size:28px;font-weight:900;color:#04261a;background:linear-gradient(135deg,#2ff0b0,#13c98a,#3c7cff);box-shadow:0 0 24px rgba(32,223,154,.35)}
+.feedDone b{font-size:18px}.feedDone span{color:#9fb2bf;font-size:13.5px}.feedDone small{color:var(--green);font-weight:800;margin-top:6px}
+.favRow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.07)}.favRow img{width:44px;height:44px;border-radius:50%;object-fit:cover}.favRow span{flex:1;min-width:0}.favRow b{display:block}.favRow small{color:#9fb2bf}
+.favStar{border:0;background:none;font-size:26px;color:#4b6573;width:44px;height:44px}.favStar.on{color:#ffd34f}
+</style>
+<script>
+/* ===================== CONVERSAS ESTILO INSTAGRAM ===================== */
+const CVX={rx:new Map(),prefs:new Map(),prefsLoaded:false,notes:new Map(),reply:null,msgs:new Map(),tab:'main',sent:new Set(),missing:{},ch:null};
+const CVX_EMO=['❤️','😂','😮','😢','😡','👍'];
+const CVX_I={
+  reply:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 6 6v4"/></svg>',
+  copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="13" height="13" rx="2.5"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+  undo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>',
+  pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5M9 3h6l-1 6 4 4H6l4-4z"/></svg>',
+  bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>',
+  mute:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.7 21a2 2 0 0 1-3.4 0M18.6 13A17.9 17.9 0 0 1 18 8M6.3 6.3A6 6 0 0 0 6 8c0 7-3 9-3 9h14M18 8a6 6 0 0 0-9.3-5M2 2l20 20"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'
+};
+function cvxUid(){return me?.id||''}
+function cvxMissing(e){return /does not exist|schema cache|Could not find|42P01|42703/i.test(String(e?.message||e||''))}
+function cvxSqlToast(){shareToast('Essa função precisa do atualizacao-instagram.sql no Supabase.')}
+function cvxFirst(n){return String(n||'').trim().split(/\s+/)[0]||'Pessoa'}
+function cvxIsDel(b){return String(b||'').trim()==='[[cm:del]]'}
+function cvxSnippet(b){if(cvxIsDel(b))return 'Mensagem apagada';const p=msgParse(b);if(p)return msgPreviewText(b);const t=String(b||'').replace(/\s+/g,' ').trim();return t.length>70?t.slice(0,70)+'…':t}
+function cvxHidden(){try{return new Set(JSON.parse(localStorage.getItem('cm_msg_hidden_'+cvxUid())||'[]'))}catch(_){return new Set()}}
+function cvxHide(id){const s=cvxHidden();s.add(String(id));try{localStorage.setItem('cm_msg_hidden_'+cvxUid(),JSON.stringify([...s].slice(-2000)))}catch(_){}}
+
+/* ---------- preferências de conversa ---------- */
+async function cvxPrefsLoad(force){
+  if(!me?.id||(CVX.prefsLoaded&&!force))return;
+  try{const {data,error}=await sb.from('cm_chat_prefs').select('peer_id,pinned_at,muted,accepted,cleared_at').eq('user_id',me.id);if(error)throw error;CVX.prefs=new Map((data||[]).map(r=>[r.peer_id,r]));CVX.missing.prefs=false}
+  catch(e){if(cvxMissing(e))CVX.missing.prefs=true;try{const loc=JSON.parse(localStorage.getItem('cm_chat_prefs_'+me.id)||'{}');CVX.prefs=new Map(Object.entries(loc))}catch(_){}}
+  CVX.prefsLoaded=true;
+}
+function cvxPref(peer){return CVX.prefs.get(peer)||{}}
+async function cvxPrefSet(peer,patch){
+  const cur={...cvxPref(peer),...patch,peer_id:peer};CVX.prefs.set(peer,cur);
+  try{localStorage.setItem('cm_chat_prefs_'+me.id,JSON.stringify(Object.fromEntries(CVX.prefs)))}catch(_){}
+  try{const row={user_id:me.id,peer_id:peer,pinned_at:cur.pinned_at||null,muted:!!cur.muted,accepted:!!cur.accepted,cleared_at:cur.cleared_at||null,updated_at:new Date().toISOString()};const {error}=await sb.from('cm_chat_prefs').upsert(row,{onConflict:'user_id,peer_id'});if(error)throw error}
+  catch(e){if(cvxMissing(e))CVX.missing.prefs=true}
+}
+function cvxIsRequest(peer){
+  if(!peer)return false;const pr=cvxPref(peer);if(pr.accepted)return false;
+  if(typeof BLK!=='undefined'&&BLK.restricted&&BLK.restricted.has(peer))return true;
+  if(isFollowing(peer)||CVX.sent.has(peer))return false;
+  return true;
+}
+function cvxCleared(peer,iso){const c=cvxPref(peer).cleared_at;return c&&Date.parse(iso)<=Date.parse(c)}
+
+/* ---------- lista de conversas ---------- */
+window.chatLoad=async function(){
+  if(!me?.id||CHAT.busy)return;CHAT.busy=true;
+  try{
+    await cvxPrefsLoad();cvxNotesLoad();
+    let r=await sb.from('messages').select(MSG_COLS+',read_at').or(`sender_id.eq.${me.id},receiver_id.eq.${me.id}`).order('created_at',{ascending:false}).limit(800);
+    if(r.error)r=await sb.from('messages').select(MSG_COLS).or(`sender_id.eq.${me.id},receiver_id.eq.${me.id}`).order('created_at',{ascending:false}).limit(800);
+    if(!r.error){const m=new Map(),hid=cvxHidden();(r.data||[]).forEach(x=>{const peer=x.sender_id===me.id?x.receiver_id:x.sender_id;if(!peer||peer===me.id)return;if(x.sender_id===me.id)CVX.sent.add(peer);if(cvxIsDel(x.body)||hid.has(String(x.id))||cvxCleared(peer,x.created_at))return;let c=m.get(peer);if(!c){c={peer,last:x,unread:0};m.set(peer,c)}if(x.receiver_id===me.id&&!x.read_at&&'read_at' in x)c.unread++});CHAT.rows=m}
+    CHAT.loaded=true;
+  }catch(_){CHAT.loaded=true}
+  CHAT.busy=false;chatPaint();refreshNavDot();
+};
+(function(){
+  const card=window.chatCard;
+  window.chatCard=function(p,c){
+    let h=card(p,c);if(!c)return h;const pr=cvxPref(p.id);
+    const icons=(pr.pinned_at?`<span class="cvxIco pin" title="Fixada">${CVX_I.pin}</span>`:'')+(pr.muted?`<span class="cvxIco" title="Silenciada">${CVX_I.mute}</span>`:'');
+    if(icons)h=h.replace(/(<div class="chatL1"><b>[\s\S]*?<\/b>)/,`$1<span class="cvxIcons">${icons}</span>`);
+    const note=CVX.notes.get(p.id);if(note)h=h.replace('<i></i></div><div class="chatMid">',`<i></i><em class="cvxNoteMini">${esc(note.text)}</em></div><div class="chatMid">`);
+    return h;
+  };
+  const prev=window.chatPreview;
+  window.chatPreview=function(m){if(m&&cvxIsDel(m.body))return 'Mensagem apagada';return prev(m)};
+  const mpt=window.msgPreviewText;
+  window.msgPreviewText=function(b){if(cvxIsDel(b))return 'Mensagem apagada';return mpt(b)};
+})();
+window.chatListHtml=function(){
+  if(!CHAT.loaded&&!CHAT.rows.size)return '<div class="chatSkel"></div><div class="chatSkel"></div><div class="chatSkel"></div>';
+  const q=normText(document.getElementById('chatSearch')?.value||'').trim();
+  const match=p=>!q||normText((p.name||'')+' '+(personCity(p)||p.city||'')).includes(q);
+  const blocked=id=>typeof blkIsBlocked==='function'&&blkIsBlocked(id);
+  let all=[...CHAT.rows.values()].filter(c=>!blocked(c.peer)).map(c=>({p:chatPerson(c.peer),c}));
+  const reqs=all.filter(x=>cvxIsRequest(x.p.id)&&x.c.last.sender_id!==me.id);
+  const reqIds=new Set(reqs.map(x=>x.p.id));
+  let convs=CVX.tab==='req'?reqs:all.filter(x=>!reqIds.has(x.p.id));
+  if(CHAT.filter==='unread')convs=convs.filter(x=>x.c.unread>0);
+  if(CHAT.filter==='online')convs=convs.filter(x=>isOnline(x.p.id));
+  convs=convs.filter(x=>match(x.p));
+  convs.sort((a,b)=>{const pa=cvxPref(a.p.id).pinned_at,pb=cvxPref(b.p.id).pinned_at;if(pa&&!pb)return -1;if(pb&&!pa)return 1;if(pa&&pb)return Date.parse(pb)-Date.parse(pa);return Date.parse(b.c.last.created_at)-Date.parse(a.c.last.created_at)});
+  let head='';
+  if(!q&&CVX.tab!=='req')head+=cvxNotesRow();
+  if(reqs.length||CVX.tab==='req')head+=`<div class="cvxTabs"><button type="button" class="${CVX.tab!=='req'?'on':''}" onclick="CVX.tab='main';chatPaint()">Principal</button><button type="button" class="${CVX.tab==='req'?'on':''}" onclick="CVX.tab='req';chatPaint()">Pedidos${reqs.length?` <b>${reqs.length}</b>`:''}</button></div>`;
+  if(CVX.tab==='req'){
+    if(!convs.length)return head+`<div class="cmEmpty small"><b>Nenhum pedido de mensagem</b><span>Mensagens de quem você não segue aparecem aqui primeiro.</span></div>`;
+    return head+`<div class="cvxReqHint">Abra uma conversa para ver a mensagem. A pessoa só fica sabendo que você viu depois que você aceitar.</div>`+convs.map(x=>chatCard(x.p,x.c)).join('');
+  }
+  let html=convs.map(x=>chatCard(x.p,x.c)).join('');
+  if(q||CHAT.filter==='online'){const ids=new Set(convs.map(x=>x.p.id));const more=getPublicPeople().filter(p=>!ids.has(p.id)&&!CHAT.rows.has(p.id)&&!blocked(p.id)&&match(p)&&(CHAT.filter!=='online'||isOnline(p.id))).slice(0,30);if(more.length)html+=`<div class="chatSection">Pessoas</div>`+more.map(p=>chatCard(p,null)).join('')}
+  if(html)return head+html;
+  if(q)return head+`<div class="cmEmpty small"><b>Ninguém encontrado</b><span>Tente outro nome ou cidade.</span></div>`;
+  if(CHAT.filter!=='all')return head+`<div class="cmEmpty small"><b>${CHAT.filter==='unread'?'Nenhuma mensagem não lida':'Ninguém online agora'}</b><span>${CHAT.filter==='unread'?'Você está em dia com as conversas.':'Quando alguém entrar, aparece aqui.'}</span></div>`;
+  return head+`<div class="cmEmpty"><div class="cmEmptyIco">💬</div><b>Nenhuma conversa ainda</b><span>Comece a conversar com pessoas da sua região.</span><button class="cmBtn" type="button" onclick="chatNew()">＋ Nova conversa</button></div>${profilesHint()}`;
+};
+/* segurar uma conversa da lista: fixar, silenciar, apagar */
+(function(){
+  let t=0,sx=0,sy=0,fired=false;
+  document.addEventListener('pointerdown',e=>{const c=e.target.closest?.('#chatPeople .chatCard');if(!c)return;fired=false;sx=e.clientX;sy=e.clientY;clearTimeout(t);t=setTimeout(()=>{fired=true;if(navigator.vibrate)try{navigator.vibrate(12)}catch(_){}cvxChatMenu(c.dataset.uid)},480)},true);
+  document.addEventListener('pointermove',e=>{if(t&&(Math.abs(e.clientX-sx)>8||Math.abs(e.clientY-sy)>8)){clearTimeout(t);t=0}},true);
+  document.addEventListener('pointerup',()=>{clearTimeout(t);t=0},true);
+  document.addEventListener('click',e=>{if(fired&&e.target.closest?.('#chatPeople .chatCard')){e.stopPropagation();e.preventDefault();fired=false}},true);
+  document.addEventListener('contextmenu',e=>{if(e.target.closest?.('#chatPeople .chatCard'))e.preventDefault()},true);
+})();
+function cvxChatMenu(uid){
+  if(!uid||!CHAT.rows.has(uid))return;const p=chatPerson(uid),pr=cvxPref(uid);
+  openModal(`<div class="modalHead"><h2>${esc(p.name)}</h2><button class="close" onclick="closeModal()">×</button></div><div class="cmSheetList">
+  <button type="button" onclick="cvxPin('${esc(uid)}')"><i>${CVX_I.pin}</i><span><b>${pr.pinned_at?'Desafixar':'Fixar conversa'}</b><small>${pr.pinned_at?'Sai do topo da lista':'Fica no topo da lista (até 3)'}</small></span></button>
+  <button type="button" onclick="cvxMute('${esc(uid)}')"><i>${pr.muted?CVX_I.bell:CVX_I.mute}</i><span><b>${pr.muted?'Ativar som':'Silenciar mensagens'}</b><small>${pr.muted?'Volta a tocar quando chegar mensagem':'Sem som e sem aviso no app'}</small></span></button>
+  <button type="button" class="danger" onclick="cvxClear('${esc(uid)}')"><i>${CVX_I.trash}</i><span><b>Apagar conversa</b><small>Some só para você. A outra pessoa continua vendo.</small></span></button></div>`);
+  document.getElementById('modal')?.classList.add('sheet');
+}
+function cvxPin(uid){const pr=cvxPref(uid);if(!pr.pinned_at){const n=[...CVX.prefs.values()].filter(x=>x.pinned_at).length;if(n>=3){alert('Você pode fixar até 3 conversas.');return}}cvxPrefSet(uid,{pinned_at:pr.pinned_at?null:new Date().toISOString()});closeModal();chatPaint();shareToast(pr.pinned_at?'Conversa desafixada':'📌 Conversa fixada')}
+function cvxMute(uid){const pr=cvxPref(uid);cvxPrefSet(uid,{muted:!pr.muted});closeModal();if(document.getElementById('chatPeople'))chatPaint();shareToast(pr.muted?'🔔 Som ativado':'🔕 Conversa silenciada')}
+function cvxClear(uid){if(!confirm('Apagar esta conversa para você?'))return;cvxPrefSet(uid,{cleared_at:new Date().toISOString(),pinned_at:null});CHAT.rows.delete(uid);closeModal();msgSheetClose?.();if(window.cmCurrentPage==='conversation'){msgLeave();go('chat')}else chatPaint();shareToast('Conversa apagada')}
+/* silenciar: sem som e sem aviso no app */
+(function(){
+  const nn=window.notifyNewMessage;window.notifyNewMessage=function(m){CVX.lastFrom=m?.sender_id;CVX.lastAt=Date.now();if(m&&(cvxPref(m.sender_id).muted||cvxIsRequest(m.sender_id)||(typeof blkIsBlocked==='function'&&blkIsBlocked(m.sender_id))))return;return nn(m)};
+  const ding=window.msgDing;window.msgDing=function(force){if(!force&&CVX.lastFrom&&Date.now()-(CVX.lastAt||0)<1500&&(cvxPref(CVX.lastFrom).muted||(typeof blkIsBlocked==='function'&&blkIsBlocked(CVX.lastFrom))))return;return ding(force)};
+})();
+
+/* ---------- Notas (24h) ---------- */
+async function cvxNotesLoad(){
+  if(!me?.id)return;
+  try{const since=new Date(Date.now()-864e5).toISOString();const {data,error}=await sb.from('cm_notes').select('user_id,text,created_at').gte('created_at',since).limit(500);if(error)throw error;CVX.notes=new Map((data||[]).filter(n=>Date.parse(n.created_at)>Date.now()-864e5).map(n=>[n.user_id,n]));CVX.missing.notes=false;if(document.getElementById('chatPeople'))chatPaint()}
+  catch(e){if(cvxMissing(e))CVX.missing.notes=true}
+}
+function cvxNotesRow(){
+  const mine=CVX.notes.get(me?.id),p=profileData();
+  const others=[...CVX.notes.values()].filter(n=>n.user_id!==me?.id&&(isFollowing(n.user_id)||CHAT.rows.has(n.user_id))&&!(typeof blkIsBlocked==='function'&&blkIsBlocked(n.user_id))).sort((a,b)=>Date.parse(b.created_at)-Date.parse(a.created_at));
+  const item=(uid,name,photo,text,mineFlag)=>`<button type="button" class="cvxNote${mineFlag?' mine':''}" onclick="${mineFlag?'cvxNoteEdit()':`cvxNoteOpen('${esc(uid)}')`}"><span class="cvxBubble${text?'':' empty'}">${text?esc(text):'Deixe uma nota…'}</span><img src="${esc(photo||avatar(name))}" alt="">${mineFlag&&!text?`<i>${CVX_I.plus}</i>`:''}<small>${mineFlag?'Sua nota':esc(cvxFirst(name))}</small></button>`;
+  return `<div class="cvxNotes">${item(me?.id,p.name,p.photo,mine?.text||'',true)}${others.map(n=>{const pp=chatPerson(n.user_id);return item(n.user_id,pp.name,pp.photo,n.text,false)}).join('')}</div>`;
+}
+function cvxNoteEdit(){
+  const mine=CVX.notes.get(me?.id);
+  openModal(`<div class="modalHead"><h2>Sua nota</h2><button class="close" onclick="closeModal()">×</button></div><div class="sub">Quem segue você vê sua nota na lista de conversas por 24 horas.</div><div class="cvxNoteEd"><span class="cvxBubble big"><textarea id="cvxNoteIn" maxlength="60" rows="2" placeholder="Compartilhe um pensamento…" oninput="document.getElementById('cvxNoteN').textContent=60-this.value.length">${esc(mine?.text||'')}</textarea></span><small id="cvxNoteN">${60-(mine?.text||'').length}</small></div><button class="primary" onclick="cvxNoteSave()">Compartilhar</button>${mine?`<button class="ghost" style="width:100%;color:#ff8a94" onclick="cvxNoteDel()">Apagar nota</button>`:''}`);
+  document.getElementById('modal')?.classList.add('sheet');setTimeout(()=>document.getElementById('cvxNoteIn')?.focus(),80);
+}
+async function cvxNoteSave(){const t=String(document.getElementById('cvxNoteIn')?.value||'').trim();if(!t){alert('Escreva sua nota.');return}const row={user_id:me.id,text:t.slice(0,60),created_at:new Date().toISOString()};try{const {error}=await sb.from('cm_notes').upsert(row,{onConflict:'user_id'});if(error)throw error;CVX.notes.set(me.id,row);closeModal();chatPaint();shareToast('Nota compartilhada 💬')}catch(e){cvxMissing(e)?cvxSqlToast():alert('Não foi possível salvar a nota agora.')}}
+async function cvxNoteDel(){try{await sb.from('cm_notes').delete().eq('user_id',me.id)}catch(_){}CVX.notes.delete(me.id);closeModal();chatPaint()}
+function cvxNoteOpen(uid){
+  const n=CVX.notes.get(uid);if(!n)return;const p=chatPerson(uid);
+  openModal(`<div class="cvxNoteView"><img src="${esc(p.photo||avatar(p.name))}" alt=""><b>${esc(p.name)}</b><span class="cvxBubble big">${esc(n.text)}</span><small>${postAgo(Date.parse(n.created_at))}</small></div><form class="cvxNoteReply" onsubmit="event.preventDefault();cvxNoteReply('${esc(uid)}')"><input id="cvxNoteRe" maxlength="500" placeholder="Responder a ${esc(cvxFirst(p.name))}…" autocomplete="off" enterkeyhint="send"><button>Enviar</button></form>`);
+  document.getElementById('modal')?.classList.add('sheet');setTimeout(()=>document.getElementById('cvxNoteRe')?.focus(),80);
+}
+async function cvxNoteReply(uid){const t=String(document.getElementById('cvxNoteRe')?.value||'').trim();if(!t)return;const n=CVX.notes.get(uid);const body=`💬 Respondeu à sua nota “${n?.text||''}”:\n${t}`;try{const {error}=await sb.from('messages').insert({sender_id:me.id,receiver_id:uid,body});if(error)throw error;CVX.sent.add(uid);closeModal();shareToast('Resposta enviada');chatLoad()}catch(e){alert(msgErrHint(e))}}
+
+/* ---------- mensagens: carregar com resposta, edição, reações ---------- */
+window.loadConversationMessages=async function(){
+  const box=document.getElementById('conversationMessages');if(!box||!currentPublicUser||!me?.id)return;
+  const other=currentPublicUser.id;await cvxPrefsLoad();
+  const filt=`and(sender_id.eq.${me.id},receiver_id.eq.${other}),and(sender_id.eq.${other},receiver_id.eq.${me.id})`;
+  let r=null;for(const cols of [MSG_COLS+',delivered_at,read_at,reply_to,edited_at',MSG_COLS+',delivered_at,read_at',MSG_COLS]){r=await sb.from('messages').select(cols).or(filt).order('created_at',{ascending:true});if(!r.error)break}
+  if(r.error){console.error('mensagens',r.error);box.innerHTML=`<div class="empty">Não foi possível carregar as mensagens agora.<br><small>${esc(msgErrHint(r.error))}</small></div>`;return}
+  const hid=cvxHidden();const rows=(r.data||[]).filter(m=>!cvxIsDel(m.body)&&!hid.has(String(m.id))&&!cvxCleared(other,m.created_at));
+  rows.forEach(m=>{CVX.msgs.set(String(m.id),m);if(m.sender_id===me.id&&m.receiver_id===other)CVX.sent.add(other)});
+  box.innerHTML='';
+  if(!rows.length)box.innerHTML='<div class="empty">Diga oi 👋 A mensagem chega mesmo se a pessoa estiver offline.</div>';
+  rows.forEach(m=>appendMessageBubble(m,true));msgGroupMedia();msgScrollBottom(true);
+  cvxRequestBar();
+  markConversationRead(other);
+  cvxRxLoad(rows.map(m=>String(m.id)));
+};
+(function(){
+  const mark=window.markConversationRead;
+  window.markConversationRead=function(otherId){if(cvxIsRequest(otherId)&&[...CVX.msgs.values()].some(m=>m.sender_id===otherId)&&!CVX.sent.has(otherId))return loadUnreadBadges();return mark(otherId)};
+  const app=window.appendMessageBubble;
+  window.appendMessageBubble=function(m,batch){
+    if(m&&(cvxIsDel(m.body)||cvxHidden().has(String(m.id))))return;
+    if(m&&m.id)CVX.msgs.set(String(m.id),m);
+    app(m,batch);
+    const row=document.querySelector(`#conversationMessages .msgRow[data-id="${CSS.escape(String(m.id))}"]`);if(row){row._cm=m;cvxDecorate(row)}
+  };
+  const gm=window.msgGroupMedia;window.msgGroupMedia=function(){gm();document.querySelectorAll('#conversationMessages .msgRow').forEach(r=>{if(r._cm)cvxDecorate(r)})};
+})();
+function cvxDecorate(row){
+  const m=row._cm||row._m;if(!m)return;const b=row.querySelector('.bubble');if(!b)return;
+  b.querySelector('.cvxQuote')?.remove();row.querySelector('.cvxRx')?.remove();b.querySelector('.cvxEd')?.remove();
+  if(m.reply_to){const ref=CVX.msgs.get(String(m.reply_to));const who=ref?(ref.sender_id===me?.id?'Você':cvxFirst(currentPublicUser?.name)):'';b.insertAdjacentHTML('afterbegin',`<button type="button" class="cvxQuote" onclick="event.stopPropagation();cvxJump('${esc(String(m.reply_to))}')">${who?`<b>${esc(who)}</b>`:''}<span>${esc(ref?cvxSnippet(ref.body):'Mensagem')}</span></button>`);b.classList.add('hasQuote')}
+  if(m.edited_at){const meta=b.querySelector('.bMeta');if(meta)meta.insertAdjacentHTML('afterbegin','<em class="cvxEd">editada</em>')}
+  const rx=CVX.rx.get(String(m.id));
+  if(rx&&rx.size){const arr=[...rx.values()].filter(Boolean);if(arr.length){const uniq=[...new Set(arr)];row.insertAdjacentHTML('beforeend',`<button type="button" class="cvxRx${rx.get(me?.id)?' mine':''}" onclick="event.stopPropagation();cvxRxInfo('${esc(String(m.id))}')">${uniq.slice(0,3).join('')}${arr.length>1?`<b>${arr.length}</b>`:''}</button>`);row.classList.add('hasRx')}else row.classList.remove('hasRx')}else row.classList.remove('hasRx');
+  if(!row.__cvx){row.__cvx=1;cvxBindRow(row)}
+}
+function cvxJump(id){const r=document.querySelector(`#conversationMessages .msgRow[data-id="${CSS.escape(id)}"]`);if(!r){shareToast('Mensagem antiga');return}r.scrollIntoView({block:'center',behavior:'smooth'});r.classList.remove('cvxFlash');void r.offsetWidth;r.classList.add('cvxFlash')}
+function cvxRxInfo(id){const rx=CVX.rx.get(id);if(!rx)return;const rows=[...rx.entries()].filter(([,e])=>e).map(([u,e])=>{const p=u===me?.id?{name:'Você',photo:profileData().photo}:chatPerson(u);return `<div class="cvxRxRow"><img src="${esc(p.photo||avatar(p.name))}" alt=""><b>${esc(p.name)}</b><span>${e}</span>${u===me?.id?`<button type="button" onclick="closeModal();cvxReact('${esc(id)}','${e}')">Tirar</button>`:''}</div>`}).join('');openModal(`<div class="modalHead"><h2>Reações</h2><button class="close" onclick="closeModal()">×</button></div>${rows}`);document.getElementById('modal')?.classList.add('sheet')}
+/* gestos: arrastar para a direita = responder · segurar = menu · dois toques = ❤️ */
+function cvxBindRow(row){
+  let s=null,lp=0,lastTap=0;
+  row.style.touchAction='pan-y';
+  row.addEventListener('pointerdown',e=>{if(e.button>0)return;s={x:e.clientX,y:e.clientY,dx:0,lock:false};clearTimeout(lp);lp=setTimeout(()=>{if(s&&!s.lock){s.menu=true;if(navigator.vibrate)try{navigator.vibrate(12)}catch(_){}cvxMsgMenu(row)}},470)});
+  row.addEventListener('pointermove',e=>{if(!s)return;const dx=e.clientX-s.x,dy=e.clientY-s.y;if(!s.lock&&(Math.abs(dx)>8||Math.abs(dy)>8)){clearTimeout(lp);if(dx>6&&Math.abs(dx)>Math.abs(dy)*1.3)s.lock=true;else{s=null;return}}if(s.lock){s.dx=Math.max(0,Math.min(80,dx));row.style.transform=`translateX(${s.dx}px)`;row.classList.toggle('cvxSwipeOk',s.dx>55)}});
+  const end=()=>{clearTimeout(lp);if(!s)return;const ok=s.lock&&s.dx>55;row.style.transition='transform .18s';row.style.transform='';row.classList.remove('cvxSwipeOk');setTimeout(()=>{row.style.transition=''},200);s=null;if(ok){if(navigator.vibrate)try{navigator.vibrate(10)}catch(_){}cvxSetReply(row._cm||row._m)}};
+  row.addEventListener('pointerup',end);row.addEventListener('pointercancel',()=>{clearTimeout(lp);row.style.transform='';s=null});
+  row.addEventListener('contextmenu',e=>{e.preventDefault()});
+  row.addEventListener('click',e=>{if(e.target.closest('button,img,video,a,.audBubble'))return;const now=Date.now();if(now-lastTap<320){lastTap=0;const m=row._cm||row._m;if(m&&!String(m.id).startsWith('tmp-'))cvxReact(String(m.id),'❤️',true)}else lastTap=now});
+}
+function cvxMsgMenu(row){
+  const m=row._cm||row._m;if(!m||String(m.id).startsWith('tmp-'))return;const id=String(m.id),mine=m.sender_id===me?.id;
+  const isText=!msgParse(m.body);const canEdit=mine&&isText&&Date.now()-Date.parse(m.created_at)<15*60*1000;
+  const myRx=CVX.rx.get(id)?.get(me?.id);
+  document.getElementById('cvxMenu')?.remove();
+  const b=row.querySelector('.bubble');const prevHtml=b?b.outerHTML:'';
+  document.body.insertAdjacentHTML('beforeend',`<div id="cvxMenu" class="cvxMenu" onclick="if(event.target===this)cvxMenuClose()"><div class="cvxMenuIn ${mine?'mine':''}">
+    <div class="cvxEmoBar">${CVX_EMO.map(e=>`<button type="button" class="${myRx===e?'on':''}" onclick="cvxReact('${id}','${e}');cvxMenuClose()">${e}</button>`).join('')}<button type="button" class="more" onclick="cvxEmoMore('${id}')" aria-label="Mais emojis">${CVX_I.plus}</button></div>
+    <div class="cvxPrev">${prevHtml}</div>
+    <div class="cvxActs">
+      <button type="button" onclick="cvxMenuClose();cvxSetReply(CVX.msgs.get('${id}'))"><span>Responder</span>${CVX_I.reply}</button>
+      ${isText?`<button type="button" onclick="cvxMenuClose();copyText(CVX.msgs.get('${id}')?.body||'','Mensagem copiada')"><span>Copiar</span>${CVX_I.copy}</button>`:''}
+      ${canEdit?`<button type="button" onclick="cvxMenuClose();cvxEdit('${id}')"><span>Editar</span>${CVX_I.edit}</button>`:''}
+      ${mine?`<button type="button" class="danger" onclick="cvxMenuClose();cvxUnsend('${id}')"><span>Cancelar envio</span>${CVX_I.undo}</button>`:`<button type="button" class="danger" onclick="cvxMenuClose();cvxDeleteMine('${id}')"><span>Apagar para você</span>${CVX_I.trash}</button>`}
+    </div></div></div>`);
+}
+function cvxMenuClose(){document.getElementById('cvxMenu')?.remove()}
+function cvxEmoMore(id){cvxMenuClose();openModal(`<div class="modalHead"><h2>Reagir</h2><button class="close" onclick="closeModal()">×</button></div><div class="cvxEmoAll">${[...CVX_EMO,...MSG_STICKERS.filter(e=>!CVX_EMO.includes(e))].map(e=>`<button type="button" onclick="closeModal();cvxReact('${id}','${e}')">${e}</button>`).join('')}</div>`);document.getElementById('modal')?.classList.add('sheet')}
+function cvxRowOf(id){return document.querySelector(`#conversationMessages .msgRow[data-id="${CSS.escape(String(id))}"]`)}
+async function cvxReact(id,emo,fromDouble){
+  const m=CVX.msgs.get(String(id));if(!m||!me?.id)return;const owner=m.sender_id===me.id?m.receiver_id:m.sender_id;
+  if(!CVX.rx.has(id))CVX.rx.set(id,new Map());const map=CVX.rx.get(id);const cur=map.get(me.id);
+  if(fromDouble&&cur==='❤️')return;
+  const next=cur===emo?null:emo;map.set(me.id,next);
+  const row=cvxRowOf(id);if(row){cvxDecorate(row);if(next){const r=row.querySelector('.cvxRx');r?.classList.add('pop')}}
+  try{const {error}=await sb.from('cm_msg_reactions').upsert({message_id:id,user_id:me.id,owner_id:owner,emoji:next,updated_at:new Date().toISOString()},{onConflict:'message_id,user_id'});if(error)throw error}
+  catch(e){map.set(me.id,cur);if(row)cvxDecorate(row);cvxMissing(e)?cvxSqlToast():shareToast('Não foi possível reagir agora.')}
+}
+async function cvxRxLoad(ids){
+  if(!ids.length)return;
+  try{for(let i=0;i<ids.length;i+=150){const {data,error}=await sb.from('cm_msg_reactions').select('message_id,user_id,emoji').in('message_id',ids.slice(i,i+150));if(error)throw error;(data||[]).forEach(r=>{const k=String(r.message_id);if(!CVX.rx.has(k))CVX.rx.set(k,new Map());CVX.rx.get(k).set(r.user_id,r.emoji||null)})}
+    ids.forEach(id=>{const r=cvxRowOf(id);if(r&&CVX.rx.has(id))cvxDecorate(r)})}
+  catch(e){if(cvxMissing(e))CVX.missing.rx=true}
+}
+/* responder */
+function cvxSetReply(m){
+  if(!m||String(m.id).startsWith('tmp-'))return;const mine=m.sender_id===me?.id;
+  CVX.reply={id:String(m.id)};
+  const f=document.getElementById('igComposer');if(!f)return;f.querySelector('.cvxReplyBar')?.remove();
+  f.insertAdjacentHTML('afterbegin',`<div class="cvxReplyBar">${CVX_I.reply}<span><b>Respondendo ${mine?'a você mesmo':'a '+esc(cvxFirst(currentPublicUser?.name))}</b><small>${esc(cvxSnippet(m.body))}</small></span><button type="button" onclick="cvxClearReply()" aria-label="Cancelar resposta">✕</button></div>`);
+  f.classList.add('replying');setTimeout(()=>document.getElementById('msgText')?.focus(),30);
+}
+function cvxClearReply(){CVX.reply=null;const f=document.getElementById('igComposer');f?.querySelector('.cvxReplyBar')?.remove();f?.classList.remove('replying')}
+window.sendMessage=async function(id){
+  const el=document.getElementById('msgText'),body=el?.value.trim();
+  if(!body||!me?.id||!id)return;
+  if(typeof blkIsBlocked==='function'&&blkIsBlocked(id)){alert('Você não pode mandar mensagem para esta pessoa.');return}
+  el.value='';msgComposerState();
+  const m={id:'tmp-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),sender_id:me.id,receiver_id:id,body,created_at:new Date().toISOString(),_sending:true,reply_to:CVX.reply?.id||null};
+  cvxClearReply();CVX.sent.add(id);
+  appendMessageBubble(m);deliverMessage(m);
+};
+window.deliverMessage=async function(m){
+  m._sending=true;m._failed=false;msgPaintStatus(m);
+  try{
+    if(m._file&&!m._uploaded){const url=await uploadMedia(m._file,'chat','post');m.body=`[[cm:${m._t}|${url}${m._extra?'|'+m._extra:''}]]`;m._uploaded=true}
+    const row={sender_id:m.sender_id,receiver_id:m.receiver_id,body:m.body};if(m.reply_to)row.reply_to=String(m.reply_to);
+    let r=await sb.from('messages').insert(row).select(MSG_COLS+(m.reply_to?',reply_to':'')).single();
+    if(r.error&&m.reply_to&&cvxMissing(r.error)){delete row.reply_to;r=await sb.from('messages').insert(row).select(MSG_COLS).single()}
+    if(r.error)throw r.error;
+    const oldId=String(m.id);if(m._el)m._el.dataset.id=r.data.id;
+    Object.assign(m,r.data,{_sending:false,_failed:false,_err:''});CVX.msgs.delete(oldId);CVX.msgs.set(String(m.id),m);
+    msgPaintStatus(m);if(m._el)cvxDecorate(m._el);
+  }catch(e){
+    console.error('enviar',e);
+    m._sending=false;m._failed=true;m._err=m._file&&!m._uploaded?'Não consegui enviar a mídia. Toque para tentar de novo.':(/cm_msg_not_blocked/.test(e?.message||'')?'Não é possível mandar mensagem para esta pessoa.':msgErrHint(e));msgPaintStatus(m);
+    const box=document.getElementById('conversationMessages');
+    if(box&&!box.querySelector('.msgHint')){box.insertAdjacentHTML('beforeend',`<div class="msgHint">${esc(m._err)}</div>`);msgScrollBottom(true)}
+  }
+};
+/* editar (até 15 min) */
+function cvxEdit(id){const m=CVX.msgs.get(id);if(!m)return;openModal(`<div class="modalHead"><h2>Editar mensagem</h2><button class="close" onclick="closeModal()">×</button></div><textarea id="cvxEdIn" class="field" rows="3" maxlength="2000">${esc(m.body)}</textarea><div class="small">Você pode editar até 15 minutos depois de enviar. A pessoa vê que foi editada.</div><button class="primary" onclick="cvxEditSave('${esc(id)}')">Salvar</button>`);document.getElementById('modal')?.classList.add('sheet');setTimeout(()=>{const t=document.getElementById('cvxEdIn');t?.focus();try{t.setSelectionRange(t.value.length,t.value.length)}catch(_){}},80)}
+async function cvxEditSave(id){
+  const m=CVX.msgs.get(id);const t=String(document.getElementById('cvxEdIn')?.value||'').trim();if(!m||!t||t===m.body){closeModal();return}
+  if(Date.now()-Date.parse(m.created_at)>15*60*1000){alert('O tempo para editar (15 minutos) já passou.');closeModal();return}
+  const now=new Date().toISOString();
+  try{let r=await sb.from('messages').update({body:t,edited_at:now}).eq('id',id).eq('sender_id',me.id).select('id');if(r.error&&cvxMissing(r.error))r=await sb.from('messages').update({body:t}).eq('id',id).eq('sender_id',me.id).select('id');if(r.error)throw r.error;if(Array.isArray(r.data)&&!r.data.length)throw new Error('row-level security');
+    m.body=t;m.edited_at=now;cvxRerender(id);closeModal()}
+  catch(e){/row-level|permission/i.test(e?.message||'')?cvxSqlToast():alert('Não foi possível editar agora.')}
+}
+function cvxRerender(id){const row=cvxRowOf(id),m=CVX.msgs.get(String(id));if(!row||!m)return;row._body=m.body;const b=row.querySelector('.bubble');if(b){const meta=b.querySelector('.bMeta');const c=msgBodyHtml(m);b.className='bubble'+(m.sender_id===me?.id?' mine':'')+' '+c.cls;b.innerHTML=c.html;if(meta){meta.querySelector('.cvxEd')?.remove();b.appendChild(meta)}}cvxDecorate(row);if(m._el===row||m.sender_id===me?.id)try{msgPaintStatus(m)}catch(_){}}
+/* cancelar envio (some para os dois) e apagar para você */
+async function cvxUnsend(id){
+  const m=CVX.msgs.get(id);if(!m)return;if(!confirm('Cancelar o envio? A mensagem some para os dois.'))return;
+  try{const r=await sb.from('messages').update({body:'[[cm:del]]'}).eq('id',id).eq('sender_id',me.id).select('id');if(r.error)throw r.error;if(Array.isArray(r.data)&&!r.data.length)throw new Error('row-level security');cvxRemoveRow(id);shareToast('Envio cancelado')}
+  catch(e){/row-level|permission/i.test(e?.message||'')?cvxSqlToast():alert('Não foi possível cancelar o envio agora.')}
+}
+function cvxDeleteMine(id){cvxHide(id);cvxRemoveRow(id);shareToast('Apagada para você')}
+function cvxRemoveRow(id){const r=cvxRowOf(id);if(r){r.style.transition='opacity .2s,transform .2s';r.style.opacity='0';r.style.transform='scale(.9)';setTimeout(()=>{r.remove();msgRefreshLast();msgGroupMedia()},200)}CVX.msgs.delete(String(id))}
+/* atualizações do banco (visto, edição, apagada) */
+window.msgApplyUpdate=function(row){
+  const id=String(row.id);const el=cvxRowOf(id);const m=CVX.msgs.get(id)||el?._m;
+  if(cvxIsDel(row.body)){cvxRemoveRow(id);if(document.getElementById('chatPeople'))chatLoad();return}
+  if(m){if(row.delivered_at)m.delivered_at=row.delivered_at;if(row.read_at)m.read_at=row.read_at;if('edited_at' in row)m.edited_at=row.edited_at;
+    if(row.body&&row.body!==m.body){m.body=row.body;cvxRerender(id)}else if(el&&m.sender_id===me?.id)try{msgPaintStatus(m)}catch(_){} }
+};
+(function(){
+  const st=window.startMessagesRealtime;
+  window.startMessagesRealtime=function(){
+    st();if(!me?.id)return;
+    try{if(CVX.ch){sb.removeChannel(CVX.ch);CVX.ch=null}
+      CVX.ch=sb.channel('cm-cvx-'+me.id)
+        .on('postgres_changes',{event:'UPDATE',schema:'public',table:'messages',filter:`receiver_id=eq.${me.id}`},p=>{msgApplyUpdate(p.new)})
+        .on('postgres_changes',{event:'*',schema:'public',table:'cm_msg_reactions',filter:`owner_id=eq.${me.id}`},p=>{const r=p.new&&p.new.message_id?p.new:p.old;if(!r||!r.message_id)return;const k=String(r.message_id);if(!CVX.rx.has(k))CVX.rx.set(k,new Map());CVX.rx.get(k).set(r.user_id,p.eventType==='DELETE'?null:(r.emoji||null));const row=cvxRowOf(k);if(row){cvxDecorate(row);row.querySelector('.cvxRx')?.classList.add('pop')}})
+        .subscribe()}catch(_){}
+  };
+})();
+/* pedido de mensagem: aceitar / apagar / bloquear */
+function cvxRequestBar(){
+  const p=currentPublicUser;if(!p)return;document.getElementById('cvxReq')?.remove();
+  const theirs=[...CVX.msgs.values()].some(m=>m.sender_id===p.id&&m.receiver_id===me.id);
+  if(!theirs||!cvxIsRequest(p.id)||CVX.sent.has(p.id))return;
+  const f=document.getElementById('igComposer');if(!f)return;
+  f.insertAdjacentHTML('beforebegin',`<div id="cvxReq" class="cvxReq"><b>${esc(cvxFirst(p.name))} quer mandar mensagem para você</b><small>${esc(p.name)} não vai saber que você viu a mensagem até você aceitar.</small><div><button type="button" onclick="cvxReqBlock()">Bloquear</button><button type="button" onclick="cvxReqDelete()">Apagar</button><button type="button" class="ok" onclick="cvxReqAccept()">Aceitar</button></div></div>`);
+  f.classList.add('cvxLocked');
+}
+function cvxReqAccept(){const p=currentPublicUser;if(!p)return;cvxPrefSet(p.id,{accepted:true});document.getElementById('cvxReq')?.remove();document.getElementById('igComposer')?.classList.remove('cvxLocked');CVX.tab='main';markConversationRead(p.id);shareToast('Pedido aceito ✓')}
+function cvxReqDelete(){const p=currentPublicUser;if(!p)return;cvxPrefSet(p.id,{cleared_at:new Date().toISOString()});CHAT.rows.delete(p.id);msgLeave();go('chat')}
+function cvxReqBlock(){const p=currentPublicUser;if(!p)return;if(typeof blkAsk==='function')blkAsk(p.id,'block');else cvxReqDelete()}
+/* menu ⋯ da conversa: fixar, silenciar, apagar */
+(function(){
+  const mm=window.msgMenu;
+  window.msgMenu=function(){
+    mm();const box=document.querySelector('#msgSheet .msgMenu');const p=currentPublicUser;if(!box||!p)return;const pr=cvxPref(p.id);
+    const extra=`<button onclick="msgSheetClose();cvxPin('${esc(p.id)}')">📌 ${pr.pinned_at?'Desafixar conversa':'Fixar conversa'}</button><button onclick="msgSheetClose();cvxMute('${esc(p.id)}')">${pr.muted?'🔔 Ativar som desta conversa':'🔕 Silenciar mensagens'}</button><button onclick="msgSheetClose();cvxClear('${esc(p.id)}')">🗑 Apagar conversa</button>`;
+    const danger=box.querySelector('.danger');if(danger)danger.insertAdjacentHTML('beforebegin',extra);else box.insertAdjacentHTML('beforeend',extra);
+  };
+})();
+/* ===================== fim CONVERSAS ESTILO INSTAGRAM ===================== */
+
+/* ===================== PUBLICAÇÕES ESTILO INSTAGRAM ===================== */
+const PPX={cl:new Map(),reply:null,openC:new Set()};
+const PPX_I={
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+  pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5M9 3h6l-1 6 4 4H6l4-4z"/></svg>',
+  arch:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18v4H3zM5 8v12h14V8M10 12h4"/></svg>',
+  heart:'<svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.6-9.4-9.6C1.2 7.1 3.7 4 7 4c2 0 3.6 1.1 5 2.8C13.4 5.1 15 4 17 4c3.3 0 5.8 3.1 4.4 6.9-1.9 5-9.4 9.6-9.4 9.6z"/></svg>',
+  nolike:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-9.4-9.6C1.2 7.1 3.7 4 7 4c2 0 3.6 1.1 5 2.8C13.4 5.1 15 4 17 4c3.3 0 5.8 3.1 4.4 6.9"/><path d="M3 3l18 18"/></svg>',
+  nocom:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.4 7.4L3.5 20.5l1.5-4.4A8.4 8.4 0 0 1 16 4.3"/><path d="M3 3l18 18"/></svg>',
+  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  draft:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>'
+};
+function ppxFmt(t){const d=new Date(t);return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' às '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}
+
+/* ---------- o que aparece: arquivados, agendados, bloqueados, contas privadas ---------- */
+(function(){
+  const gp=window.getPosts;
+  window.getPosts=function(){const now=Date.now();return gp().filter(x=>{const d=x._d||{};if(d.sch&&!x._schFix){x.created=Math.max(x.created||0,+d.sch||0);x._schFix=1}if(d.arch)return false;if(d.sch&&+d.sch>now)return false;if(typeof blkHidePost==='function'&&blkHidePost(x))return false;return true})};
+  let last=Date.now();setInterval(()=>{const now=Date.now();if((POSTS.list||[]).some(x=>x._d?.sch&&+x._d.sch>last&&+x._d.sch<=now)){POSTS.sig='';postsRefreshScreen()}last=now},30000);
+})();
+function ppPinSort(a){return a.slice().sort((x,y)=>{const px=+(x._d?.pin||0),py=+(y._d?.pin||0);if(px||py)return py-px;return y.created-x.created})}
+window.profUserPosts=function(uid){return ppPinSort(getPosts().filter(x=>x.ownerId===uid||(x.collabs||[]).includes(uid)))};
+
+/* ---------- salvar mudanças no post ---------- */
+async function ppDescUpdate(id,patch,msg){
+  const x=postFind(id);if(!x||x.ownerId!==me?.id)return false;const d={...(x._d||{})};
+  Object.entries(patch).forEach(([k,v])=>{if(v==null||v===false)delete d[k];else d[k]=v});
+  try{const {error}=await sb.from('vitrine_items').update({description:JSON.stringify(d)}).eq('id',id).eq('user_id',me.id);if(error)throw error;
+    x._d=d;if('text' in patch){x.text=d.text||'';x.tags=d.tags||[];x.men=d.men||{}}
+    POSTS.sig='';if(msg)shareToast(msg);ppxRefresh(id);return true}
+  catch(e){alert('Não foi possível salvar agora.');return false}
+}
+function ppxRefresh(id){if(window.cmCurrentPage==='profile'&&!document.getElementById('modal'))go('profile');else{if(document.getElementById('post-'+id))postRepaint(id);if(document.getElementById('feed'))renderFeed()}const one=document.querySelector('#modal .onePost');if(one){const x=postFind(id);if(x)one.innerHTML=postHtml(x)}}
+
+/* ---------- menu ⋯ do post ---------- */
+(function(){
+  const pm=window.postMenu;
+  window.postMenu=function(id){
+    pm(id);const x=postFind(id);const list=document.querySelector('#modal .cmSheetList');if(!x||!list)return;const d=x._d||{},mine=x.ownerId===me?.id;
+    const row=(ic,t,st,act,cls)=>`<button type="button" class="${cls||''}" onclick="${act}"><i>${ic}</i><span><b>${t}</b><small>${st}</small></span></button>`;
+    if(mine){
+      let h='';
+      if(d.sch&&+d.sch>Date.now())h+=row(PPX_I.clock,'Publicar agora','Agendada para '+ppxFmt(+d.sch),`closeModal();ppxPublishNow('${esc(id)}')`);
+      h+=row(PPX_I.edit,'Editar legenda','Mudar o texto da publicação',`ppxEditCap('${esc(id)}')`);
+      if(!d.arch)h+=row(PPX_I.pin,d.pin?'Desafixar do perfil':'Fixar no perfil',d.pin?'Volta para a ordem normal':'Fica no topo do seu perfil (até 3)',`closeModal();ppxPin('${esc(id)}')`);
+      h+=row(PPX_I.arch,d.arch?'Mostrar no perfil':'Arquivar',d.arch?'Volta a aparecer para todos':'Esconde sem apagar. Só você vê em Arquivo',`closeModal();ppxArchive('${esc(id)}')`);
+      h+=row(PPX_I.nolike,d.hl?'Mostrar número de curtidas':'Ocultar número de curtidas',d.hl?'Todos voltam a ver quantas curtidas':'Só você vê quantas curtidas tem',`closeModal();ppDescUpdate('${esc(id)}',{hl:${!d.hl}},'${d.hl?'Curtidas visíveis':'Número de curtidas oculto'}')`);
+      h+=row(PPX_I.nocom,d.nc?'Ativar comentários':'Desativar comentários',d.nc?'As pessoas voltam a comentar':'Ninguém consegue comentar',`closeModal();ppDescUpdate('${esc(id)}',{nc:${!d.nc}},'${d.nc?'Comentários ativados':'Comentários desativados'}')`);
+      const danger=list.querySelector('.danger');if(danger)danger.insertAdjacentHTML('beforebegin',h);else list.insertAdjacentHTML('beforeend',h);
+    }else if(typeof blkPostMenuRows==='function'){const danger=list.querySelector('.danger');const h=blkPostMenuRows(x.ownerId);if(danger)danger.insertAdjacentHTML('beforebegin',h);else list.insertAdjacentHTML('beforeend',h)}
+  };
+})();
+function ppxEditCap(id){const x=postFind(id);if(!x)return;openModal(`<div class="modalHead"><h2>Editar legenda</h2><button class="close" onclick="closeModal()">×</button></div><textarea id="ppxCap" class="field" rows="5" maxlength="2200">${esc(x.text||'')}</textarea><div class="small">Use # para hashtags e @ para mencionar.</div><button class="primary" onclick="ppxEditSave('${esc(id)}')">Salvar</button>`);setTimeout(()=>{const t=document.getElementById('ppxCap');t?.focus();try{t.setSelectionRange(t.value.length,t.value.length)}catch(_){}},80)}
+async function ppxEditSave(id){const x=postFind(id);if(!x)return;const text=String(document.getElementById('ppxCap')?.value||'').trim();if(!text&&!postMedia(x).length){alert('A publicação de texto não pode ficar vazia.');return}const tags=ccHashtags(text);const men={};Object.entries(x.men||{}).forEach(([n,u])=>{if(text.includes('@'+n))men[n]=u});closeModal();const ok=await ppDescUpdate(id,{text,tags,men,ed:Date.now()},'Legenda atualizada');if(ok){try{await sb.from('cm_post_hashtags').delete().eq('post_id',String(id));if(tags.length)await sb.from('cm_post_hashtags').insert(tags.map(t=>({post_id:String(id),tag:t})))}catch(_){}}}
+function ppxPin(id){const x=postFind(id);if(!x)return;if(!x._d?.pin){const n=(POSTS.list||[]).filter(p=>p.ownerId===me?.id&&p._d?.pin).length;if(n>=3){alert('Você pode fixar até 3 publicações no perfil. Desafixe uma antes.');return}}ppDescUpdate(id,{pin:x._d?.pin?null:Date.now()},x._d?.pin?'Publicação desafixada':'📌 Fixada no topo do perfil')}
+function ppxArchive(id){const x=postFind(id);if(!x)return;const on=!x._d?.arch;ppDescUpdate(id,{arch:on,pin:on?null:x._d?.pin},on?'Arquivada. Veja em Perfil → Arquivo':'Voltou para o perfil').then(()=>{if(on&&document.querySelector('#modal .onePost'))closeModal()})}
+function ppxPublishNow(id){ppDescUpdate(id,{sch:Date.now()},'Publicado agora 🎉').then(()=>{const x=postFind(id);if(x){x._schFix=0;x.created=Date.now()}if(document.getElementById('modal'))closeModal()})}
+
+/* ---------- no feed: fixado, curtidas ocultas, comentários desativados ---------- */
+(function(){
+  const ph=window.postHtml;
+  window.postHtml=function(p){
+    let h=ph(p);const d=p&&p._d;if(!d)return h;const mine=p.ownerId===me?.id;
+    if(d.pin)h=h.replace(/(<header>[\s\S]*?<span>)/,`$1<em class="igPinB">${PPX_I.pin}Fixado</em>`);
+    if(mine&&d.arch)h=h.replace('<header>','<div class="igArchB">🗂 Arquivada · só você vê</div><header>');
+    if(mine&&d.sch&&+d.sch>Date.now())h=h.replace('<header>',`<div class="igArchB">⏰ Agendada para ${ppxFmt(+d.sch)}</div><header>`);
+    if(d.hl&&!mine)h=h.replace(/<div class="igLikes">[^<]*<\/div>/,p.likes>1?'<div class="igLikes">Curtido por outras pessoas</div>':'');
+    else if(d.hl&&mine)h=h.replace(/(<div class="igLikes">[^<]*)(<\/div>)/,'$1 <small>· só você vê</small>$2');
+    if(d.nc){h=h.replace(/<button onclick="cmCommentsOpen\([^)]*\)" aria-label="Comentar">[\s\S]*?<\/button>/,'').replace(/<button class="igAllC"[\s\S]*?<\/button>/,'').replace(/<div class="igComments">[\s\S]*?<\/div><form class="igAddC"[\s\S]*?<\/form>/,mine?'<div class="igNoC">Comentários desativados</div>':'')}
+    else{const cs=(p.comments||[]).filter(c=>!c.re&&!(typeof blkHideComment==='function'&&blkHideComment(c,p)));const pc=d.pc&&cs.find(c=>String(c.id)===String(d.pc));const show=pc?[pc,...cs.filter(c=>c!==pc).slice(-1)]:cs.slice(-2);h=h.replace(/<div class="igComments">[\s\S]*?<\/div><form class="igAddC"/,`<div class="igComments">${show.map(c=>`<div class="igC">${c===pc?`<span class="igCPin">${PPX_I.pin}</span>`:''}<b>${esc(c.name)}</b> ${esc(c.text)}</div>`).join('')}</div><form class="igAddC"`)}
+    return h;
+  };
+  const co=window.cmCommentsOpen;
+  window.cmCommentsOpen=function(id){const x=postFind(id);if(x?._d?.nc){shareToast('Os comentários estão desativados nesta publicação.');return}co(id);PPX.reply=null;ppxCLikesLoad(id)};
+})();
+
+/* ---------- comentários: curtir, responder em fio, fixar ---------- */
+function ppxCHidden(c,x){return typeof blkHideComment==='function'&&blkHideComment(c,x)}
+window.cmCommentsPaint=function(id){
+  const el=document.getElementById('cmtList'),x=postFind(id);if(!el||!x)return;
+  const all=(x.comments||[]).filter(c=>!ppxCHidden(c,x));const ids=new Set(all.map(c=>String(c.id)));
+  const top=all.filter(c=>!c.re||!ids.has(String(c.re)));const pc=x._d?.pc?String(x._d.pc):'';
+  top.sort((a,b)=>(String(b.id)===pc)-(String(a.id)===pc)||(a.created-b.created));
+  if(!top.length){el.innerHTML='<div class="cmEmpty small"><b>Nenhum comentário ainda</b><span>Seja o primeiro a comentar.</span></div>';return}
+  el.innerHTML=top.map(c=>{const reps=all.filter(r=>r.re&&String(r.re)===String(c.id)).sort((a,b)=>a.created-b.created);const open=PPX.openC.has(String(c.id))||reps.length<=1;
+    return ppxCHtml(c,x,false,String(c.id)===pc)+(reps.length?`<div class="cmtReps">${open?reps.map(r=>ppxCHtml(r,x,true,false)).join(''):''}${reps.length>1?`<button type="button" class="cmtMore" onclick="ppxToggleReps('${esc(id)}','${esc(String(c.id))}')"><i></i>${open?'Ocultar respostas':`Ver ${reps.length} respostas`}</button>`:''}</div>`:'')}).join('');
+};
+function ppxToggleReps(pid,cid){if(PPX.openC.has(cid))PPX.openC.delete(cid);else PPX.openC.add(cid);cmCommentsPaint(pid)}
+function ppxCHtml(c,x,isRep,pinned){
+  const pp=c.ownerId===me?.id?{photo:profileData().photo}:(personById(c.ownerId)||{});const cid=c.id?String(c.id):'';const set=PPX.cl.get(cid);const n=set?set.size:0,liked=set?set.has(me?.id):false;const ownPost=x.ownerId===me?.id;
+  return `<div class="cmt${isRep?' rep':''}${pinned?' pinned':''}" data-cid="${esc(cid)}"><img src="${esc(pp.photo||avatar(c.name))}" alt="" onclick="closeModal();postOpenProfile('${esc(c.ownerId)}')"><div class="cmtBody">${pinned?`<div class="cmtPinL">${PPX_I.pin}Fixado por ${esc(cvxFirst?cvxFirst(x.name):x.name)}</div>`:''}<div><b>${esc(c.name)}</b> ${esc(c.text)}</div><div class="cmtMeta"><small>${c.created?postAgo(c.created):''}</small>${n?`<small>${n} ${n>1?'curtidas':'curtida'}</small>`:''}${cid?`<button type="button" onclick="ppxReply('${esc(x.id)}','${esc(isRep?String(c.re):cid)}','${esc(String(c.name||'').replace(/'/g,''))}')">Responder</button>`:''}${ownPost&&!isRep&&cid?`<button type="button" onclick="ppxCPin('${esc(x.id)}','${esc(cid)}')">${pinned?'Desafixar':'Fixar'}</button>`:''}${(c.ownerId===me?.id||ownPost)&&cid?`<button type="button" onclick="cmCommentDelete('${esc(x.id)}','${esc(cid)}')">Excluir</button>`:''}</div></div>${cid?`<button type="button" class="cmtLike${liked?' on':''}" onclick="ppxCLike('${esc(x.id)}','${esc(cid)}')" aria-label="Curtir comentário">${PPX_I.heart}</button>`:''}</div>`;
+}
+async function ppxCLikesLoad(pid){const x=postFind(pid);if(!x)return;const ids=(x.comments||[]).map(c=>c.id&&String(c.id)).filter(Boolean);if(!ids.length)return;try{for(let i=0;i<ids.length;i+=150){const {data,error}=await sb.from('cm_comment_likes').select('comment_id,user_id').in('comment_id',ids.slice(i,i+150));if(error)throw error;ids.slice(i,i+150).forEach(k=>PPX.cl.set(k,new Set()));(data||[]).forEach(r=>{const k=String(r.comment_id);if(!PPX.cl.has(k))PPX.cl.set(k,new Set());PPX.cl.get(k).add(r.user_id)})}cmCommentsPaint(pid)}catch(_){}}
+async function ppxCLike(pid,cid){
+  if(!me?.id)return;if(!PPX.cl.has(cid))PPX.cl.set(cid,new Set());const s=PPX.cl.get(cid),had=s.has(me.id);if(had)s.delete(me.id);else s.add(me.id);cmCommentsPaint(pid);
+  try{const r=had?await sb.from('cm_comment_likes').delete().eq('comment_id',cid).eq('user_id',me.id):await sb.from('cm_comment_likes').insert({comment_id:cid,user_id:me.id});if(r.error&&!/duplicate/i.test(r.error.message||''))throw r.error}
+  catch(e){if(had)s.add(me.id);else s.delete(me.id);cmCommentsPaint(pid);typeof cvxMissing==='function'&&cvxMissing(e)?cvxSqlToast():shareToast('Não foi possível curtir agora.')}
+}
+function ppxCPin(pid,cid){const x=postFind(pid);if(!x)return;const cur=x._d?.pc&&String(x._d.pc)===cid;ppDescUpdate(pid,{pc:cur?null:cid},cur?'Comentário desafixado':'📌 Comentário fixado').then(()=>cmCommentsPaint(pid))}
+function ppxReply(pid,cid,name){PPX.reply={pid:String(pid),re:String(cid)};const f=document.querySelector('#modal .cmtForm');if(!f)return;const inp=f.querySelector('input');f.querySelector('.cmtReplying')?.remove();f.insertAdjacentHTML('afterbegin',`<div class="cmtReplying">Respondendo a <b>${esc(name)}</b><button type="button" onclick="PPX.reply=null;this.parentElement.remove()">✕</button></div>`);if(inp){if(!inp.value.startsWith('@'))inp.value='@'+name.split(' ')[0]+' ';inp.focus();try{inp.setSelectionRange(inp.value.length,inp.value.length)}catch(_){}}}
+window.postComment=async function(id,form){
+  const inp=form.querySelector('input'),text=inp.value.trim();if(!text||!me?.id)return;const x=postFind(id);if(!x)return;
+  if(x._d?.nc){shareToast('Os comentários estão desativados nesta publicação.');return}
+  const re=PPX.reply&&PPX.reply.pid===String(id)?PPX.reply.re:'';inp.value='';PPX.reply=null;form.querySelector('.cmtReplying')?.remove();
+  if(re)PPX.openC.add(re);
+  const p=profileData();const c={ownerId:me.id,name:p.name,text,created:Date.now(),re};x.comments.push(c);postRepaint(id);if(document.getElementById('cmtList'))cmCommentsPaint(id);
+  try{const d={text,n:p.name};if(re)d.re=re;const r=await sb.from('vitrine_items').insert({user_id:me.id,name:'comment',price:0,position:0,item_type:'post_comment',active:true,link_url:String(id),description:JSON.stringify(d)}).select('id').single();if(r.error)throw r.error;if(r.data)c.id=r.data.id;if(document.getElementById('cmtList'))cmCommentsPaint(id)}
+  catch(e){x.comments=x.comments.filter(q=>q!==c);postRepaint(id);if(document.getElementById('cmtList'))cmCommentsPaint(id);alert(/cm_comment_rules/.test(e?.message||'')?'Não é possível comentar nesta publicação.':'Não foi possível comentar agora.')}
+};
+
+/* ---------- perfil: Arquivo, Agendadas e Rascunhos ---------- */
+(function(){
+  const pr=window.profile;
+  window.profile=function(){
+    let h=pr();const mine=(POSTS.list||[]).filter(x=>x.ownerId===me?.id);const arch=mine.filter(x=>x._d?.arch).length,sch=mine.filter(x=>x._d?.sch&&+x._d.sch>Date.now()).length;
+    const chips=(arch?`<button type="button" onclick="ppxArchList()">${PPX_I.arch}<span>Arquivo</span><b>${arch}</b></button>`:'')+(sch?`<button type="button" onclick="ppxSchList()">${PPX_I.clock}<span>Agendadas</span><b>${sch}</b></button>`:'')+`<button type="button" id="ppxDraftChip" class="hidden" onclick="ppxDraftList()">${PPX_I.draft}<span>Rascunhos</span><b></b></button>`;
+    h=h.replace('<div class="pfPage" id="profilePages">',`<div class="pfPage" id="profilePages"><div class="ppxChips">${chips}</div>`);
+    setTimeout(()=>ppxDraftAll().then(a=>{const c=document.getElementById('ppxDraftChip');if(c&&a.length){c.classList.remove('hidden');c.querySelector('b').textContent=a.length}}).catch(()=>{}),0);
+    return h;
+  };
+})();
+function ppxGrid(a,fn){return `<div class="pubGrid">${a.map(x=>{const m=postMedia(x)[0];return m?`<button onclick="${fn}('${esc(x.id)}')">${m.t==='video'?(m.th?`<img src="${esc(m.th)}" loading="lazy" alt=""><i>▶</i>`:`<video src="${esc(m.u)}" muted playsinline preload="metadata"></video><i>▶</i>`):`<img src="${esc(m.u)}" loading="lazy" alt="">`}</button>`:`<button class="pubTxt" onclick="${fn}('${esc(x.id)}')">${esc((x.text||'').slice(0,80))}</button>`}).join('')}</div>`}
+function ppxArchList(){const a=(POSTS.list||[]).filter(x=>x.ownerId===me?.id&&x._d?.arch).sort((a,b)=>b.created-a.created);openModal(`<div class="modalHead"><h2>Arquivo</h2><button class="close" onclick="closeModal()">×</button></div><div class="sub" style="margin-bottom:10px">Só você vê. Abra uma publicação e toque em ⋯ → Mostrar no perfil.</div>${a.length?ppxGrid(a,'postShowOne'):'<div class="cmEmpty small"><b>Nada arquivado</b></div>'}`)}
+function ppxSchList(){const a=(POSTS.list||[]).filter(x=>x.ownerId===me?.id&&x._d?.sch&&+x._d.sch>Date.now()).sort((a,b)=>a._d.sch-b._d.sch);openModal(`<div class="modalHead"><h2>Agendadas</h2><button class="close" onclick="closeModal()">×</button></div>${a.length?a.map(x=>{const m=postMedia(x)[0];return `<div class="ppxSchRow" onclick="postShowOne('${esc(x.id)}')">${m?`<img src="${esc(m.t==='video'?(m.th||''):m.u)}" alt="">`:'<i>📝</i>'}<span><b>${esc(ppxFmt(+x._d.sch))}</b><small>${esc((x.text||'Sem legenda').slice(0,60))}</small></span><button type="button" onclick="event.stopPropagation();ppxPublishNow('${esc(x.id)}')">Publicar agora</button></div>`}).join(''):'<div class="cmEmpty small"><b>Nenhuma publicação agendada</b></div>'}`)}
+
+/* ---------- agendar publicação ---------- */
+(function(){
+  const det=window.ccDetails;
+  window.ccDetails=function(){
+    det();if(!CC)return;const rows=document.querySelector('.ccFin .ccFRows');
+    if(rows&&CC.kind){rows.insertAdjacentHTML('beforeend',`<button type="button" class="ccFRow" onclick="ppxSchOpen()"><i>${PPX_I.clock}</i><span><b>Agendar</b></span>${CC.sch?`<u onclick="event.stopPropagation();ccCapSave();CC.sch=null;ccDetails()" aria-label="Tirar agendamento">✕</u>`:''}<strong>${CC.sch?esc(ppxFmt(CC.sch)):'Agora'}</strong><em>${CC_ICO.chev}</em></button>`)}
+    const b=document.querySelector('.ccFin .ccShare');if(b&&CC.sch)b.textContent='Agendar';
+  };
+})();
+function ppxLocalInput(t){const d=new Date(t);const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`}
+function ppxSchOpen(){ccCapSave();const v=CC.sch||Date.now()+3600e3;openModal(`<div class="modalHead"><h2>Agendar publicação</h2><button class="close" onclick="closeModal()">×</button></div><div class="sub" style="margin-bottom:8px">Escolha quando a publicação vai aparecer para todo mundo. Até lá, só você vê em Perfil → Agendadas.</div><input id="ppxSchIn" class="field" type="datetime-local" min="${ppxLocalInput(Date.now()+15*60e3)}" max="${ppxLocalInput(Date.now()+75*864e5)}" value="${ppxLocalInput(v)}"><button class="primary" onclick="ppxSchSave()">Confirmar</button>${CC.sch?`<button class="ghost" style="width:100%" onclick="CC.sch=null;closeModal();ccDetails()">Publicar agora em vez de agendar</button>`:''}`);document.getElementById('modal')?.classList.add('sheet')}
+function ppxSchSave(){const v=document.getElementById('ppxSchIn')?.value;const t=v?new Date(v).getTime():NaN;if(!isFinite(t)){alert('Escolha a data e a hora.');return}if(t<Date.now()+10*60e3){alert('Escolha um horário pelo menos 15 minutos à frente.');return}if(t>Date.now()+75*864e5){alert('Dá para agendar até 75 dias à frente.');return}CC.sch=t;closeModal();ccDetails()}
+
+/* ---------- vídeo no carrossel ---------- */
+function ppxLoadVid(f){return new Promise(res=>{const url=URL.createObjectURL(f);const v=document.createElement('video');v.muted=true;v.playsInline=true;v.preload='auto';v.src=url;let done=false;const fin=o=>{if(done)return;done=true;if(!o)try{URL.revokeObjectURL(url)}catch(_){}try{v.removeAttribute('src');v.load()}catch(_){}res(o)};setTimeout(()=>fin(null),12000);
+  v.addEventListener('loadedmetadata',()=>{const dur=v.duration||0;if(!isFinite(dur)||dur<=0){fin(null);return}if(dur>60.5){fin({long:true,dur});return}try{v.currentTime=Math.min(1,dur/3)}catch(_){fin(null)}},{once:true});
+  v.addEventListener('seeked',()=>{try{const sc=Math.min(1,1080/Math.max(v.videoWidth,v.videoHeight));const c=document.createElement('canvas');c.width=Math.round(v.videoWidth*sc);c.height=Math.round(v.videoHeight*sc);c.getContext('2d').drawImage(v,0,0,c.width,c.height);c.toBlob(b=>{if(!b){fin(null);return}fin({file:f,vurl:url,url:URL.createObjectURL(b),thumbBlob:b,isVid:true,w:v.videoWidth,h:v.videoHeight,dur:v.duration,zoom:1,px:0,py:0,f:'',adj:{b:0,c:0,s:0,w:0},tx:[]})},'image/jpeg',.85)}catch(_){fin(null)}},{once:true});
+  v.addEventListener('error',()=>fin(null),{once:true})})}
+(function(){
+  const create=window.cmCreate;
+  window.cmCreate=function(kind,resp){create(kind,resp);const mi=document.getElementById('ccMultiIn');if(mi)mi.setAttribute('accept','image/*,video/*')};
+  const picked=window.ccPicked;
+  window.ccPicked=async function(inp,kind){
+    if(kind==='video'||!CC)return picked(inp,kind);
+    const files=[...(inp.files||[])];const vids=files.filter(f=>cmFileKind(f)==='video');if(!vids.length)return picked(inp,kind);
+    inp.value='';const imgs=files.filter(f=>cmFileKind(f)==='image');
+    const adding=CC.step==='edit'&&CC.kind!=='video'&&CC.pool?.length;
+    if(!adding&&!imgs.length&&vids.length===1&&kind!=='carousel'){return picked({files:vids,value:''},'video')}
+    if(!adding&&!imgs.length){(CC.pool||[]).forEach(p=>{try{URL.revokeObjectURL(p.url)}catch(_){}});CC.pool=[];CC.photos=[];CC.cur=null;CC.aspect='4:5';CC.video=null}
+    CC.multi=true;
+    if(imgs.length)await picked({files:imgs,value:''},adding?kind:'carousel');
+    if(!CC)return;CC.multi=true;if(!CC.pool)CC.pool=[];
+    const body=document.getElementById('ccBody');if(body&&!CC.pool.length)body.innerHTML='<div class="ccLoading"><div class="ccSpin"></div><span>Abrindo seus vídeos…</span></div>';
+    let long=0,bad=0;
+    for(const f of vids){if(CC.pool.length>=CC_MAX_PHOTOS)break;const it=await ppxLoadVid(f);if(!CC)return;if(!it){bad++;continue}if(it.long){long++;continue}CC.pool.push(it);if(CC.photos.length<CC_MAX_PHOTOS)CC.photos.push(it);CC.cur=it}
+    if(long)alert(long>1?long+' vídeos passam de 60 segundos. No carrossel cada vídeo pode ter até 60 segundos.':'Esse vídeo passa de 60 segundos. No carrossel cada vídeo pode ter até 60 segundos. Para vídeos maiores, use a opção Vídeo.');
+    if(bad)alert('Não consegui abrir '+(bad>1?bad+' vídeos':'um dos vídeos')+' neste aparelho.');
+    if(!CC.pool.length){ccPick();return}
+    if(!CC.cur)CC.cur=CC.photos[0]||CC.pool[0];CC.kind=CC.photos.length>1?'carousel':'photo';ccEdit();
+  };
+  const ed=window.ccEdit;
+  window.ccEdit=function(){ed();if(!CC||CC.kind==='video')return;document.querySelectorAll('.ccGal .ccGT').forEach((t,i)=>{const p=CC.pool[i];if(p&&p.isVid)t.insertAdjacentHTML('beforeend',`<em class="ccVidDur">▶ ${msgDur(p.dur)}</em>`)});if(CC.cur?.isVid)document.getElementById('ccSelPrev')?.insertAdjacentHTML('beforeend',`<span class="ccVidBadge">▶ Vídeo · ${msgDur(CC.cur.dur)}</span>`)};
+  const tp=window.ccToolsPanel;
+  window.ccToolsPanel=function(){tp();if(!CC)return;const p=CC.photos[CC.ti];if(p&&p.isVid&&!CC.panel){const row=document.querySelector('#ccTPanel .ccTRow');if(row){row.querySelectorAll('button').forEach(b=>{if(!/ppMuOpen/.test(b.getAttribute('onclick')||''))b.remove()});row.insertAdjacentHTML('beforeend','<div class="ccVidNote">Vídeo do carrossel: filtros e textos valem só para as fotos.</div>')}}};
+  const ts=window.ccToolsStage;
+  window.ccToolsStage=function(){ts();const p=CC?.photos?.[CC.ti];const st=document.getElementById('ccTStage');if(p&&p.isVid&&st){const img=st.querySelector('img');const v=document.createElement('video');v.src=p.vurl;v.muted=true;v.loop=true;v.playsInline=true;v.autoplay=true;v.setAttribute('playsinline','');v.className='ccTVid';if(img){v.style.cssText=img.style.cssText;v.style.filter='none';img.replaceWith(v)}v.play().catch(()=>{})}};
+})();
+/* ---------- publicar (com vídeo no carrossel, agendamento e rascunho) ---------- */
+window.ccPublish=async function(){
+  if(!CC||CC.busy||!me?.id)return;try{ccPrepCompress()}catch(_){}
+  const ta=document.getElementById('ccCap');if(ta)CC.text=ta.value;const text=(CC.text||'').trim();
+  if(CC.kind==='text'&&!text){alert('Escreva alguma coisa para publicar.');return}
+  if(CC.kind==='video'&&!CC.video?.ready){alert('Espere o vídeo ficar pronto.');return}
+  if((CC.kind==='photo'||CC.kind==='carousel')&&!CC.photos.length){alert('Escolha pelo menos uma foto.');return}
+  if(CC.sch&&CC.sch<Date.now()+5*60e3){alert('O horário agendado já passou. Escolha outro ou publique agora.');return}
+  CC.busy=true;const btn=document.querySelector('.ccPubBtn');const label=CC.sch?'Agendar':'Compartilhar';if(btn){btn.disabled=true;btn.textContent=CC.sch?'Agendando…':'Publicando…'}
+  try{
+    const media=[];let thumb='',type='image';
+    const upVid=async(file,label,frac0,frac1,dur)=>{let blob=file,ctype=(file.type||cmGuessType(file,'video')).split(';')[0];if(blob.size>25*1048576&&ccCanCompress()){ccProgress('Otimizando o vídeo para celular…',frac0);const t0=Date.now();const iv=setInterval(()=>ccProgress('Otimizando o vídeo para celular…',Math.min(.99,(Date.now()-t0)/1000/Math.max(1,dur||30))),500);try{const out=await compressVideoFile(file);if(out&&out.size<blob.size){blob=out;ctype=(out.type||'video/mp4').split(';')[0]}}finally{clearInterval(iv)}}if(blob.size>CC_MAX_VIDEO_MB*1048576)throw new Error('too large');const ext=/webm/.test(ctype)?'webm':/quicktime|mov/.test(ctype)?'mov':'mp4';return ccUploadBlob(blob,ext,ctype,f=>ccProgress(label,frac0+(frac1-frac0)*f))};
+    if(CC.kind==='photo'||CC.kind==='carousel'){
+      const n=CC.photos.length;
+      for(let k=0;k<n;k++){const p=CC.photos[k];const lab=n>1?`Enviando ${p.isVid?'vídeo':'foto'} ${k+1} de ${n}…`:(p.isVid?'Enviando seu vídeo…':'Enviando sua foto…');
+        if(p.isVid){ccProgress(lab,k/n);let th='';try{th=await ccUploadBlob(p.thumbBlob,'jpg','image/jpeg')}catch(_){}const u=await upVid(p.file,lab,k/n,(k+1)/n,p.dur);media.push({u,t:'video',th,w:p.w,h:p.h,d:Math.round(p.dur)});if(!thumb&&k===0)thumb=th}
+        else{ccProgress(n>1?`Preparando foto ${k+1} de ${n}…`:'Preparando sua foto…',k/n);const r=await ccRender(p);const u=await ccUploadBlob(r.blob,'jpg','image/jpeg',f=>ccProgress(lab,(k+f)/n));media.push({u,t:'image',w:r.w,h:r.h})}}
+      if(media.length===1&&media[0].t==='video')type='video';
+    }else if(CC.kind==='video'){
+      type='video';const v=CC.video;ccProgress('Preparando seu vídeo…',0);
+      const tb=await ccVideoThumb();if(tb){try{thumb=await ccUploadBlob(tb,'jpg','image/jpeg')}catch(_){}}
+      const u=await upVid(v.file,'Enviando seu vídeo…',0,1,v.dur);media.push({u,t:'video',th:thumb,w:v.w,h:v.h,d:Math.round(v.dur)});
+    }
+    ccProgress(CC.sch?'Agendando…':'Publicando…',1);
+    const p=profileData(),tags=ccHashtags(text);const men={};Object.entries(CC.men).forEach(([n,uid])=>{if(text.includes('@'+n))men[n]=uid});
+    const desc={v:2,text,type,n:p.name,c:p.city,media,th:thumb,vis:CC.vis,loc:CC.loc||'',tags,men,tg:CC.tg,...ccExtraDesc()};if(CC.sch)desc.sch=CC.sch;
+    const {data,error}=await sb.from('vitrine_items').insert({user_id:me.id,name:'post',price:0,position:0,item_type:'post',active:true,image_url:media[0]?.th&&media[0].t==='video'?media[0].u:(media[0]?.u||''),link_url:'',description:JSON.stringify(desc)}).select('id,created_at').single();
+    if(error)throw error;const pid=String(data.id);
+    const extra=[];if(tags.length)extra.push(sb.from('cm_post_hashtags').insert(tags.map(t=>({post_id:pid,tag:t}))));
+    const tagRows=[...CC.tg.map(u=>({post_id:pid,user_id:u,kind:'tag',tagged_by:me.id})),...Object.values(men).filter(u=>u!==me.id).map(u=>({post_id:pid,user_id:u,kind:'mention',tagged_by:me.id}))];if(tagRows.length)extra.push(sb.from('cm_post_tags').insert(tagRows));
+    if(CC.collabs.length)extra.push(sb.from('cm_post_collabs').insert(CC.collabs.map(u=>({post_id:pid,owner_id:me.id,user_id:u,status:'pending'}))));
+    await Promise.allSettled(extra);
+    POSTS.list.push({id:pid,ownerId:me.id,name:p.name,city:p.city,photo:p.photo,text,image:media[0]?.u||'',type,media,thumb,vis:CC.vis,loc:CC.loc||'',tags,men,tg:CC.tg,_d:desc,collabs:[],collabPend:[...CC.collabs],created:Date.parse(data.created_at)||Date.now(),likes:0,likedByMe:false,comments:[]});POSTS.loaded=true;POSTS.sig='';POSTS.shown=20;
+    if(CC.draftId)ppxDraftDel(CC.draftId).catch(()=>{});
+    const wasVideo=type==='video',sch=CC.sch;ccClose();
+    shareToast(sch?'⏰ Agendada para '+ppxFmt(sch)+'. Veja em Perfil → Agendadas.':wasVideo?'Publicado com sucesso! 🎉 Seu vídeo também está em Vídeos.':'Publicado com sucesso! 🎉');
+    if(document.getElementById('feed'))renderFeed();else if(window.cmCurrentPage==='profile')go('profile');else go('home');
+  }catch(e){console.error('publicar',e);document.getElementById('ccProg')?.remove();if(CC)CC.busy=false;if(btn){btn.disabled=false;btn.textContent=label}alert(ccErrPt(e))}
+};
+
+/* ---------- rascunhos (ficam guardados neste aparelho, como no Instagram) ---------- */
+const PPXD={db:null};
+function ppxIdb(){return new Promise((res,rej)=>{if(PPXD.db)return res(PPXD.db);if(!window.indexedDB)return rej(new Error('sem idb'));const r=indexedDB.open('cm_drafts',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('d',{keyPath:'id'})}catch(_){}};r.onsuccess=()=>{PPXD.db=r.result;res(PPXD.db)};r.onerror=()=>rej(r.error)})}
+async function ppxDraftPut(o){const db=await ppxIdb();return new Promise((res,rej)=>{const t=db.transaction('d','readwrite');t.objectStore('d').put(o);t.oncomplete=()=>res();t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error)})}
+async function ppxDraftAll(){const db=await ppxIdb();return new Promise((res,rej)=>{const t=db.transaction('d','readonly');const q=t.objectStore('d').getAll();q.onsuccess=()=>res((q.result||[]).filter(d=>d.uid===me?.id).sort((a,b)=>b.updated-a.updated));q.onerror=()=>rej(q.error)})}
+async function ppxDraftDel(id){const db=await ppxIdb();return new Promise((res,rej)=>{const t=db.transaction('d','readwrite');t.objectStore('d').delete(id);t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})}
+function ppxHasContent(){if(!CC)return false;return !!(CC.photos?.length||CC.video||(CC.text||'').trim())}
+(function(){
+  const back=window.ccBack;
+  window.ccBack=function(){
+    if(!CC||CC.busy)return back();
+    const editing=CC.step==='edit'&&!document.getElementById('ccTxEd')&&!CC.panel;const textDet=CC.step==='details'&&CC.kind==='text';
+    if((editing||textDet)&&ppxHasContent()){if(textDet)ccCapSave();ppxDraftAsk();return}
+    return back();
+  };
+  const pick=window.ccPick;
+  window.ccPick=function(){pick();ppxDraftAll().then(a=>{const box=document.querySelector('.ccPick');if(!box||!a.length||box.querySelector('.ppxDraftBtn'))return;box.insertAdjacentHTML('beforeend',`<button type="button" class="ppxDraftBtn" onclick="ppxDraftList()"><i>🗂️</i><span><b>Rascunhos</b><small>${a.length} ${a.length>1?'publicações guardadas':'publicação guardada'} neste aparelho</small></span></button>`)}).catch(()=>{})};
+})();
+function ppxDraftAsk(){
+  openModal(`<div class="ppxAsk"><b>Salvar como rascunho?</b><span>Você pode terminar depois. O rascunho fica guardado neste aparelho.</span><button class="primary" onclick="ppxDraftSave()">Salvar rascunho</button><button class="secondary" style="width:100%;margin-top:8px;color:#ff8a94" onclick="closeModal();ppxDiscard()">Descartar</button><button class="ghost" style="width:100%" onclick="closeModal()">Continuar editando</button></div>`);
+  document.getElementById('modal')?.classList.add('sheet');
+}
+function ppxDiscard(){if(!CC)return;if(CC.kind==='text'){CC.text='';ccPick();return}(CC.pool||[]).forEach(p=>{try{URL.revokeObjectURL(p.url)}catch(_){}});CC.pool=[];CC.photos=[];CC.cur=null;CC.video=null;CC.draftId=null;ccPick()}
+async function ppxDraftSave(){
+  if(!CC)return;closeModal();
+  try{
+    let thumb=null;if(CC.photos?.length){const p=CC.photos[0];thumb=p.isVid?p.thumbBlob:p.file}else if(CC.video){thumb=await ccVideoThumb().catch(()=>null)}
+    const o={id:CC.draftId||('d'+Date.now()),uid:me.id,updated:Date.now(),kind:CC.kind,multi:!!CC.multi,aspect:CC.aspect,text:CC.text||'',men:CC.men||{},loc:CC.loc||'',tg:CC.tg||[],collabs:CC.collabs||[],vis:CC.vis||'public',mu:CC.mu||'',poll:CC.poll||null,pr:CC.pr||null,resp:CC.resp||null,sch:CC.sch||null,thumb,
+      photos:(CC.photos||[]).map(p=>({blob:p.file,name:p.file?.name||'',isVid:!!p.isVid,thumbBlob:p.thumbBlob||null,w:p.w,h:p.h,dur:p.dur||0,zoom:p.zoom,px:p.px,py:p.py,f:p.f||'',adj:p.adj||{},tx:p.tx||[]})),
+      video:CC.video?{blob:CC.video.file,name:CC.video.file?.name||'',cover:CC.video.cover||0}:null};
+    await ppxDraftPut(o);ccClose();shareToast('🗂️ Rascunho salvo. Continue em Criar → Rascunhos.');
+  }catch(e){console.error('rascunho',e);alert('Não consegui salvar o rascunho neste aparelho (pouco espaço ou modo anônimo).')}
+}
+async function ppxDraftList(){
+  let a=[];try{a=await ppxDraftAll()}catch(_){}
+  openModal(`<div class="modalHead"><h2>Rascunhos</h2><button class="close" onclick="closeModal()">×</button></div>${a.length?`<div class="ppxDrafts">${a.map(d=>`<div class="ppxDraft"><button type="button" class="ppxDraftOpen" onclick="ppxDraftOpen('${esc(d.id)}')"><span class="ppxDraftTh" data-did="${esc(d.id)}">${d.kind==='text'?'📝':''}</span><span><b>${esc({photo:'Foto',carousel:'Carrossel',video:'Vídeo',text:'Texto'}[d.kind]||'Publicação')}</b><small>${esc((d.text||'Sem legenda').slice(0,50))}</small><small>${esc(postAgo(d.updated))}</small></span></button><button type="button" class="ppxDraftDel" onclick="ppxDraftRemove('${esc(d.id)}')" aria-label="Apagar rascunho">🗑</button></div>`).join('')}</div>`:'<div class="cmEmpty small"><b>Nenhum rascunho</b><span>Ao sair no meio de uma publicação, toque em Salvar rascunho.</span></div>'}`);
+  a.forEach(d=>{if(d.thumb){const el=document.querySelector(`.ppxDraftTh[data-did="${CSS.escape(d.id)}"]`);if(el)el.innerHTML=`<img src="${URL.createObjectURL(d.thumb)}" alt="">`}});
+}
+async function ppxDraftRemove(id){if(!confirm('Apagar este rascunho?'))return;await ppxDraftDel(id).catch(()=>{});ppxDraftList()}
+async function ppxDraftOpen(id){
+  let d=null;try{d=(await ppxDraftAll()).find(x=>x.id===id)}catch(_){}if(!d){alert('Rascunho não encontrado.');return}
+  closeModal();if(!document.getElementById('cmc'))cmCreate('',d.resp||null);
+  Object.assign(CC,{kind:d.kind,multi:d.multi,aspect:d.aspect||'4:5',text:d.text,men:d.men||{},loc:d.loc,tg:d.tg||[],collabs:d.collabs||[],vis:d.vis||'public',mu:d.mu||'',poll:d.poll,pr:d.pr,resp:d.resp,sch:d.sch&&d.sch>Date.now()?d.sch:null,draftId:d.id});
+  if(d.kind==='text'){ccDetails();return}
+  if(d.kind==='video'&&d.video){const f=d.video.blob;CC.video={file:f,url:URL.createObjectURL(f),dur:0,w:0,h:0,cover:d.video.cover||0,ready:false};ccEdit();return}
+  const items=(d.photos||[]).map(p=>{const it={file:p.blob,w:p.w,h:p.h,zoom:p.zoom||1,px:p.px||0,py:p.py||0,f:p.f||'',adj:p.adj||{b:0,c:0,s:0,w:0},tx:p.tx||[]};if(p.isVid){it.isVid=true;it.dur=p.dur;it.thumbBlob=p.thumbBlob;it.vurl=URL.createObjectURL(p.blob);it.url=URL.createObjectURL(p.thumbBlob)}else it.url=URL.createObjectURL(p.blob);return it});
+  if(!items.length){ccPick();return}
+  CC.pool=items;CC.photos=[...items];CC.cur=items[0];CC.kind=items.length>1?'carousel':'photo';ccEdit();
+}
+/* ===================== fim PUBLICAÇÕES ESTILO INSTAGRAM ===================== */
+
+/* ===================== PERFIL: MARCADOS, SUGESTÕES, CONTA PRIVADA, BLOQUEAR ===================== */
+const BLK={blocked:new Set(),restricted:new Set(),blockedBy:new Set(),rpairs:new Set(),myReq:new Set(),inReq:[],loaded:false,missing:false,dismiss:new Set()};
+try{BLK.dismiss=new Set(JSON.parse(localStorage.getItem('cm_sug_dismiss')||'[]'))}catch(_){}
+const BLK_I={
+  tag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="12" cy="10" r="3"/><path d="M6.5 19a6 6 0 0 1 11 0"/></svg>',
+  block:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>',
+  restrict:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 12-5M16 16l5 5M21 16l-5 5"/></svg>',
+  lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
+  out:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M17 11h5"/></svg>'
+};
+function blkIsBlocked(uid){return !!uid&&(BLK.blocked.has(uid)||BLK.blockedBy.has(uid))}
+function blkPerson(uid){return (publicProfilesCache||[]).find(p=>p.id===uid)||{id:uid,name:'Pessoa',photo:''}}
+function blkIsPrivate(uid){if(!uid||uid===me?.id)return false;const p=blkPerson(uid);return p.is_private===true||p.is_private==='true'}
+function blkCanSee(uid){return !blkIsPrivate(uid)||followCache.has(uid)}
+function blkHidePost(x){if(!x||x.ownerId===me?.id)return false;if(blkIsBlocked(x.ownerId))return true;if(!blkCanSee(x.ownerId)&&!(x.collabs||[]).includes(me?.id))return true;return false}
+function blkHideComment(c,x){if(!c)return false;if(c.ownerId===me?.id)return false;if(blkIsBlocked(c.ownerId))return true;
+  if(x&&x.ownerId!==me?.id&&BLK.rpairs.has(x.ownerId+'|'+c.ownerId)&&!((x._d?.ca||[]).includes(String(c.id))))return true;return false}
+async function blkLoad(){
+  if(!me?.id)return;
+  try{const {data,error}=await sb.from('cm_blocks').select('blocker_id,blocked_id,kind');if(error)throw error;
+    BLK.blocked=new Set();BLK.restricted=new Set();BLK.blockedBy=new Set();
+    (data||[]).forEach(r=>{if(r.blocker_id===me.id){if(r.kind==='restrict')BLK.restricted.add(r.blocked_id);else BLK.blocked.add(r.blocked_id)}else if(r.blocked_id===me.id&&r.kind!=='restrict')BLK.blockedBy.add(r.blocker_id)});BLK.missing=false}
+  catch(e){if(typeof cvxMissing==='function'&&cvxMissing(e))BLK.missing=true}
+  try{const {data,error}=await sb.from('cm_follow_requests').select('requester_id,target_id,created_at');if(!error){BLK.myReq=new Set((data||[]).filter(r=>r.requester_id===me.id).map(r=>r.target_id));BLK.inReq=(data||[]).filter(r=>r.target_id===me.id).sort((a,b)=>Date.parse(b.created_at)-Date.parse(a.created_at))}}catch(_){}
+  BLK.loaded=true;
+}
+async function blkPairsLoad(){
+  const owners=[...new Set((POSTS.list||[]).map(x=>x.ownerId).filter(Boolean))];if(!owners.length)return;
+  try{const {data,error}=await sb.rpc('cm_restricted_pairs',{p_owners:owners.slice(0,500)});if(error)throw error;BLK.rpairs=new Set((data||[]).map(r=>r.blocker+'|'+r.blocked))}catch(_){}
+}
+/* carrega junto com as publicações */
+(function(){
+  const pl=window.postsLoad;let t=0;
+  window.postsLoad=async function(){if(!BLK.loaded||Date.now()-t>60000){t=Date.now();await blkLoad();blkPairsLoad()}return pl.apply(this,arguments)};
+  const gpp=window.getPublicPeople;window.getPublicPeople=function(){return gpp().filter(p=>!blkIsBlocked(p.id))};
+  const sg=window.storyGroups;window.storyGroups=function(){const a=sg();return Array.isArray(a)?a.filter(g=>!g||g.uid===me?.id||g.uid==='me'||(!blkIsBlocked(g.uid)&&blkCanSee(g.uid))):a};
+})();
+
+/* ---------- bloquear / restringir ---------- */
+function blkAsk(uid,kind){
+  const p=blkPerson(uid),first=String(p.name||'').split(' ')[0]||'esta pessoa';
+  const txt=kind==='block'?`<b>Bloquear ${esc(first)}?</b><span>${esc(first)} não vai conseguir ver seu perfil, suas publicações e stories, nem mandar mensagem ou comentar. Vocês deixam de se seguir. ${esc(first)} não recebe aviso.</span>`:`<b>Restringir ${esc(first)}?</b><span>As mensagens de ${esc(first)} vão para Pedidos e você não aparece como "Visto". Os comentários de ${esc(first)} nas suas publicações só ficam visíveis para vocês dois, até você aprovar. ${esc(first)} não recebe aviso.</span>`;
+  closeModal();msgSheetClose?.();
+  openModal(`<div class="ppxAsk">${txt}<button class="primary" style="${kind==='block'?'background:#ff5c6c;color:#fff':''}" onclick="blkDo('${esc(uid)}','${kind}')">${kind==='block'?'Bloquear':'Restringir'}</button><button class="ghost" style="width:100%" onclick="closeModal()">Cancelar</button></div>`);
+  document.getElementById('modal')?.classList.add('sheet');
+}
+async function blkDo(uid,kind){
+  closeModal();
+  try{let r=await sb.rpc('cm_block',{p_user:uid,p_kind:kind});
+    if(r.error){if(!(typeof cvxMissing==='function'&&cvxMissing(r.error)))throw r.error;r=await sb.from('cm_blocks').upsert({blocker_id:me.id,blocked_id:uid,kind},{onConflict:'blocker_id,blocked_id'});if(r.error)throw r.error;if(kind==='block')await sb.from('follows').delete().eq('follower_id',me.id).eq('following_id',uid)}
+    if(kind==='block'){BLK.blocked.add(uid);BLK.restricted.delete(uid);followCache.delete(uid)}else{BLK.restricted.add(uid);BLK.blocked.delete(uid)}
+    POSTS.sig='';shareToast(kind==='block'?'Conta bloqueada':'Conta restrita');
+    if(kind==='block'){if(window.cmCurrentPage==='conversation'||window.cmCurrentPage==='publicProfile'){msgLeave?.();go('home')}else postsRefreshScreen()}else if(window.cmCurrentPage==='publicProfile')go('publicProfile');
+  }catch(e){typeof cvxMissing==='function'&&cvxMissing(e)?cvxSqlToast():alert('Não foi possível agora: '+(e?.message||''))}
+}
+async function blkUndo(uid){
+  try{const {error}=await sb.from('cm_blocks').delete().eq('blocker_id',me.id).eq('blocked_id',uid);if(error)throw error;BLK.blocked.delete(uid);BLK.restricted.delete(uid);POSTS.sig='';shareToast('Pronto');if(document.getElementById('cfg')&&CFG.stack.length)CFG.stack[CFG.stack.length-1]();else if(window.cmCurrentPage==='publicProfile')go('publicProfile')}
+  catch(e){alert('Não foi possível agora.')}
+}
+function blkPostMenuRows(uid){if(!uid||uid===me?.id)return '';const row=(ic,t,st,act)=>`<button type="button" onclick="${act}"><i>${ic}</i><span><b>${t}</b><small>${st}</small></span></button>`;return (BLK.restricted.has(uid)?row(BLK_I.restrict,'Tirar restrição','Volta ao normal',`closeModal();blkUndo('${esc(uid)}')`):row(BLK_I.restrict,'Restringir','Limita sem a pessoa saber',`blkAsk('${esc(uid)}','restrict')`))+row(BLK_I.block,'Bloquear','A pessoa não vê mais você',`blkAsk('${esc(uid)}','block')`)}
+/* menu ⋯ do perfil de outra pessoa e da conversa */
+(function(){
+  const pm=window.pfPubMenu;
+  window.pfPubMenu=function(){
+    pm();const p=currentPublicUser;const box=document.querySelector('#modal .pfMenu');if(!p||!box)return;
+    let h='';if(BLK.myReq.has(p.id))h+=`<button onclick="closeModal();blkCancelReq('${esc(p.id)}')">${BLK_I.lock}<span>Cancelar pedido para seguir</span></button>`;
+    h+=`<button onclick="blkFollowsMe('${esc(p.id)}')">${BLK_I.out}<span>Remover dos seus seguidores<small>A pessoa deixa de seguir você</small></span></button>`;
+    h+=BLK.restricted.has(p.id)?`<button onclick="closeModal();blkUndo('${esc(p.id)}')">${BLK_I.restrict}<span>Tirar restrição</span></button>`:`<button onclick="blkAsk('${esc(p.id)}','restrict')">${BLK_I.restrict}<span>Restringir<small>Limita sem a pessoa saber</small></span></button>`;
+    h+=`<button class="danger" onclick="blkAsk('${esc(p.id)}','block')">${BLK_I.block}<span>Bloquear</span></button>`;
+    box.insertAdjacentHTML('beforeend',h);
+  };
+  const mm=window.msgMenu;
+  window.msgMenu=function(){mm();const box=document.querySelector('#msgSheet .msgMenu');const p=currentPublicUser;if(!box||!p)return;const danger=box.querySelector('.danger');const h=`<button onclick="blkAsk('${esc(p.id)}','restrict')">🚫 ${BLK.restricted.has(p.id)?'Já está restrita':'Restringir'}</button><button class="danger" onclick="blkAsk('${esc(p.id)}','block')">⛔ Bloquear</button>`;if(danger){danger.insertAdjacentHTML('beforebegin',h);danger.innerHTML='⚑ Denunciar'}else box.insertAdjacentHTML('beforeend',h)};
+  const mr=window.markConversationRead;window.markConversationRead=function(id){if(BLK.restricted.has(id))return loadUnreadBadges();return mr(id)};
+})();
+async function blkFollowsMe(uid){closeModal();if(!confirm('Remover esta pessoa dos seus seguidores? Ela não recebe aviso.'))return;try{const {error}=await sb.rpc('cm_remove_follower',{p_user:uid});if(error)throw error;shareToast('Removida dos seus seguidores');if(window.cmCurrentPage==='publicProfile')go('publicProfile')}catch(e){typeof cvxMissing==='function'&&cvxMissing(e)?cvxSqlToast():alert('Não foi possível agora.')}}
+
+/* ---------- conta privada: seguir com pedido ---------- */
+(function(){
+  const tf=window.toggleFollow;
+  window.toggleFollow=async function(id){
+    if(!me?.id||!id||id===me.id)return;
+    if(blkIsBlocked(id)){alert('Você não pode seguir esta conta.');return}
+    if(!followCache.has(id)&&blkIsPrivate(id)){
+      if(BLK.myReq.has(id))return blkCancelReq(id);
+      try{const {error}=await sb.from('cm_follow_requests').insert({requester_id:me.id,target_id:id});if(error&&!/duplicate/i.test(error.message||''))throw error;BLK.myReq.add(id);shareToast('Pedido enviado. Você vê as publicações quando aceitarem.');
+        try{await sb.from('cm_notifications').insert({user_id:id,actor_id:me.id,kind:'follow_request'})}catch(_){}
+        if(currentPublicUser?.id===id)go('publicProfile')}catch(e){typeof cvxMissing==='function'&&cvxMissing(e)?cvxSqlToast():alert('Não foi possível pedir para seguir agora.')}
+      return;
+    }
+    const was=followCache.has(id);await tf(id);
+    if(!was&&followCache.has(id)&&currentPublicUser?.id===id)setTimeout(()=>sugInject(id),80);
+  };
+  /* botões "Seguir" viram "Solicitar"/"Solicitado" em contas privadas */
+  const pps=window.publicProfileScreen;
+  window.publicProfileScreen=function(){
+    const p=currentPublicUser;
+    if(p&&BLK.blocked.has(p.id))return screen(`<div class="pf"><div class="blkWall">${BLK_I.block}<b>Você bloqueou ${esc(p.name)}</b><span>Ela não vê seu perfil nem consegue falar com você.</span><button class="pfBtn main" onclick="blkUndo('${esc(p.id)}')"><span>Desbloquear</span></button><button class="pfBtn" onclick="go('home')"><span>Voltar</span></button></div></div>`,'explore');
+    if(p&&BLK.blockedBy.has(p.id))return screen(`<div class="pf"><div class="blkWall">${BLK_I.block}<b>Perfil indisponível</b><span>Esta conta não está disponível para você.</span><button class="pfBtn" onclick="go('home')"><span>Voltar</span></button></div></div>`,'explore');
+    let h=pps();if(!p)return h;
+    const locked=blkIsPrivate(p.id)&&!followCache.has(p.id);
+    if(locked){const req=BLK.myReq.has(p.id);h=h.replace(/(<button type="button" class="pfFollow)[^"]*(" onclick="toggleFollow\('[^']*'\)">)[^<]*(<\/button>)/,`$1${req?' on':''}$2${req?'Solicitado':'+ Seguir'}$3`);
+      setTimeout(()=>{const pg=document.getElementById('pfPages'),tb=document.getElementById('pfTabs');if(tb)tb.remove();if(pg)pg.innerHTML=`<div class="pfPage"><div class="blkPriv">${BLK_I.lock}<b>Esta conta é privada</b><span>${req?'Pedido enviado. Quando aceitarem, você vê as fotos e os vídeos.':'Siga esta conta para ver as fotos e os vídeos.'}</span></div></div>`},0)}
+    if(BLK.restricted.has(p.id))h=h.replace('<div class="pfActions">','<div class="blkRestr">🚫 Conta restrita por você · <a onclick="blkUndo(\''+esc(p.id)+'\')">Tirar restrição</a></div><div class="pfActions">');
+    if(!locked)setTimeout(()=>tagInject(p.id),0);
+    return h;
+  };
+  const pr=window.profile;
+  window.profile=function(){const h=pr();setTimeout(()=>{tagInject(me?.id);blkReqChip()},0);return h};
+})();
+async function blkCancelReq(id){try{await sb.from('cm_follow_requests').delete().eq('requester_id',me.id).eq('target_id',id)}catch(_){}BLK.myReq.delete(id);shareToast('Pedido cancelado');if(currentPublicUser?.id===id&&window.cmCurrentPage==='publicProfile')go('publicProfile')}
+function blkReqChip(){const box=document.querySelector('#profilePages .ppxChips');if(!box||!BLK.inReq.length||box.querySelector('.blkReqChip'))return;box.insertAdjacentHTML('afterbegin',`<button type="button" class="blkReqChip" onclick="blkReqList()">${BLK_I.lock}<span>Pedidos para seguir</span><b>${BLK.inReq.length}</b></button>`)}
+function blkReqList(){
+  const a=BLK.inReq;openModal(`<div class="modalHead"><h2>Pedidos para seguir</h2><button class="close" onclick="closeModal()">×</button></div>${a.length?`<div class="cmPeopleList">${a.map(r=>{const p=blkPerson(r.requester_id);return `<div class="blkReqRow"><img src="${esc(p.photo||avatar(p.name))}" alt="" onclick="closeModal();postOpenProfile('${esc(p.id)}')"><span><b>${esc(p.name)}</b><small>${esc(personCity(p)||'')}</small></span><button type="button" class="ok" onclick="blkReqAnswer('${esc(p.id)}',true)">Aceitar</button><button type="button" onclick="blkReqAnswer('${esc(p.id)}',false)">Recusar</button></div>`}).join('')}</div>`:'<div class="cmEmpty small"><b>Nenhum pedido agora</b></div>'}`);document.getElementById('modal')?.classList.add('sheet')}
+async function blkReqAnswer(uid,ok){
+  try{if(ok){const {data,error}=await sb.rpc('cm_follow_accept',{p_requester:uid});if(error)throw error;shareToast('Pedido aceito ✓')}else{const {error}=await sb.from('cm_follow_requests').delete().eq('requester_id',uid).eq('target_id',me.id);if(error)throw error}
+    BLK.inReq=BLK.inReq.filter(r=>r.requester_id!==uid);blkReqList();if(window.cmCurrentPage==='profile')go('profile')}
+  catch(e){typeof cvxMissing==='function'&&cvxMissing(e)?cvxSqlToast():alert('Não foi possível agora.')}
+}
+/* ---------- configurações: privacidade ---------- */
+(function(){
+  const cm=window.cfgMain;
+  window.cfgMain=function(){
+    cm();const secs=[...document.querySelectorAll('#cfg .cfgSec')];const after=secs.find(s=>/Seu perfil/.test(s.querySelector('h3')?.textContent||''))||secs[1];if(!after)return;
+    const priv=blkIsPrivateMe();
+    after.insertAdjacentHTML('afterend',cfgSec('Quem pode ver seu conteúdo',[
+      {i:'lock',t:'Conta privada',s:priv?'Só seguidores aprovados veem suas publicações':'Qualquer pessoa vê suas publicações',sw:priv,on:"blkPrivToggle(this)",k:'privada privacidade'},
+      {i:'user',t:'Pedidos para seguir',r:BLK.inReq.length?String(BLK.inReq.length):'',on:"cfgGo('blkReqList()')",k:'pedidos seguir'},
+      {i:'lock',t:'Contas bloqueadas',r:BLK.blocked.size?String(BLK.blocked.size):'',on:"cfgPush(()=>blkCfgList('block'))",k:'bloqueados bloquear'},
+      {i:'lock',t:'Contas restritas',r:BLK.restricted.size?String(BLK.restricted.size):'',on:"cfgPush(()=>blkCfgList('restrict'))",k:'restritas restringir'}
+    ]));
+  };
+})();
+function blkIsPrivateMe(){const p=(publicProfilesCache||[]).find(x=>x.id===me?.id);return !!(p&&(p.is_private===true||p.is_private==='true'))||me?.user_metadata?.is_private===true}
+async function blkPrivToggle(btn){
+  const sw=btn.querySelector('.switch');const on=!sw?.classList.contains('on');sw?.classList.toggle('on',on);
+  try{const {error}=await sb.from('profiles').update({is_private:on}).eq('id',me.id);if(error)throw error;const p=(publicProfilesCache||[]).find(x=>x.id===me.id);if(p)p.is_private=on;try{const {data}=await sb.auth.updateUser({data:{...(me.user_metadata||{}),is_private:on}});if(data?.user)me=data.user}catch(_){}
+    const s=btn.querySelector('small');if(s)s.textContent=on?'Só seguidores aprovados veem suas publicações':'Qualquer pessoa vê suas publicações';shareToast(on?'🔒 Sua conta agora é privada':'Sua conta agora é pública')}
+  catch(e){sw?.classList.toggle('on',!on);typeof cvxMissing==='function'&&cvxMissing(e)?cvxSqlToast():alert('Não foi possível mudar agora.')}
+}
+function blkCfgList(kind){const set=kind==='block'?BLK.blocked:BLK.restricted;const a=[...set].map(blkPerson);cfgOpenPage(cfgShell(kind==='block'?'Contas bloqueadas':'Contas restritas',`<section class="cfgSec">${a.length?a.map(p=>`<div class="blkReqRow"><img src="${esc(p.photo||avatar(p.name))}" alt=""><span><b>${esc(p.name)}</b><small>${esc(personCity(p)||'')}</small></span><button type="button" onclick="blkUndo('${esc(p.id)}')">${kind==='block'?'Desbloquear':'Tirar restrição'}</button></div>`).join(''):`<div class="cmEmpty small"><b>${kind==='block'?'Você não bloqueou ninguém':'Nenhuma conta restrita'}</b></div>`}</section>`,false))}
+
+/* ---------- aba Marcados ---------- */
+function tagPosts(uid){return getPosts().filter(x=>x.ownerId!==uid&&((x.tg||[]).includes(uid)||Object.values(x.men||{}).includes(uid))).sort((a,b)=>b.created-a.created)}
+function tagInject(uid){
+  const tabs=document.getElementById('pfTabs'),pages=document.getElementById('pfPages');if(!uid||!tabs||!pages||tabs.querySelector('.pfTab[data-tag]'))return;
+  const idx=pages.querySelectorAll(':scope > .pfPage').length;if(!idx)return;
+  tabs.insertAdjacentHTML('beforeend',`<button type="button" class="pfTab" data-tag="1" onclick="pfShowTab(${idx})">${BLK_I.tag}<span>Marcados</span></button>`);tabs.classList.add('n4');
+  const a=tagPosts(uid),own=uid===me?.id;
+  pages.insertAdjacentHTML('beforeend',`<div class="pfPage hidden">${a.length?ppxGrid(a,'postShowOne'):pfEmpty('photos',own?'Fotos e vídeos com você':'Ainda não há marcações',own?'Quando marcarem você em publicações, elas aparecem aqui.':'Quando marcarem esta pessoa, as publicações aparecem aqui.')}</div>`);
+}
+
+/* ---------- sugestões para seguir ---------- */
+function sugList(base){
+  const city=normText(personCity(blkPerson(base))||''),my=normText(profileData().city||'');
+  return getPublicPeople().filter(p=>p.id!==base&&p.id!==me?.id&&!followCache.has(p.id)&&!BLK.dismiss.has(p.id)&&!BLK.myReq.has(p.id))
+    .map(p=>{const c=normText(personCity(p)||'');let s=0;if(city&&c===city)s+=3;if(my&&c===my)s+=2;if(p.photo)s+=1;return {p,s}}).sort((a,b)=>b.s-a.s).slice(0,12).map(x=>x.p);
+}
+function sugHtml(base,title){const a=sugList(base);if(!a.length)return '';return `<div class="sugBox" data-base="${esc(base||'')}"><div class="sugHead"><b>${esc(title||'Sugestões para você')}</b><button type="button" onclick="this.closest('.sugBox').remove()" aria-label="Fechar">✕</button></div><div class="sugRow">${a.map(p=>`<div class="sugCard" data-uid="${esc(p.id)}"><button type="button" class="sugX" onclick="sugDismiss('${esc(p.id)}',this)" aria-label="Remover sugestão">✕</button><img src="${esc(p.photo||avatar(p.name))}" alt="" onclick="postOpenProfile('${esc(p.id)}')"><b>${esc(p.name)}${vBadge(p.id)}</b><small>${esc(personCity(p)||'Mantiqueira')}</small><button type="button" class="sugFollow" onclick="sugFollow('${esc(p.id)}',this)">${blkIsPrivate(p.id)?'Solicitar':'Seguir'}</button></div>`).join('')}</div></div>`}
+function sugInject(base){const act=document.querySelector('.pf .pfActions');if(!act||document.querySelector('.pf .sugBox'))return;const h=sugHtml(base,'Sugestões para você');if(h){act.insertAdjacentHTML('afterend',h);document.querySelector('.pf .sugBox')?.classList.add('in')}}
+function sugDismiss(uid,btn){BLK.dismiss.add(uid);try{localStorage.setItem('cm_sug_dismiss',JSON.stringify([...BLK.dismiss].slice(-300)))}catch(_){}const c=btn.closest('.sugCard');c?.remove()}
+async function sugFollow(uid,btn){btn.disabled=true;if(blkIsPrivate(uid)){try{const {error}=await sb.from('cm_follow_requests').insert({requester_id:me.id,target_id:uid});if(error&&!/duplicate/i.test(error.message||''))throw error;BLK.myReq.add(uid);btn.textContent='Solicitado';btn.classList.add('on')}catch(e){btn.disabled=false;typeof cvxMissing==='function'&&cvxMissing(e)?cvxSqlToast():alert('Não foi possível agora.')}return}
+  try{const {error}=await sb.from('follows').insert({follower_id:me.id,following_id:uid});if(error)throw error;followCache.add(uid);btn.textContent='Seguindo';btn.classList.add('on')}catch(e){btn.disabled=false;alert('Não foi possível seguir agora.')}}
+/* ===================== fim PERFIL ===================== */
+
+/* ===================== FEED: PARA VOCÊ · SEGUINDO · FAVORITOS · VOCÊ ESTÁ EM DIA ===================== */
+const FEEDM={mode:'all',fav:new Set(),favLoaded:false,inFeed:false};
+try{FEEDM.mode=sessionStorage.getItem('cm_feed_mode')||'all'}catch(_){}
+async function favLoad(){if(!me?.id)return;try{const {data,error}=await sb.from('cm_favorites').select('fav_id').eq('user_id',me.id);if(error)throw error;FEEDM.fav=new Set((data||[]).map(r=>r.fav_id))}catch(_){try{FEEDM.fav=new Set(JSON.parse(localStorage.getItem('cm_fav_'+me.id)||'[]'))}catch(__){}}FEEDM.favLoaded=true}
+(function(){
+  const gp=window.getPosts;
+  window.getPosts=function(){const a=gp();if(!FEEDM.inFeed||FEEDM.mode==='all')return a;if(FEEDM.mode==='following')return a.filter(x=>x.ownerId===me?.id||followCache.has(x.ownerId)||(x.collabs||[]).some(u=>followCache.has(u)));if(FEEDM.mode==='fav')return a.filter(x=>FEEDM.fav.has(x.ownerId));return a};
+  const rf=window.renderFeed;
+  window.renderFeed=function(){
+    const el=document.getElementById('feed');const home=el&&!el.dataset.explore;
+    if(home&&!FEEDM.favLoaded){FEEDM.favLoaded=true;favLoad().then(()=>{if(FEEDM.mode==='fav')renderFeed()})}
+    FEEDM.inFeed=!!home;
+    try{rf()}finally{FEEDM.inFeed=false}
+    if(!home||!el)return;
+    if(!document.getElementById('feedModes'))el.insertAdjacentHTML('beforebegin',`<div id="feedModes" class="feedModes"></div>`);
+    const fm=document.getElementById('feedModes');if(fm)fm.innerHTML=[['all','Para você'],['following','Seguindo'],['fav','★ Favoritos']].map(([k,l])=>`<button type="button" class="${FEEDM.mode===k?'on':''}" onclick="feedMode('${k}')">${l}</button>`).join('')+(FEEDM.mode==='fav'?`<button type="button" class="feedFavEdit" onclick="favEdit()">Editar</button>`:'');
+    if(FEEDM.mode==='fav'&&!FEEDM.fav.size){el.innerHTML=`<div class="cmEmpty"><div class="cmEmptyIco">★</div><b>Escolha seus Favoritos</b><span>Veja primeiro as publicações das pessoas que você mais gosta. Ninguém fica sabendo que está na sua lista.</span><button class="cmBtn" type="button" onclick="favEdit()">Escolher favoritos</button></div>`;return}
+    if(FEEDM.mode==='following'&&!el.querySelector('.igPost')){el.innerHTML=`<div class="cmEmpty"><div class="cmEmptyIco">👥</div><b>Nada novo de quem você segue</b><span>Siga mais pessoas da região para ver as publicações delas aqui.</span><button class="cmBtn" type="button" onclick="go('people')">Encontrar pessoas</button></div>`;return}
+    feedCaughtUp(el);feedSugInject(el);
+  };
+})();
+function feedMode(k){FEEDM.mode=k;try{sessionStorage.setItem('cm_feed_mode',k)}catch(_){}POSTS.shown=20;renderFeed();document.getElementById('feedModes')?.scrollIntoView({block:'nearest',behavior:'smooth'})}
+/* "Você está em dia": depois das publicações dos últimos 3 dias */
+function feedCaughtUp(el){
+  el.querySelector('.feedDone')?.remove();
+  const posts=[...el.querySelectorAll(':scope > .igPost:not(.sponsored):not(.promo)')];if(!posts.length)return;
+  const lim=Date.now()-3*864e5;let firstOld=null,anyNew=false;
+  for(const art of posts){const id=art.id.replace(/^post-/,'');const x=postFind(id);if(!x)continue;if(x.created>=lim)anyNew=true;else{firstOld=art;break}}
+  const html=`<div class="feedDone"><div class="feedDoneIco">✓</div><b>Você está em dia</b><span>${anyNew?'Você viu todas as novas publicações dos últimos 3 dias.':'Não há publicações novas dos últimos 3 dias.'}</span>${firstOld?'<small>Publicações mais antigas</small>':''}</div>`;
+  if(firstOld)firstOld.insertAdjacentHTML('beforebegin',html);else if(anyNew&&!document.getElementById('feedMore'))el.insertAdjacentHTML('beforeend',html);
+}
+/* sugestões para seguir no meio do feed */
+function feedSugInject(el){
+  if(el.querySelector('.sugBox'))return;let hide=0;try{hide=+localStorage.getItem('cm_sug_feed_hide')||0}catch(_){}if(Date.now()-hide<3*864e5)return;
+  const posts=el.querySelectorAll(':scope > .igPost');const at=posts[Math.min(2,posts.length-1)];if(!at||typeof sugHtml!=='function')return;
+  const h=sugHtml(null,'Sugestões para você');if(!h)return;at.insertAdjacentHTML('afterend',h);
+  const x=el.querySelector('.sugBox .sugHead button');if(x)x.setAttribute('onclick',"try{localStorage.setItem('cm_sug_feed_hide',String(Date.now()))}catch(_){}this.closest('.sugBox').remove()");
+}
+/* escolher favoritos */
+function favEdit(){
+  openModal(`<div class="modalHead"><h2>Favoritos</h2><button class="close" onclick="closeModal();renderFeed()">×</button></div><div class="sub" style="margin-bottom:8px">As publicações dos favoritos aparecem em ★ Favoritos. Até 50 pessoas. Ninguém fica sabendo.</div><div class="cmSearch inModal"><span class="cmSearchIco">${CMI.search}</span><input id="favQ" type="search" placeholder="Buscar pessoas que você segue…" autocomplete="off" oninput="favPaint()"></div><div id="favList" class="cmPeopleList"></div><button class="primary" onclick="closeModal();renderFeed()">Concluir</button>`);
+  document.getElementById('modal')?.classList.add('sheet');favPaint();
+}
+function favPaint(){const el=document.getElementById('favList');if(!el)return;const q=normText(document.getElementById('favQ')?.value||'');const ppl=getPublicPeople().filter(p=>followCache.has(p.id)||FEEDM.fav.has(p.id)).filter(p=>!q||normText(p.name+' '+(personCity(p)||'')).includes(q)).sort((a,b)=>(FEEDM.fav.has(b.id)-FEEDM.fav.has(a.id))||String(a.name).localeCompare(String(b.name)));
+  el.innerHTML=ppl.length?ppl.map(p=>`<div class="favRow"><img src="${esc(p.photo||avatar(p.name))}" alt=""><span><b>${esc(p.name)}</b><small>${esc(personCity(p)||'')}</small></span><button type="button" class="favStar${FEEDM.fav.has(p.id)?' on':''}" onclick="favToggle('${esc(p.id)}',this)" aria-label="Favorito">${FEEDM.fav.has(p.id)?'★':'☆'}</button></div>`).join(''):'<div class="cmEmpty small"><b>Siga pessoas primeiro</b><span>Os favoritos são escolhidos entre quem você segue.</span></div>'}
+async function favToggle(uid,btn){const had=FEEDM.fav.has(uid);if(!had&&FEEDM.fav.size>=50){alert('Você pode ter até 50 favoritos.');return}if(had)FEEDM.fav.delete(uid);else FEEDM.fav.add(uid);btn.classList.toggle('on',!had);btn.textContent=had?'☆':'★';try{localStorage.setItem('cm_fav_'+me.id,JSON.stringify([...FEEDM.fav]))}catch(_){}
+  try{const r=had?await sb.from('cm_favorites').delete().eq('user_id',me.id).eq('fav_id',uid):await sb.from('cm_favorites').insert({user_id:me.id,fav_id:uid});if(r.error&&!/duplicate/i.test(r.error.message||''))throw r.error}catch(e){if(typeof cvxMissing==='function'&&cvxMissing(e))cvxSqlToast()}}
+/* ===================== fim FEED ===================== */
 
 </script>
 </body></html>
