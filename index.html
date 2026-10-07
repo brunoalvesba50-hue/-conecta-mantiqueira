@@ -9018,4 +9018,511 @@ if(typeof back==='function')window.scBackToPick=function(){const v=document.quer
 .cmOffBar.on{transform:none;opacity:1}
 .cmOffBar svg{width:17px;height:17px;flex:none}
 </style>
+<style id="featcss">
+/* ---------- notificações ---------- */
+.ntSheet .modalBox{max-height:88dvh;display:flex;flex-direction:column}
+.ntList{overflow-y:auto;margin:0 -6px;padding:0 6px}
+.ntSec{font-weight:800;color:#fff;font-size:15.5px;margin:14px 2px 6px}
+.ntRow{display:flex;align-items:center;gap:12px;padding:8px 6px;border-radius:12px;cursor:pointer}
+.ntRow.new{background:rgba(32,223,154,.07)}
+.ntRow:active{background:rgba(255,255,255,.06)}
+.ntAv{flex:0 0 44px;width:44px;height:44px;border-radius:50%;object-fit:cover;background:#1f3542}
+.ntAvs{position:relative;flex:0 0 44px;width:44px;height:44px}
+.ntAvs img{position:absolute;width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid #0e2230;background:#1f3542}
+.ntAvs img:first-child{top:0;right:0}.ntAvs img:last-child{bottom:0;left:0}
+.ntBody{flex:1;min-width:0;font-size:14px;line-height:1.35;color:#dfe9ee}
+.ntBody b{color:#fff}.ntBody small{color:#8fa6b3;font-size:13px;white-space:nowrap}
+.ntExtra{color:#fff}
+.ntThumb{flex:0 0 44px;width:44px;height:44px;border-radius:6px;object-fit:cover;background:#1f3542}
+.ntTxt{display:grid;place-items:center;font-size:8px;line-height:1.1;padding:3px;overflow:hidden;color:#cfe;text-align:center}
+.ntFollow{flex:0 0 auto;border:0;border-radius:9px;background:#3d5afe;color:#fff;font-weight:700;font-size:13px;padding:8px 12px}
+.ntFollow.on{background:rgba(255,255,255,.12)}
+/* ---------- destaques ---------- */
+.highlightRow .highlight{cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.hlNew .highlightCircle{display:grid;place-items:center;border:1.5px solid rgba(255,255,255,.35)!important;background:transparent!important}
+.hlNew .highlightCircle svg{width:24px;height:24px;color:#fff}
+.hlPublic{margin:6px 0 10px}
+.hlSheet .modalBox{max-height:90dvh;display:flex;flex-direction:column}
+.hlHint{margin:2px 0 10px;opacity:.85}
+.hlGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;overflow-y:auto;max-height:58dvh;border-radius:10px}
+.hlTile{position:relative;aspect-ratio:9/16;border:0;padding:0;background:#12262f center/cover;overflow:hidden;cursor:pointer}
+.hlTile video{width:100%;height:100%;object-fit:cover;pointer-events:none}
+.hlTile i{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.25);color:#fff;font-style:normal;font-weight:800;font-size:12px;display:grid;place-items:center}
+.hlTile.on i{background:#3d5afe;border-color:#3d5afe}
+.hlTile.on::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.18)}
+.hlTile span{position:absolute;left:5px;bottom:5px;color:#fff;font-size:11px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.8)}
+.hlNext{width:100%;margin-top:12px}.hlNext:disabled{opacity:.45}
+.hlCoverBig{width:120px;height:120px;border-radius:50%;margin:6px auto 14px;background:#1f3542 center/cover;border:3px solid rgba(255,255,255,.15)}
+.hlNameIn{text-align:center;font-size:17px;font-weight:700}
+.hlCovers{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px}
+.hlCovers button{flex:0 0 56px;height:56px;border-radius:50%;border:2px solid transparent;background:#1f3542 center/cover;padding:0}
+.hlCovers button.on{border-color:#fff;box-shadow:0 0 0 2px #3d5afe}
+.hlMenu{display:flex;flex-direction:column;gap:4px;padding:4px 0}
+.hlMenu b{text-align:center;color:#fff;margin-bottom:8px}
+.hlMenu button{border:0;background:rgba(255,255,255,.06);color:#fff;border-radius:12px;padding:14px;font-weight:600;font-size:15px}
+.hlMenu button.danger{color:#ff6b7d}
+.svHlBtn{position:absolute;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 74px);z-index:30;display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:none;color:#fff;font-size:11px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.svHlBtn span{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.35);display:grid;place-items:center}
+.svHlBtn svg{width:20px;height:20px}
+/* ---------- classificados ---------- */
+.homeGrid4{grid-template-columns:repeat(4,1fr)!important}
+.homeGrid4 .quick small{font-size:11.5px;white-space:nowrap}
+.cmClassChip{display:inline-flex;align-items:center;gap:6px}
+.cmClassChip svg{width:16px;height:16px}
+.clPage{padding-bottom:20px}
+.clTop{display:flex;align-items:center;gap:10px;margin:4px 0 2px}
+.clTop h1{flex:1;margin:0;font-size:26px}
+.clBack{width:40px;height:40px;border:0;border-radius:50%;background:rgba(255,255,255,.08);color:#fff;display:grid;place-items:center}
+.clBack svg{width:22px;height:22px}
+.clNewBtn{display:flex;align-items:center;gap:6px;border:0;border-radius:12px;background:#20df9a;color:#04140d;font-weight:800;font-size:14px;padding:10px 14px}
+.clNewBtn svg{width:16px;height:16px}
+.clSub{color:#9db1bd;font-size:13.5px;margin:0 0 12px 50px}
+.clSearch{margin-bottom:10px}
+.clCats{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}
+.clCats::-webkit-scrollbar{display:none}
+.clCats button{flex:0 0 auto;display:flex;align-items:center;gap:6px;border:0;border-radius:999px;background:rgba(255,255,255,.08);color:#dfe9ee;font-weight:700;font-size:13.5px;padding:8px 13px}
+.clCats button.on{background:#fff;color:#04140d}
+.clGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.clCard{display:block;border:0;padding:0;background:rgba(255,255,255,.04);border-radius:14px;overflow:hidden;text-align:left;color:#fff;cursor:pointer}
+.clPh{position:relative;aspect-ratio:1;background:#16303b center/cover;display:grid;place-items:center;font-size:40px}
+.clSold{position:absolute;top:8px;left:8px;font-style:normal;background:#ff3b5c;color:#fff;font-size:11px;font-weight:800;padding:3px 8px;border-radius:6px}
+.clN{position:absolute;right:7px;bottom:7px;font-style:normal;background:rgba(0,0,0,.55);color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:9px}
+.clInfo{padding:8px 10px 10px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.clInfo b{font-size:16px}.clInfo span{font-size:13.5px;color:#dfe9ee;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.clInfo small{font-size:12px;color:#8fa6b3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clCard.sk .clPh,.clCard.sk s{background:linear-gradient(90deg,rgba(255,255,255,.05),rgba(255,255,255,.11),rgba(255,255,255,.05));background-size:200% 100%;animation:muxSh 1.2s linear infinite}
+.clCard.sk s{display:block;height:11px;border-radius:5px;margin:4px 0;width:70%}
+.clEmpty{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:8px;padding:30px 10px}
+.clSheet .modalBox{padding:0!important;overflow:hidden;max-height:92dvh;display:flex;flex-direction:column}
+.clDet{position:relative;overflow-y:auto}
+.clCar{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;aspect-ratio:1;background:#0b1820}
+.clCar::-webkit-scrollbar{display:none}
+.clCar img{flex:0 0 100%;width:100%;height:100%;object-fit:cover;scroll-snap-align:center}
+.clCar.empty{display:grid;place-items:center;font-size:70px;aspect-ratio:2}
+.clDots{display:flex;justify-content:center;gap:5px;margin-top:-22px;position:relative}
+.clDots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.45)}.clDots i.on{background:#fff}
+.clX{position:absolute;top:10px;right:10px;width:36px;height:36px;border:0;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;font-size:22px;line-height:1}
+.clDBody{padding:14px 16px 22px}
+.clDPrice{font-size:26px;font-weight:900;color:#fff;display:flex;align-items:center;gap:8px}
+.clDPrice .clSold{position:static}
+.clDBody h2{margin:2px 0 6px;font-size:19px}
+.clDMeta{color:#9db1bd;font-size:13.5px}
+.clDDesc{color:#dfe9ee;font-size:14.5px;line-height:1.5;margin:12px 0}
+.clSeller{display:flex;align-items:center;gap:10px;width:100%;border:0;background:rgba(255,255,255,.05);border-radius:14px;padding:10px;color:#fff;text-align:left;margin:12px 0}
+.clSeller img{width:42px;height:42px;border-radius:50%;object-fit:cover;background:#1f3542}
+.clSeller span{flex:1}.clSeller small{display:block;color:#9db1bd}
+.clActs{display:grid;gap:8px}
+.clActs button{width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
+.clActs svg{width:17px;height:17px}
+.clActs .danger{color:#ff6b7d}
+.clSheetForm .modalBox{max-height:92dvh;overflow-y:auto}
+.clForm{display:grid;gap:10px}
+.clForm label{display:grid;gap:4px;font-size:13px;font-weight:700;color:#9db1bd}
+.clForm .field{margin:0}
+.clPhs{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px}
+.clAddPh{flex:0 0 84px;height:84px;border:1.5px dashed rgba(255,255,255,.3);border-radius:12px;background:transparent;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:700;font-size:12.5px}
+.clAddPh svg{width:22px;height:22px}.clAddPh small{color:#8fa6b3;font-size:11px}
+.clPhIt{position:relative;flex:0 0 84px;height:84px;border-radius:12px;background:#16303b center/cover}
+.clPhIt button{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:14px;line-height:1;padding:0}
+.clPhIt i{position:absolute;left:4px;bottom:4px;font-style:normal;font-size:10px;font-weight:800;background:#20df9a;color:#04140d;border-radius:5px;padding:1px 5px}
+/* ---------- reels ---------- */
+.rxRoot{position:fixed;inset:0;bottom:calc(env(safe-area-inset-bottom,0px) + 58px);background:#000;z-index:5}
+.rxTop{position:absolute;top:0;left:0;right:0;z-index:4;display:flex;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top,0px) + 10px) 14px 10px;pointer-events:none;background:linear-gradient(rgba(0,0,0,.45),transparent)}
+.rxTop b{font-size:22px;color:#fff;font-weight:800}
+.rxTop div{display:flex;align-items:center;gap:8px;pointer-events:auto}
+.rxTopBtn{border:0;border-radius:999px;background:rgba(255,255,255,.18);color:#fff;font-weight:700;font-size:12.5px;padding:7px 12px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.rxTopIco{width:38px;height:38px;border:0;border-radius:50%;background:transparent;color:#fff;display:grid;place-items:center}
+.rxTopIco svg{width:26px;height:26px}
+.rxFeed{height:100%;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;overscroll-behavior:contain}
+.rxFeed::-webkit-scrollbar{display:none}
+.rxS{position:relative;height:100%;scroll-snap-align:start;scroll-snap-stop:always;overflow:hidden;background:#000}
+.rxS video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.rxTap{position:absolute;inset:0;z-index:1}
+.rxBig{position:absolute;left:50%;top:45%;width:110px;height:110px;margin:-55px 0 0 -55px;z-index:2;opacity:0;pointer-events:none}
+.rxBig svg{width:100%;height:100%;filter:drop-shadow(0 4px 14px rgba(0,0,0,.4))}
+.rxBig.show{animation:rxHeart .8s ease}
+@keyframes rxHeart{0%{opacity:0;transform:scale(.4)}20%{opacity:1;transform:scale(1.1)}40%{transform:scale(.95)}80%{opacity:1}100%{opacity:0;transform:scale(1)}}
+.rxMuteIco{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;background:rgba(0,0,0,.5);display:grid;place-items:center;color:#fff;z-index:2;opacity:0;pointer-events:none}
+.rxMuteIco svg{width:30px;height:30px}
+.rxMuteIco.show{animation:rxFade 1s ease}
+@keyframes rxFade{0%,60%{opacity:1}100%{opacity:0}}
+.rxRail{position:absolute;right:8px;bottom:22px;z-index:3;display:flex;flex-direction:column;align-items:center;gap:16px}
+.rxRail button{border:0;background:none;color:#fff;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12.5px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.6);padding:0}
+.rxRail svg{width:29px;height:29px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.5))}
+.rxRail .rxSave.on{color:#fff}
+.rxDisc{width:30px;height:30px;border-radius:8px;border:2px solid #fff;object-fit:cover;background:#1f3542}
+.rxInfo{position:absolute;left:12px;right:70px;bottom:20px;z-index:3;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.rxWho{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.rxWho img{width:34px;height:34px;border-radius:50%;object-fit:cover;border:1.5px solid #fff;background:#1f3542}
+.rxWho b{font-size:15px}
+.rxFol{border:1.5px solid rgba(255,255,255,.85);background:transparent;color:#fff;border-radius:9px;padding:4px 10px;font-weight:700;font-size:13px}
+.rxCap{font-size:14px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:8px}
+.rxCap.open{-webkit-line-clamp:unset;display:block}
+.rxMu{display:flex;align-items:center;gap:6px;font-size:13px;max-width:100%;overflow:hidden}
+.rxMu svg{width:14px;height:14px;flex:none}
+.rxMu span{overflow:hidden;white-space:nowrap}
+.rxMu em{font-style:normal;display:inline-block;padding-right:30px;animation:rxMarq 9s linear infinite}
+@keyframes rxMarq{0%,15%{transform:translateX(0)}100%{transform:translateX(-60%)}}
+.rxBar{position:absolute;left:0;right:0;bottom:0;height:2px;background:rgba(255,255,255,.25);z-index:3}
+.rxBar i{display:block;height:100%;width:0;background:#fff}
+.rxEmpty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#fff;text-align:center;padding:24px}
+.rxEmpty div{font-size:46px}.rxEmpty span{color:#9db1bd}
+.rxEmpty button{min-width:200px}
+</style>
+<script>
+/* ===================== RECURSOS NOVOS: Notificações · Destaques · Classificados · Reels ===================== */
+(function(){
+const I={
+  heart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20.5s-7.5-4.6-9.4-9.6C1.2 7.1 3.7 4 7 4c2 0 3.6 1.1 5 2.8C13.4 5.1 15 4 17 4c3.3 0 5.8 3.1 4.4 6.9-1.9 5-9.4 9.6-9.4 9.6z"/></svg>',
+  heartF:'<svg viewBox="0 0 24 24" fill="#ff3b5c"><path d="M12 20.5s-7.5-4.6-9.4-9.6C1.2 7.1 3.7 4 7 4c2 0 3.6 1.1 5 2.8C13.4 5.1 15 4 17 4c3.3 0 5.8 3.1 4.4 6.9-1.9 5-9.4 9.6-9.4 9.6z"/></svg>',
+  com:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.4 7.4L3.5 20.5l1.5-4.4A8.4 8.4 0 1 1 20.5 11.6z"/></svg>',
+  share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M22 3 9.2 10.1M22 3l-6.6 18-3.6-8.2L3 9.4z"/></svg>',
+  save:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3.5h12a1 1 0 0 1 1 1V21l-7-4.5L5 21V4.5a1 1 0 0 1 1-1z"/></svg>',
+  saveF:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 3.5h12a1 1 0 0 1 1 1V21l-7-4.5L5 21V4.5a1 1 0 0 1 1-1z"/></svg>',
+  dots:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>',
+  music:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>',
+  mute:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9 6 6M22 9l-6 6"/></svg>',
+  snd:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>',
+  cam:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.6"/></svg>',
+  tag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>'
+};
+window.CMF_ICO=I;
+const SQL_MSG='O administrador precisa rodar a atualização do banco (atualizacao-recursos.sql).';
+const missingTable=e=>/does not exist|schema cache|relation|Could not find/i.test(String(e&&e.message||e||''));
+const fmtNum=n=>n>=1e6?(n/1e6).toFixed(1).replace('.0','').replace('.',',')+' mi':n>=1e4?Math.round(n/1e3)+' mil':n>=1e3?(n/1e3).toFixed(1).replace('.0','').replace('.',',')+' mil':String(n||0);
+const person=uid=>uid===me?.id?{id:me.id,...profileData()}:(personById(uid)||{id:uid,name:'Alguém',photo:''});
+const ph=p=>esc(p.photo||avatar(p.name||'?'));
+
+/* =========================================================================================
+   1) NOTIFICAÇÕES COMPLETAS (igual à aba Atividade do Instagram)
+   ========================================================================================= */
+Object.assign(NOTIF_TXT,{post_like:'curtiu sua publicação.',post_comment:'comentou:',follow:'começou a seguir você.',story_like:'curtiu seu story.',story_reply:'respondeu ao seu story:',follow_request:'pediu para seguir você.'});
+const sent=new Set((()=>{try{return JSON.parse(localStorage.getItem('cm_notif_sent')||'[]')}catch(_){return []}})());
+async function cmNotify(uid,kind,o){
+  o=o||{};if(!me?.id||!uid||uid===me.id||navigator.onLine===false)return;
+  if(/like|follow/.test(kind)){const k=kind+':'+uid+':'+(o.post_id||o.story_id||'');if(sent.has(k))return;sent.add(k);try{localStorage.setItem('cm_notif_sent',JSON.stringify([...sent].slice(-400)))}catch(_){}}
+  const row={user_id:uid,actor_id:me.id,kind};if(o.post_id)row.post_id=String(o.post_id);if(o.story_id)row.story_id=o.story_id;if(o.extra)row.extra=String(o.extra).slice(0,120);
+  try{let r=await sb.from('cm_notifications').insert(row);if(r.error&&row.extra){delete row.extra;r=await sb.from('cm_notifications').insert(row)}}catch(_){}
+}
+window.cmNotify=cmNotify;
+const ownerOf=id=>{const x=postFind(String(id).replace(/^ad\d+-/,''));return x?x.ownerId:null};
+if(typeof postLike==='function'){const f=window.postLike;window.postLike=async function(id){const x=postFind(String(id).replace(/^ad\d+-/,''));const was=!!(x&&x.likedByMe);const r=await f.apply(this,arguments);const y=postFind(String(id).replace(/^ad\d+-/,''));if(y&&!was&&y.likedByMe)cmNotify(y.ownerId,'post_like',{post_id:y.id});return r}}
+if(typeof postComment==='function'){const f=window.postComment;window.postComment=async function(id,form){const t=(form&&form.querySelector('input')?.value||'').trim();const r=await f.apply(this,arguments);if(t){const o=ownerOf(id);if(o)cmNotify(o,'post_comment',{post_id:String(id).replace(/^ad\d+-/,''),extra:t})}return r}}
+if(typeof toggleFollow==='function'){const f=window.toggleFollow;window.toggleFollow=async function(id){const was=followCache.has(id);const r=await f.apply(this,arguments);if(!was&&followCache.has(id))cmNotify(id,'follow');return r}}
+if(typeof svLike==='function'){const f=window.svLike;window.svLike=async function(){const it=svCur();const was=it&&storyLikes.has(it.id);const r=await f.apply(this,arguments);if(it&&!was&&storyLikes.has(it.id))cmNotify(it.user_id,'story_like',{story_id:it.id});return r}}
+if(typeof svSendReply==='function'){const f=window.svSendReply;window.svSendReply=async function(e){const it=svCur();const t=(document.getElementById('svInput')?.value||'').trim();const r=await f.apply(this,arguments);if(it&&t)cmNotify(it.user_id,'story_reply',{story_id:it.id,extra:t});return r}}
+
+function sectionOf(ts){const d=Date.now()-ts;if(d<864e5&&new Date(ts).toDateString()===new Date().toDateString())return 'Hoje';if(d<7*864e5)return 'Esta semana';if(d<30*864e5)return 'Este mês';return 'Anteriores'}
+function thumbOf(pid){const x=pid&&postFind(String(pid));if(!x)return '';const m=postMedia(x)[0];const u=m?(m.t==='video'?(m.th||x.thumb||''):m.u):'';return u?`<img class="ntThumb" src="${esc(u)}" alt="" loading="lazy">`:`<span class="ntThumb ntTxt">${esc(String(x.text||'').slice(0,40))}</span>`}
+window.cmNotifLoad=async function(){
+  const el=document.getElementById('notifList');if(!el||!me?.id)return;
+  let r=await sb.from('cm_notifications').select('id,actor_id,kind,story_id,post_id,created_at,read_at,extra').eq('user_id',me.id).order('created_at',{ascending:false}).limit(80);
+  if(r.error&&/extra/i.test(r.error.message||''))r=await sb.from('cm_notifications').select('id,actor_id,kind,story_id,post_id,created_at,read_at').eq('user_id',me.id).order('created_at',{ascending:false}).limit(80);
+  if(r.error){el.innerHTML=`<div class="cmEmpty small"><b>Sem notificações por enquanto</b><span>${missingTable(r.error)?'O administrador precisa rodar a atualização do banco (atualizacao.sql).':'Não foi possível carregar agora. Tente de novo.'}</span></div>`;return}
+  CM_NOTIF.list=r.data||[];
+  const miss=[...new Set(CM_NOTIF.list.map(n=>n.actor_id).filter(id=>id&&!personById(id)))];
+  if(miss.length){try{const pr=await sb.from('profiles').select('id,name,city,photo').in('id',miss);(pr.data||[]).forEach(p=>{if(!publicProfilesCache.some(x=>x.id===p.id))publicProfilesCache.push(p)})}catch(_){}}
+  if(CM_NOTIF.list.some(n=>n.post_id)&&!POSTS.loaded){try{await postsLoad()}catch(_){}}
+  let collabs=new Map();const inv=CM_NOTIF.list.filter(n=>n.kind==='collab_invite').map(n=>n.post_id);
+  if(inv.length){try{const c=await sb.from('cm_post_collabs').select('post_id,status').eq('user_id',me.id).in('post_id',inv);(c.data||[]).forEach(x=>collabs.set(String(x.post_id),x.status))}catch(_){}}
+  /* agrupa curtidas do mesmo post (ex.: "Ana, João e mais 3 curtiram") */
+  const groups=[];const byKey=new Map();
+  CM_NOTIF.list.forEach(n=>{const ts=Date.parse(n.created_at)||Date.now();const sec=sectionOf(ts);
+    if(n.kind==='post_like'||n.kind==='story_like'){const k=sec+'|'+n.kind+'|'+(n.post_id||n.story_id);const g=byKey.get(k);if(g){if(!g.actors.includes(n.actor_id))g.actors.push(n.actor_id);if(!n.read_at)g.unread=true;g.ids.push(n.id);return}const ng={n,sec,ts,actors:[n.actor_id],unread:!n.read_at,ids:[n.id]};byKey.set(k,ng);groups.push(ng);return}
+    groups.push({n,sec,ts,actors:[n.actor_id],unread:!n.read_at,ids:[n.id]})});
+  if(!groups.length){el.innerHTML=`<div class="cmEmpty small"><div class="cmEmptyIco">🔔</div><b>Nenhuma notificação</b><span>Quando alguém curtir, comentar, seguir ou responder seu story, aparece aqui.</span></div>`;return}
+  let last='',html='';
+  groups.forEach(g=>{const n=g.n;if(g.sec!==last){html+=`<div class="ntSec">${g.sec}</div>`;last=g.sec}
+    const a=person(g.actors[0]);const others=g.actors.length-1;
+    const names=others===0?`<b>${esc(a.name)}</b>`:others===1?`<b>${esc(a.name)}</b> e <b>${esc(person(g.actors[1]).name)}</b>`:`<b>${esc(a.name)}</b>, <b>${esc(person(g.actors[1]).name)}</b> e mais ${others-1}`;
+    let txt=NOTIF_TXT[n.kind]||'interagiu com você.';if(others&&n.kind==='post_like')txt='curtiram sua publicação.';if(others&&n.kind==='story_like')txt='curtiram seu story.';
+    const extra=n.extra?` <span class="ntExtra">${esc(n.extra)}</span>`:'';
+    const avs=others?`<span class="ntAvs"><img src="${ph(person(g.actors[1]))}" alt=""><img src="${ph(a)}" alt=""></span>`:`<img class="ntAv" src="${ph(a)}" alt="" onclick="event.stopPropagation();postOpenProfile('${esc(a.id)}')">`;
+    let right='';const st=collabs.get(String(n.post_id));
+    if(n.kind==='collab_invite')right=st==='pending'?`<div class="notifAct"><button class="cmBtn sm" onclick="event.stopPropagation();cmCollabRespond('${esc(n.post_id)}','accepted')">Aceitar</button><button class="secondary" onclick="event.stopPropagation();cmCollabRespond('${esc(n.post_id)}','declined')">Recusar</button></div>`:`<div class="notifAct small">${st==='accepted'?'✓ Aceito':st==='declined'?'Recusado':''}</div>`;
+    else if(n.kind==='follow'){const f=followCache.has(n.actor_id);right=`<button class="ntFollow${f?' on':''}" onclick="event.stopPropagation();toggleFollow('${esc(n.actor_id)}').then(()=>cmNotifLoad())">${f?'Seguindo':'Seguir de volta'}</button>`}
+    else if(n.post_id)right=thumbOf(n.post_id);
+    html+=`<div class="ntRow${g.unread?' new':''}" onclick="cmNotifGo(${n.id})">${avs}<div class="ntBody">${names} ${esc(txt)}${extra} <small>${esc(timeAgo(g.ts))}</small></div>${right}</div>`});
+  el.innerHTML=html;
+  const unread=CM_NOTIF.list.filter(n=>!n.read_at).map(n=>n.id);
+  if(unread.length){setTimeout(async()=>{try{await sb.from('cm_notifications').update({read_at:new Date().toISOString()}).in('id',unread).eq('user_id',me.id)}catch(_){}CM_NOTIF.unread=0;cmNotifDots()},1500)}
+};
+const go0=window.cmNotifGo;
+window.cmNotifGo=async function(id){const n=(CM_NOTIF.list||[]).find(x=>x.id===id);if(!n)return;
+  if(n.kind==='follow'||n.kind==='follow_request'){closeModal();postOpenProfile(n.actor_id);return}
+  if(n.kind==='story_reply'){const p=personById(n.actor_id);closeModal();if(p){currentPublicUser=p;go('conversation')}return}
+  if(n.kind==='post_comment'&&n.post_id){closeModal();await cmOpenPost(n.post_id);setTimeout(()=>{try{cmCommentsOpen(n.post_id)}catch(_){}},350);return}
+  return go0.apply(this,arguments)};
+window.cmNotifOpen=function(){openModal(`<div class="modalHead"><h2>Notificações</h2><button class="close" onclick="closeModal()">×</button></div><div id="notifList" class="notifList ntList"><div class="chatSkel"></div><div class="chatSkel"></div><div class="chatSkel"></div></div><button class="secondary notifSettings" onclick="closeModal();settingsScreen()">⚙ Configurações</button>`);document.getElementById('modal')?.classList.add('sheet','ntSheet');cmNotifLoad()};
+
+/* =========================================================================================
+   2) DESTAQUES DOS STORIES (igual ao Instagram)
+   ========================================================================================= */
+const HL={cache:new Map(),table:true,pick:[],arch:[],cover:0};
+async function hlLoad(uid,force){
+  if(!uid)return [];if(!force&&HL.cache.has(uid))return HL.cache.get(uid);
+  let list=[];
+  if(HL.table){try{const r=await sb.from('cm_highlights').select('id,user_id,name,cover,items,position,created_at').eq('user_id',uid).order('position',{ascending:true}).order('created_at',{ascending:true});if(r.error){if(missingTable(r.error))HL.table=false}else list=r.data||[]}catch(_){}}
+  HL.cache.set(uid,list);return list;
+}
+function oldHl(uid){if(uid===me?.id)return profileData().highlights||[];const p=personById(uid);return (p&&Array.isArray(p.highlights))?p.highlights:[]}
+function hlRowHtml(uid,list){
+  const mine=uid===me?.id;const olds=oldHl(uid);
+  const add=mine?`<div class="highlight hlNew" onclick="cmHlNew()"><div class="highlightCircle highlightAdd">${I.plus}</div><div>Novo</div></div>`:'';
+  const items=list.map(h=>`<div class="highlight" data-hl="${esc(h.id)}" onclick="cmHlOpen('${esc(uid)}','${esc(h.id)}')"><img class="highlightCircle" src="${esc(h.cover||'')}" alt="" onerror="this.style.visibility='hidden'"><div>${esc(h.name)}</div></div>`).join('');
+  const oldItems=olds.map((h,i)=>`<div class="highlight" onclick="viewHighlight(${JSON.stringify(h.images||[h.image]).replace(/"/g,'&quot;')},${JSON.stringify(h.name).replace(/"/g,'&quot;')})"><img class="highlightCircle" src="${esc(h.image)}"><div>${esc(h.name)}</div></div>`).join('');
+  return add+items+oldItems;
+}
+async function hlPaint(uid){
+  const list=await hlLoad(uid);
+  if(uid===me?.id){const row=document.querySelector('#app .highlightBar .highlightRow');if(row){row.innerHTML=hlRowHtml(uid,list);hlBindPress(row)}return}
+  if(!list.length&&!oldHl(uid).length)return;
+  const tabs=document.querySelector('#app #pfTabs');if(!tabs||document.querySelector('#app .hlPublic'))return;
+  tabs.insertAdjacentHTML('beforebegin',`<div class="highlightBar hlPublic"><div class="highlightRow compact">${hlRowHtml(uid,list)}</div></div>`);
+}
+function hlBindPress(row){row.querySelectorAll('[data-hl]').forEach(el=>{let t=0;const id=el.dataset.hl;
+  el.addEventListener('pointerdown',()=>{t=setTimeout(()=>{t=-1;cmHlMenu(id)},520)});
+  ['pointerup','pointerleave','pointercancel'].forEach(ev=>el.addEventListener(ev,()=>{if(t>0)clearTimeout(t)}));
+  el.addEventListener('click',e=>{if(t===-1){e.stopImmediatePropagation();e.preventDefault();t=0}},true);
+  el.addEventListener('contextmenu',e=>{e.preventDefault();cmHlMenu(id)})})}
+window.cmHlOpen=function(uid,id){
+  const h=(HL.cache.get(uid)||[]).find(x=>String(x.id)===String(id));if(!h||!h.items||!h.items.length)return;
+  const p=person(uid);
+  const items=h.items.map(row=>stMapRow(row,{name:p.name,photo:p.photo})).sort((a,b)=>a.created-b.created);
+  SV.groups=[{uid,mine:uid===me?.id,name:h.name,photo:h.cover||p.photo,items,allSeen:true,hl:true}];SV.gi=0;SV.si=0;SV.muted=false;svBuild();svShow();
+};
+window.cmHlMenu=function(id){
+  const h=(HL.cache.get(me?.id)||[]).find(x=>String(x.id)===String(id));if(!h)return;
+  openModal(`<div class="stGrab"></div><div class="hlMenu"><b>${esc(h.name)}</b><button onclick="cmHlEdit('${esc(id)}')">Editar destaque</button><button class="danger" onclick="cmHlDel('${esc(id)}')">Remover destaque</button><button onclick="closeModal()">Cancelar</button></div>`);document.getElementById('modal')?.classList.add('sheet');
+};
+window.cmHlDel=async function(id){if(!confirm('Remover este destaque? Os stories continuam no seu arquivo.'))return;closeModal();try{const {error}=await sb.from('cm_highlights').delete().eq('id',id).eq('user_id',me.id);if(error)throw error;await hlLoad(me.id,true);hlPaint(me.id);shareToast('Destaque removido')}catch(e){alert('Não foi possível remover agora.')}};
+async function archLoad(){
+  const base='id,user_id,media_url,media_type,caption,music,link_url,created_at,expires_at';
+  let r=await sb.from('stories').select(base+',audience,original_post_id,overlay').eq('user_id',me.id).order('created_at',{ascending:false}).limit(150);
+  if(r.error)r=await sb.from('stories').select(base).eq('user_id',me.id).order('created_at',{ascending:false}).limit(150);
+  if(r.error)throw r.error;return r.data||[];
+}
+function hlPickPaint(){
+  const box=document.getElementById('hlGrid');if(!box)return;
+  if(!HL.arch.length){box.innerHTML='<div class="stEmptyBox"><i>🗂️</i><b>Nenhum story no seu arquivo</b>Publique stories para poder criar destaques.</div>';return}
+  box.innerHTML=HL.arch.map((x,i)=>{const n=HL.pick.indexOf(i);const vid=x.media_type==='video';return `<button class="hlTile${n>=0?' on':''}" onclick="cmHlToggle(${i})" style="${vid?'':`background-image:url('${esc(x.media_url)}')`}">${vid?`<video src="${esc(x.media_url)}#t=0.3" muted playsinline preload="metadata"></video>`:''}<i>${n>=0?n+1:''}</i><span>${new Date(x.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})}</span></button>`}).join('');
+  const nx=document.getElementById('hlNext');if(nx){nx.disabled=!HL.pick.length;nx.textContent=HL.pick.length?`Avançar (${HL.pick.length})`:'Avançar'}
+}
+window.cmHlToggle=function(i){const k=HL.pick.indexOf(i);if(k>=0)HL.pick.splice(k,1);else HL.pick.push(i);hlPickPaint()};
+window.cmHlNew=async function(edit){
+  HL.edit=edit||null;HL.pick=[];HL.cover=0;
+  openModal(`<div class="stGrab"></div><div class="stSheetHead"><h2>${edit?'Editar destaque':'Novo destaque'}</h2><button class="close" onclick="closeModal()">×</button></div><div class="small hlHint">Escolha os stories que vão ficar no destaque.</div><div id="hlGrid" class="hlGrid"><div class="stEmptyBox">Carregando…</div></div><button id="hlNext" class="primary hlNext" disabled onclick="cmHlStep2()">Avançar</button>`);
+  document.getElementById('modal')?.classList.add('sheet','hlSheet');
+  try{HL.arch=await archLoad();if(edit){const ids=new Set((edit.items||[]).map(x=>String(x.id)));HL.arch.forEach((x,i)=>{if(ids.has(String(x.id)))HL.pick.push(i)})}hlPickPaint()}catch(e){const g=document.getElementById('hlGrid');if(g)g.innerHTML='<div class="stEmptyBox">Não foi possível carregar seus stories agora.</div>'}
+};
+window.cmHlEdit=function(id){const h=(HL.cache.get(me?.id)||[]).find(x=>String(x.id)===String(id));if(h)cmHlNew(h)};
+window.cmHlStep2=function(){
+  if(!HL.pick.length)return;const sel=HL.pick.map(i=>HL.arch[i]);
+  if(HL.edit&&HL.edit.cover){const ci=sel.findIndex(x=>x.media_url===HL.edit.cover);HL.cover=ci>=0?ci:0}
+  const coverOf=x=>x.media_type==='video'?'':x.media_url;
+  openModal(`<div class="stGrab"></div><div class="stSheetHead"><button class="close" onclick="cmHlNew(HL_EDIT())" aria-label="Voltar">‹</button><h2>Nome e capa</h2><button class="close" onclick="closeModal()">×</button></div>
+  <div class="hlCoverBig" id="hlCoverBig" style="background-image:url('${esc(coverOf(sel[HL.cover])||'')}')"></div>
+  <input id="hlName" class="field hlNameIn" maxlength="24" placeholder="Nome do destaque" value="${esc(HL.edit?HL.edit.name:'')}">
+  <div class="small hlHint">Toque numa foto para escolher a capa</div>
+  <div class="hlCovers">${sel.map((x,i)=>x.media_type==='video'?'':`<button class="${i===HL.cover?'on':''}" style="background-image:url('${esc(x.media_url)}')" onclick="cmHlCover(${i},this)"></button>`).join('')}</div>
+  <button class="primary hlNext" onclick="cmHlSave()">Concluir</button>`);
+  document.getElementById('modal')?.classList.add('sheet','hlSheet');setTimeout(()=>document.getElementById('hlName')?.focus(),200);
+};
+window.HL_EDIT=()=>HL.edit;
+window.cmHlCover=function(i,b){HL.cover=i;document.querySelectorAll('.hlCovers button').forEach(x=>x.classList.toggle('on',x===b));const sel=HL.pick.map(k=>HL.arch[k]);const big=document.getElementById('hlCoverBig');if(big)big.style.backgroundImage=`url('${sel[i].media_url}')`};
+window.cmHlSave=async function(){
+  const name=(document.getElementById('hlName')?.value||'').trim()||'Destaques';
+  const sel=HL.pick.map(i=>HL.arch[i]);if(!sel.length)return;
+  const cv=sel[HL.cover]&&sel[HL.cover].media_type!=='video'?sel[HL.cover].media_url:((sel.find(x=>x.media_type!=='video')||{}).media_url||profileData().photo||'');
+  const row={user_id:me.id,name,cover:cv,items:sel};
+  const b=document.querySelector('.hlNext');if(b){b.disabled=true;b.textContent='Salvando…'}
+  try{let r;
+    if(HL.edit)r=await sb.from('cm_highlights').update({name,cover:cv,items:sel}).eq('id',HL.edit.id).eq('user_id',me.id);
+    else{const pos=(HL.cache.get(me.id)||[]).length;r=await sb.from('cm_highlights').insert({...row,position:pos})}
+    if(r.error)throw r.error;closeModal();await hlLoad(me.id,true);hlPaint(me.id);shareToast(HL.edit?'Destaque atualizado':'Destaque criado ✨')}
+  catch(e){if(b){b.disabled=false;b.textContent='Concluir'}alert(missingTable(e)?SQL_MSG:'Não foi possível salvar o destaque agora.')}
+};
+window.addHighlight=function(){cmHlNew()};
+/* "Adicionar ao destaque" direto do story que você está vendo */
+window.cmHlAddFromStory=async function(){const it=svCur();if(!it)return;try{svClose()}catch(_){}HL.arch=await archLoad().catch(()=>[]);const i=HL.arch.findIndex(x=>String(x.id)===String(it.id));await cmHlNew();if(i>=0){HL.pick=[i];hlPickPaint()}};
+
+/* =========================================================================================
+   3) CLASSIFICADOS DA SERRA (compra e venda entre moradores)
+   ========================================================================================= */
+const CAT=[['','Todos','🏷️'],['veiculos','Veículos','🚗'],['imoveis','Imóveis','🏡'],['moveis','Móveis','🛋️'],['eletronicos','Eletrônicos','📱'],['animais','Animais','🐴'],['roupas','Roupas','👕'],['servicos','Serviços','🛠️'],['outros','Outros','📦']];
+const CL={list:[],cat:'',q:'',loaded:false,photos:[]};
+const brl=v=>v==null||v===''||isNaN(+v)?'A combinar':(+v===0?'Grátis':'R$ '+(+v).toLocaleString('pt-BR',{minimumFractionDigits:+v%1?2:0,maximumFractionDigits:2}));
+function clCities(){try{return [...new Set((typeof RL_CITIES!=='undefined'?RL_CITIES:[]).map(c=>c.replace(/\s+(Minas Gerais|SP|MG)$/i,'')))]}catch(_){return []}}
+async function clLoad(){
+  const r=await sb.from('cm_classificados').select('id,user_id,title,price,category,city,description,photos,status,created_at').order('created_at',{ascending:false}).limit(300);
+  if(r.error)throw r.error;CL.list=(r.data||[]).map(x=>({...x,photos:Array.isArray(x.photos)?x.photos:(()=>{try{return JSON.parse(x.photos||'[]')}catch(_){return []}})()}));CL.loaded=true;
+  const miss=[...new Set(CL.list.map(x=>x.user_id).filter(id=>id&&!personById(id)))];
+  if(miss.length){try{const pr=await sb.from('profiles').select('id,name,city,photo').in('id',miss);(pr.data||[]).forEach(p=>{if(!publicProfilesCache.some(x=>x.id===p.id))publicProfilesCache.push(p)})}catch(_){}}
+}
+function clCard(x){const p=x.photos[0];return `<button class="clCard" onclick="cmClOpen('${esc(x.id)}')"><div class="clPh" style="${p?`background-image:url('${esc(p)}')`:''}">${p?'':`<span>${(CAT.find(c=>c[0]===x.category)||CAT[8])[2]}</span>`}${x.status==='vendido'?'<i class="clSold">Vendido</i>':''}${x.photos.length>1?`<i class="clN">${x.photos.length}</i>`:''}</div><div class="clInfo"><b>${esc(brl(x.price))}</b><span>${esc(x.title)}</span><small>${esc(x.city||'')}${x.city?' · ':''}${esc(timeAgo(Date.parse(x.created_at)||Date.now()))}</small></div></button>`}
+function clPaint(){
+  const box=document.getElementById('clGrid');if(!box)return;
+  const q=normText(CL.q);const list=CL.list.filter(x=>(!CL.cat||x.category===CL.cat)&&(!q||normText(x.title+' '+(x.description||'')+' '+(x.city||'')).includes(q)));
+  box.innerHTML=list.length?list.map(clCard).join(''):`<div class="cmEmpty small clEmpty"><div class="cmEmptyIco">🏷️</div><b>${CL.list.length?'Nada encontrado':'Nenhum anúncio ainda'}</b><span>${CL.list.length?'Tente outra categoria ou palavra.':'Seja o primeiro a anunciar algo para a serra!'}</span><button class="cmBtn" onclick="cmClNew()">Anunciar item</button></div>`;
+}
+function classificadosScreen(){
+  return screen(`<div class="clPage"><div class="clTop"><button class="clBack" onclick="go('explore')" aria-label="Voltar">${I.back}</button><h1>Classificados</h1><button class="clNewBtn" onclick="cmClNew()">${I.plus}<span>Anunciar</span></button></div>
+  <div class="clSub">Compra e venda entre moradores da serra</div>
+  <div class="cmSearch clSearch"><span class="cmSearchIco">${typeof CMI!=='undefined'?CMI.search:''}</span><input id="clQ" type="search" placeholder="Buscar moto, sofá, cavalo, casa…" autocomplete="off" oninput="cmClSearch(this.value)"></div>
+  <div class="clCats">${CAT.map(c=>`<button class="${CL.cat===c[0]?'on':''}" onclick="cmClCat('${c[0]}',this)"><span>${c[2]}</span>${c[1]}</button>`).join('')}</div>
+  <div id="clGrid" class="clGrid">${Array.from({length:6},()=>'<div class="clCard sk"><div class="clPh"></div><div class="clInfo"><s></s><s></s></div></div>').join('')}</div></div>`,'explore');
+}
+window.cmClSearch=function(v){CL.q=v;clPaint()};
+window.cmClCat=function(c,b){CL.cat=c;document.querySelectorAll('.clCats button').forEach(x=>x.classList.toggle('on',x===b));clPaint()};
+async function clEnter(){try{await clLoad();clPaint()}catch(e){const box=document.getElementById('clGrid');if(box)box.innerHTML=`<div class="cmEmpty small clEmpty"><b>Classificados indisponíveis</b><span>${missingTable(e)?SQL_MSG:'Não foi possível carregar agora. Tente de novo.'}</span></div>`}}
+window.cmClOpen=function(id){
+  const x=CL.list.find(y=>String(y.id)===String(id));if(!x)return;const s=person(x.user_id);const mine=x.user_id===me?.id;const cat=CAT.find(c=>c[0]===x.category)||CAT[8];
+  openModal(`<div class="clDet">${x.photos.length?`<div class="clCar" onscroll="this.nextElementSibling&&[...this.nextElementSibling.children].forEach((d,k)=>d.classList.toggle('on',k===Math.round(this.scrollLeft/this.clientWidth)))">${x.photos.map(u=>`<img src="${esc(u)}" alt="">`).join('')}</div>${x.photos.length>1?`<div class="clDots">${x.photos.map((_,k)=>`<i class="${k?'':'on'}"></i>`).join('')}</div>`:''}`:`<div class="clCar empty"><span>${cat[2]}</span></div>`}
+  <button class="clX" onclick="closeModal()" aria-label="Fechar">×</button>
+  <div class="clDBody"><div class="clDPrice">${esc(brl(x.price))}${x.status==='vendido'?' <i class="clSold">Vendido</i>':''}</div><h2>${esc(x.title)}</h2><div class="clDMeta">${cat[2]} ${esc(cat[1])} · 📍 ${esc(x.city||'Serra da Mantiqueira')} · ${esc(timeAgo(Date.parse(x.created_at)||Date.now()))}</div>
+  ${x.description?`<p class="clDDesc">${esc(x.description).replace(/\n/g,'<br>')}</p>`:''}
+  <button class="clSeller" onclick="closeModal();postOpenProfile('${esc(x.user_id)}')"><img src="${ph(s)}" alt=""><span><b>${esc(s.name)}</b><small>${esc(s.city||'')}</small></span>›</button>
+  ${mine?`<div class="clActs"><button class="secondary" onclick="cmClSold('${esc(x.id)}')">${x.status==='vendido'?'Marcar como disponível':'Marcar como vendido'}</button><button class="secondary danger" onclick="cmClDel('${esc(x.id)}')">Excluir anúncio</button></div>`:`<div class="clActs"><button class="primary" onclick="cmClChat('${esc(x.id)}')">💬 Chamar no bate-papo</button><button class="secondary" onclick="cmClShare('${esc(x.id)}')">${I.share} Compartilhar</button></div>`}</div></div>`);
+  document.getElementById('modal')?.classList.add('sheet','clSheet');
+};
+window.cmClChat=function(id){const x=CL.list.find(y=>String(y.id)===String(id));if(!x)return;const p=personById(x.user_id)||person(x.user_id);closeModal();currentPublicUser=p;go('conversation');setTimeout(()=>{const i=document.getElementById('msgText');if(i){i.value=`Olá! Vi seu anúncio "${x.title}" nos Classificados do Conecta. Ainda está disponível?`;try{msgComposerState()}catch(_){}}},500)};
+window.cmClShare=async function(id){const x=CL.list.find(y=>String(y.id)===String(id));if(!x)return;const url=CONECTA_APP_URL+'?cl='+encodeURIComponent(id);const text=`${x.title} — ${brl(x.price)} · Classificados do Conecta Mantiqueira`;try{if(navigator.share){await navigator.share({title:x.title,text,url});return}}catch(_){return}try{await navigator.clipboard.writeText(text+' '+url);shareToast('Link copiado')}catch(_){prompt('Copie o link:',url)}};
+window.cmClSold=async function(id){const x=CL.list.find(y=>String(y.id)===String(id));if(!x)return;const st=x.status==='vendido'?'ativo':'vendido';try{const {error}=await sb.from('cm_classificados').update({status:st}).eq('id',id).eq('user_id',me.id);if(error)throw error;x.status=st;closeModal();clPaint();shareToast(st==='vendido'?'Marcado como vendido ✓':'Anúncio disponível de novo')}catch(e){alert('Não foi possível atualizar agora.')}};
+window.cmClDel=async function(id){if(!confirm('Excluir este anúncio?'))return;try{const {error}=await sb.from('cm_classificados').delete().eq('id',id).eq('user_id',me.id);if(error)throw error;CL.list=CL.list.filter(y=>String(y.id)!==String(id));closeModal();clPaint();shareToast('Anúncio excluído')}catch(e){alert('Não foi possível excluir agora.')}};
+window.cmClNew=function(){
+  if(!me?.id)return;CL.photos=[];const city=(profileData().city||'').replace(/Cidade não informada/i,'');
+  openModal(`<div class="stGrab"></div><div class="stSheetHead"><h2>Anunciar item</h2><button class="close" onclick="closeModal()">×</button></div>
+  <div class="clForm"><div class="clPhs" id="clPhs"><button class="clAddPh" onclick="document.getElementById('clFiles').click()">${I.cam}<span>Fotos</span><small>até 6</small></button></div>
+  <input id="clFiles" type="file" accept="image/*" multiple class="hidden" onchange="cmClFiles(this)">
+  <label>Título<input id="clT" class="field" maxlength="80" placeholder="Ex.: Moto Fan 160 2019"></label>
+  <label>Preço (R$)<input id="clP" class="field" inputmode="decimal" placeholder="Deixe vazio para 'A combinar'"></label>
+  <label>Categoria<select id="clC" class="field">${CAT.slice(1).map(c=>`<option value="${c[0]}">${c[2]} ${c[1]}</option>`).join('')}</select></label>
+  <label>Cidade<input id="clCity" class="field" list="clCityList" value="${esc(city)}" placeholder="Sua cidade"><datalist id="clCityList">${clCities().map(c=>`<option value="${esc(c)}">`).join('')}</datalist></label>
+  <label>Descrição<textarea id="clD" class="field" rows="4" maxlength="800" placeholder="Estado, detalhes, como entregar…"></textarea></label>
+  <button id="clPub" class="primary" onclick="cmClPublish()">Publicar anúncio</button></div>`);
+  document.getElementById('modal')?.classList.add('sheet','clSheetForm');
+};
+window.cmClFiles=function(inp){const fs=[...(inp.files||[])].filter(f=>/^image\//.test(f.type)||/\.(heic|heif|jpe?g|png|webp)$/i.test(f.name));inp.value='';fs.forEach(f=>{if(CL.photos.length<6)CL.photos.push({f,u:URL.createObjectURL(f)})});clPhPaint()};
+window.cmClRm=function(i){const p=CL.photos.splice(i,1)[0];try{URL.revokeObjectURL(p.u)}catch(_){}clPhPaint()};
+function clPhPaint(){const b=document.getElementById('clPhs');if(!b)return;b.innerHTML=CL.photos.map((p,i)=>`<div class="clPhIt" style="background-image:url('${p.u}')"><button onclick="cmClRm(${i})" aria-label="Remover">×</button>${i===0?'<i>Capa</i>':''}</div>`).join('')+(CL.photos.length<6?`<button class="clAddPh" onclick="document.getElementById('clFiles').click()">${I.cam}<span>Fotos</span><small>${CL.photos.length}/6</small></button>`:'')}
+window.cmClPublish=async function(){
+  const t=(document.getElementById('clT')?.value||'').trim();const pr=(document.getElementById('clP')?.value||'').replace(/[^\d,\.]/g,'').replace(/\.(?=\d{3}(\D|$))/g,'').replace(',','.');
+  const cat=document.getElementById('clC')?.value||'outros';const city=(document.getElementById('clCity')?.value||'').trim();const d=(document.getElementById('clD')?.value||'').trim();
+  if(t.length<2){alert('Escreva um título para o anúncio.');return}
+  if(!CL.photos.length&&!confirm('Anúncios com foto vendem muito mais. Publicar mesmo sem foto?'))return;
+  const b=document.getElementById('clPub');if(b){b.disabled=true;b.textContent='Publicando…'}
+  try{const urls=[];for(let i=0;i<CL.photos.length;i++){if(b)b.textContent=`Enviando foto ${i+1} de ${CL.photos.length}…`;urls.push(await uploadMedia(CL.photos[i].f,'classificados','post'))}
+    const row={user_id:me.id,title:t,price:pr===''?null:+pr,category:cat,city,description:d,photos:urls,status:'ativo'};
+    const {data,error}=await sb.from('cm_classificados').insert(row).select('id,created_at').single();if(error)throw error;
+    CL.list.unshift({...row,id:data.id,created_at:data.created_at});CL.photos.forEach(p=>{try{URL.revokeObjectURL(p.u)}catch(_){}});CL.photos=[];closeModal();
+    if(window.cmCurrentPage==='classificados')clPaint();else go('classificados');shareToast('Anúncio publicado! 🎉')}
+  catch(e){if(b){b.disabled=false;b.textContent='Publicar anúncio'}alert(missingTable(e)?SQL_MSG:(navigator.onLine===false?'Sem conexão. Tente de novo quando a internet voltar.':'Não foi possível publicar o anúncio agora.'))}
+};
+
+/* =========================================================================================
+   4) REELS (vídeos dos moradores em tela cheia, igual ao Instagram)
+   ========================================================================================= */
+const RX={io:null,muted:false,cur:null,list:[]};
+function rxList(){return (POSTS.list||[]).filter(x=>{const m=postMedia(x);return m.length&&m[0].t==='video'&&(!x.vis||x.vis==='public'||x.ownerId===me?.id)}).sort((a,b)=>(b.created||0)-(a.created||0))}
+function rxSlide(x){
+  const m=postMedia(x)[0];const p=person(x.ownerId);const mine=x.ownerId===me?.id;const fol=followCache&&followCache.has(x.ownerId);
+  let mu='';try{if(x._d&&x._d.mu){const t=musicDecode(x._d.mu);mu=`${esc(t.title)}${t.artist?' · '+esc(t.artist):''}`}}catch(_){}
+  const sv=POSTS.saved&&POSTS.saved.has(x.id);const cs=(x.comments||[]).length;
+  return `<section class="rxS" data-pid="${esc(x.id)}"><video src="${esc(m.u)}" ${m.th?`poster="${esc(m.th)}"`:''} playsinline webkit-playsinline loop preload="metadata" disablepictureinpicture></video>
+  <div class="rxTap"></div><i class="rxBig">${I.heartF}</i><i class="rxMuteIco"></i>
+  <div class="rxRail"><button class="rxLike${x.likedByMe?' on':''}" onclick="cmRxLike('${esc(x.id)}')" aria-label="Curtir">${x.likedByMe?I.heartF:I.heart}<span>${fmtNum(x.likes||0)}</span></button><button onclick="cmRxPause();cmCommentsOpen('${esc(x.id)}')" aria-label="Comentar">${I.com}<span>${fmtNum(cs)}</span></button><button onclick="sharePost('${esc(x.id)}')" aria-label="Compartilhar">${I.share}</button><button class="rxSave${sv?' on':''}" onclick="cmRxSave('${esc(x.id)}',this)" aria-label="Salvar">${sv?I.saveF:I.save}</button><button onclick="cmRxPause();postMenu('${esc(x.id)}')" aria-label="Mais">${I.dots}</button><img class="rxDisc" src="${ph(p)}" alt=""></div>
+  <div class="rxInfo"><div class="rxWho"><img src="${ph(p)}" alt="" onclick="cmRxStop();postOpenProfile('${esc(x.ownerId)}')"><b onclick="cmRxStop();postOpenProfile('${esc(x.ownerId)}')">${esc(p.name)}</b>${typeof vBadge==='function'?vBadge(x.ownerId):''}${!mine&&!fol?`<button class="rxFol" onclick="toggleFollow('${esc(x.ownerId)}').then(()=>{this.remove()})">Seguir</button>`:''}</div>
+  ${x.text?`<div class="rxCap" onclick="this.classList.toggle('open')">${esc(x.text)}</div>`:''}<div class="rxMu">${I.music}<span><em>${mu||esc(p.name)+' · Áudio original'}</em></span></div></div>
+  <div class="rxBar"><i></i></div></section>`;
+}
+function reelsScreen(){
+  return `<div id="rxRoot" class="rxRoot"><div class="rxTop"><b>Reels</b><div><button class="rxTopBtn" onclick="cmRxStop();go('videos')">Vídeos da região</button><button class="rxTopIco" onclick="cmRxStop();cmCreate();setTimeout(()=>document.getElementById('ccVideoIn')?.click(),60)" aria-label="Criar reel">${I.cam}</button></div></div><div id="rxFeed" class="rxFeed"><div class="rxEmpty">Carregando…</div></div></div>${nav('explore')}`;
+}
+function rxPlay(sec){
+  if(!sec)return;const v=sec.querySelector('video');if(!v)return;RX.cur=sec;
+  document.querySelectorAll('#rxFeed video').forEach(o=>{if(o!==v&&!o.paused)o.pause()});
+  const hasMu=!!(postFind(sec.dataset.pid)?._d?.mu);
+  v.muted=hasMu?true:RX.muted;
+  const p=v.play();if(p&&p.catch)p.catch(()=>{if(!hasMu){RX.muted=true;v.muted=true;v.play().catch(()=>{});rxMuteFlash(sec)}});
+  if(hasMu&&typeof CMA!=='undefined'&&CMA)setTimeout(()=>{try{if(CMA._vm)CMA.muted=RX.muted}catch(_){}},400);
+}
+function rxMuteFlash(sec){const i=sec.querySelector('.rxMuteIco');if(!i)return;i.innerHTML=RX.muted?I.mute:I.snd;i.classList.remove('show');void i.offsetWidth;i.classList.add('show')}
+function rxBind(){
+  const feed=document.getElementById('rxFeed');if(!feed)return;
+  RX.io&&RX.io.disconnect();
+  RX.io=new IntersectionObserver(es=>{es.forEach(e=>{const v=e.target.querySelector('video');if(e.isIntersecting&&e.intersectionRatio>=.6)rxPlay(e.target);else if(v&&!v.paused)v.pause()})},{root:feed,threshold:[0,.6,1]});
+  feed.querySelectorAll('.rxS').forEach(sec=>{RX.io.observe(sec);
+    const v=sec.querySelector('video'),bar=sec.querySelector('.rxBar i'),tap=sec.querySelector('.rxTap');
+    v.addEventListener('timeupdate',()=>{if(v.duration)bar.style.width=(v.currentTime/v.duration*100)+'%'});
+    let lastTap=0,hold=0,held=false;
+    tap.addEventListener('pointerdown',()=>{held=false;hold=setTimeout(()=>{held=true;v.pause()},300)});
+    tap.addEventListener('pointerup',()=>{clearTimeout(hold);if(held){v.play().catch(()=>{});return}
+      const now=Date.now();if(now-lastTap<280){lastTap=0;clearTimeout(tap._t);const x=postFind(sec.dataset.pid);if(x&&!x.likedByMe)cmRxLike(sec.dataset.pid);const h=sec.querySelector('.rxBig');h.classList.remove('show');void h.offsetWidth;h.classList.add('show');return}
+      lastTap=now;tap._t=setTimeout(()=>{RX.muted=!RX.muted;feed.querySelectorAll('video').forEach(o=>{if(!postFind(o.closest('.rxS').dataset.pid)?._d?.mu)o.muted=RX.muted});try{if(typeof CMA!=='undefined'&&CMA&&CMA._vm)CMA.muted=RX.muted}catch(_){}if(!RX.muted&&v.paused)v.play().catch(()=>{});rxMuteFlash(sec)},280)});
+    tap.addEventListener('pointercancel',()=>clearTimeout(hold));
+  });
+}
+async function rxEnter(startId){
+  const feed=document.getElementById('rxFeed');if(!feed)return;
+  if(!POSTS.loaded){try{await postsLoad()}catch(_){}}
+  if(!document.getElementById('rxFeed'))return;
+  RX.list=rxList();
+  if(!RX.list.length){feed.innerHTML=`<div class="rxEmpty"><div>🎬</div><b>Ainda não há reels</b><span>Publique o primeiro vídeo da serra!</span><button class="cmBtn" onclick="cmCreate();setTimeout(()=>document.getElementById('ccVideoIn')?.click(),60)">Criar reel</button><button class="secondary" onclick="go('videos')">Ver vídeos da região</button></div>`;return}
+  feed.innerHTML=RX.list.map(rxSlide).join('');rxBind();
+  if(startId){const s=feed.querySelector(`.rxS[data-pid="${CSS.escape(String(startId))}"]`);if(s)feed.scrollTop=s.offsetTop}
+}
+window.cmRxPause=function(){document.querySelectorAll('#rxFeed video').forEach(v=>{try{v.pause()}catch(_){}});try{if(typeof ppVMStop==='function')ppVMStop()}catch(_){}};
+window.cmRxStop=function(){cmRxPause();try{RX.io&&RX.io.disconnect()}catch(_){}};
+window.cmRxLike=async function(id){await postLike(id);const x=postFind(id);const b=document.querySelector(`.rxS[data-pid="${CSS.escape(String(id))}"] .rxLike`);if(x&&b){b.classList.toggle('on',!!x.likedByMe);b.innerHTML=(x.likedByMe?I.heartF:I.heart)+`<span>${fmtNum(x.likes||0)}</span>`}};
+window.cmRxSave=async function(id,b){try{await postSaveToggle(id)}catch(_){}const on=POSTS.saved&&POSTS.saved.has(id);if(b){b.classList.toggle('on',on);b.innerHTML=on?I.saveF:I.save}};
+/* fechou comentários/menu: volta a tocar */
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('.close')&&RX.cur&&document.getElementById('rxFeed'))setTimeout(()=>{if(!document.getElementById('modal'))rxPlay(RX.cur)},250)},true);
+window.cmOpenReel=function(id){go('reels',id)};
+
+
+/* stories em memória por 40s: voltar para o Início não baixa tudo de novo (mais rápido) */
+(function(){
+  if(typeof loadStories!=='function')return;
+  const ls=window.loadStories;let cache=null,at=0,inflight=null;
+  window.loadStories=function(force){
+    if(!force&&cache&&Date.now()-at<40e3)return Promise.resolve(cache);
+    if(!inflight)inflight=Promise.resolve(ls.apply(this,arguments)).then(r=>{cache=r;at=Date.now();return r}).finally(()=>{inflight=null});
+    return inflight;
+  };
+  window.cmStoriesStale=function(){cache=null;at=0};
+  ['scPublish','svDelete','stDelete'].forEach(n=>{const f=window[n];if(typeof f==='function'){window[n]=async function(){const r=await f.apply(this,arguments);cmStoriesStale();return r}}});
+})();
+/* =========================================================================================
+   ENTRADAS: novas telas, Explorar, início e perfil
+   ========================================================================================= */
+const g=window.go;
+window.go=function(page,arg){
+  if(window.cmCurrentPage==='reels'&&page!=='reels')cmRxStop();
+  if(page==='reels'||page==='classificados'){
+    const r=g.call(this,page,arg);const a=document.getElementById('app');
+    if(a){if(page==='reels'){a.innerHTML=reelsScreen();rxEnter(arg)}else{a.innerHTML=classificadosScreen();if(CL.loaded)clPaint();clEnter()}}
+    return r;
+  }
+  const r=g.apply(this,arguments);
+  if(page==='profile'&&me?.id){hlPaint(me.id);Promise.resolve(r).then(()=>setTimeout(()=>hlPaint(me.id),0))}
+  if(page==='publicProfile'&&typeof currentPublicUser!=='undefined'&&currentPublicUser){const uid=currentPublicUser.id;Promise.resolve(r).then(()=>setTimeout(()=>{if(currentPublicUser&&currentPublicUser.id===uid)hlPaint(uid)},0))}
+  return r;
+};
+/* Explorar: "Vídeos" abre os Reels e ganha o atalho Classificados */
+if(typeof explore==='function'){const ex=window.explore;window.explore=function(){let h=ex.apply(this,arguments);
+  h=h.replace(/onclick="go\('videos'\)"/,`onclick="go('reels')"`);
+  if(!/cmClassChip/.test(h))h=h.replace(/(<button type="button" onclick="go\('reels'\)"[^>]*>[\s\S]*?<\/button>)/,`$1<button type="button" class="cmClassChip" onclick="go('classificados')">${I.tag}Classificados</button>`);
+  return h}}
+/* Início: quarto atalho "Classificados" */
+if(typeof home==='function'){const hm=window.home;window.home=function(){let h=hm.apply(this,arguments);
+  if(!/cmClassQuick/.test(h))h=h.replace(/(<div class="grid4 homeGrid3">[\s\S]*?go\('business'\)[\s\S]*?<\/button>)/,`$1<button class="quick premiumQuick cmClassQuick" onclick="go('classificados')"><div class="ico">🏷️</div><small>Classificados</small></button>`).replace('class="grid4 homeGrid3"','class="grid4 homeGrid4"');
+  return h}}
+/* abrir anúncio por link (?cl=ID) */
+try{const sp=new URLSearchParams(location.search),c=sp.get('cl');if(c){sp.delete('cl');history.replaceState(null,'',location.pathname+(sp.toString()?'?'+sp:'')+location.hash);const t=setInterval(()=>{if(me?.id&&document.querySelector('#app .nav')){clearInterval(t);go('classificados');const w=setInterval(()=>{if(CL.loaded){clearInterval(w);cmClOpen(c)}},300);setTimeout(()=>clearInterval(w),15000)}},500);setTimeout(()=>clearInterval(t),30000)}}catch(_){}
+/* no visualizador de stories próprios: "Destaque" */
+if(typeof svBuild==='function'){const sb0=window.svBuild;window.svBuild=function(){const r=sb0.apply(this,arguments);try{const gr=SV.groups[SV.gi];if(gr&&gr.uid===me?.id&&!gr.hl&&!document.getElementById('svHlBtn')){const box=document.getElementById('svBox')||document.getElementById('sv');box&&box.insertAdjacentHTML('beforeend',`<button id="svHlBtn" class="svHlBtn" onclick="cmHlAddFromStory()"><span>${I.heart}</span>Destaque</button>`)}}catch(_){}return r}}
+})();
+</script>
 </body></html>
