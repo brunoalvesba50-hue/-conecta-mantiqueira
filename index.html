@@ -1094,7 +1094,7 @@ function postJ(r){try{return JSON.parse(r.description||'{}')||{}}catch(_){return
 async function postsLoad(){
   if(POSTS.loading||!me?.id)return;POSTS.loading=true;
   try{
-    const {data,error}=await sb.from('vitrine_items').select('id,user_id,name,description,image_url,link_url,item_type,created_at').in('item_type',['post','post_like','post_comment']).order('created_at',{ascending:true}).limit(3000);
+    const {data,error}=await sb.from('publicacoes').select('id,user_id,name,description,image_url,link_url,item_type,created_at').in('item_type',['post','post_like','post_comment']).order('created_at',{ascending:true}).limit(3000);
     if(error)throw error;
     const posts=new Map(),likes=[],comments=[];
     (data||[]).forEach(r=>{if(r.item_type==='post'){const d=postJ(r);const owner=personById(r.user_id)||(r.user_id===me.id?{name:profileData().name,city:profileData().city,photo:profileData().photo}:null);const media=Array.isArray(d.media)?d.media.filter(m=>m&&m.u).slice(0,20):[];const vis=['public','followers','private'].includes(d.vis)?d.vis:'public';if(r.user_id!==me.id&&(vis==='private'||(vis==='followers'&&!followCache.has(r.user_id))))return;posts.set(String(r.id),{id:String(r.id),ownerId:r.user_id,name:owner?.name||d.n||'Pessoa da região',city:personCity(owner||{city:d.c})||d.c||'Mantiqueira',photo:owner?.photo||d.ph||'',text:d.text||'',image:r.image_url||media[0]?.u||'',type:d.type||(media[0]?.t==='video'?'video':'image'),media,thumb:d.th||media[0]?.th||'',vis,loc:d.loc||'',tags:Array.isArray(d.tags)?d.tags:[],men:(d.men&&typeof d.men==='object')?d.men:{},tg:Array.isArray(d.tg)?d.tg:[],_d:d,promo:!!d.promo,biz:d.biz?String(d.biz):'',bizName:d.bizName||'',created:Date.parse(r.created_at)||Date.now(),likes:0,likedByMe:false,myLikeId:null,comments:[]})}else if(r.item_type==='post_like')likes.push(r);else comments.push(r)});
@@ -1115,12 +1115,12 @@ async function dataUrlToFile(u,name){const r=await fetch(u);const b=await r.blob
 async function postsMigrateLocal(){
   if(POSTS.migrating)return;const done=new Set(JSON.parse(localStorage.getItem('cm_posts_migrated')||'[]'));
   const pend=getLocalPosts().filter(x=>(x.ownerId===me?.id||(!x.ownerId&&x.name===profileData().name))&&!done.has(String(x.id)));if(!pend.length)return;POSTS.migrating=true;
-  for(const x of pend){try{let img=x.image||'';if(/^data:/.test(img))img=await uploadMedia(await dataUrlToFile(img,'post.jpg'),'posts','post');const row={user_id:me.id,name:'post',price:0,position:0,item_type:'post',active:true,image_url:img,description:JSON.stringify({text:x.text||'',type:x.type||'image',n:x.name,c:x.city}),link_url:''};if(x.created)row.created_at=new Date(x.created).toISOString();let r=await sb.from('vitrine_items').insert(row);if(r.error&&row.created_at){delete row.created_at;r=await sb.from('vitrine_items').insert(row)}if(r.error)throw r.error;done.add(String(x.id));localStorage.setItem('cm_posts_migrated',JSON.stringify([...done]))}catch(e){console.error('migrar publicação',e)}}
+  for(const x of pend){try{let img=x.image||'';if(/^data:/.test(img))img=await uploadMedia(await dataUrlToFile(img,'post.jpg'),'posts','post');const row={user_id:me.id,name:'post',price:0,position:0,item_type:'post',active:true,image_url:img,description:JSON.stringify({text:x.text||'',type:x.type||'image',n:x.name,c:x.city}),link_url:''};if(x.created)row.created_at=new Date(x.created).toISOString();let r=await sb.from('publicacoes').insert(row);if(r.error&&row.created_at){delete row.created_at;r=await sb.from('publicacoes').insert(row)}if(r.error)throw r.error;done.add(String(x.id));localStorage.setItem('cm_posts_migrated',JSON.stringify([...done]))}catch(e){console.error('migrar publicação',e)}}
   POSTS.migrating=false;POSTS.sig='';postsLoad();
 }
 async function postsCreate(text,file,url,extra){
   const p=profileData();const image=file?await uploadMedia(file,'posts','post'):(url||'');
-  const {data,error}=await sb.from('vitrine_items').insert({user_id:me.id,name:'post',price:0,position:0,item_type:'post',active:true,image_url:image,link_url:'',description:JSON.stringify({text,type:file?.type?.startsWith('video/')?'video':'image',n:p.name,c:p.city,...(extra||{})})}).select('id,created_at').single();
+  const {data,error}=await sb.from('publicacoes').insert({user_id:me.id,name:'post',price:0,position:0,item_type:'post',active:true,image_url:image,link_url:'',description:JSON.stringify({text,type:file?.type?.startsWith('video/')?'video':'image',n:p.name,c:p.city,...(extra||{})})}).select('id,created_at').single();
   if(error)throw error;
   POSTS.list.push({id:String(data.id),ownerId:me.id,name:p.name,city:p.city,photo:p.photo,text,image,type:file?.type?.startsWith('video/')?'video':'image',created:Date.parse(data.created_at)||Date.now(),likes:0,likedByMe:false,comments:[],promo:!!extra?.promo,biz:extra?.biz||'',bizName:extra?.bizName||''});POSTS.loaded=true;
 }
@@ -1987,7 +1987,7 @@ async function ccPublish(){
     const p=profileData(),tags=ccHashtags(text);
     const men={};Object.entries(CC.men).forEach(([n,uid])=>{if(text.includes('@'+n))men[n]=uid});
     const desc={v:2,text,type,n:p.name,c:p.city,media,th:thumb,vis:CC.vis,loc:CC.loc||'',tags,men,tg:CC.tg,...ccExtraDesc()};
-    const {data,error}=await sb.from('vitrine_items').insert({user_id:me.id,name:'post',price:0,position:0,item_type:'post',active:true,image_url:media[0]?.u||'',link_url:'',description:JSON.stringify(desc)}).select('id,created_at').single();
+    const {data,error}=await sb.from('publicacoes').insert({user_id:me.id,name:'post',price:0,position:0,item_type:'post',active:true,image_url:media[0]?.u||'',link_url:'',description:JSON.stringify(desc)}).select('id,created_at').single();
     if(error)throw error;
     const pid=String(data.id);
     const extra=[];
@@ -2023,18 +2023,18 @@ function postRepaint(id){const x=postFind(id);const el=document.getElementById('
 async function postLike(id,fromDouble){
   const x=postFind(id);if(!x||!me?.id)return;
   if(fromDouble){const h=document.querySelector(`#post-${CSS.escape(String(id))} .igBigHeart`);if(h){h.classList.remove('go');void h.offsetWidth;h.classList.add('go')}if(x.likedByMe)return}
-  if(x.likedByMe){const lid=x.myLikeId;x.likedByMe=false;x.likes=Math.max(0,x.likes-1);x.myLikeId=null;postRepaint(id);try{if(lid)await sb.from('vitrine_items').delete().eq('id',lid).eq('user_id',me.id);else await sb.from('vitrine_items').delete().eq('item_type','post_like').eq('link_url',String(id)).eq('user_id',me.id)}catch(_){}}
-  else{x.likedByMe=true;x.likes++;postRepaint(id);try{const {data}=await sb.from('vitrine_items').insert({user_id:me.id,name:'like',price:0,position:0,item_type:'post_like',active:true,link_url:String(id),description:''}).select('id').single();if(data)x.myLikeId=data.id}catch(_){}}
+  if(x.likedByMe){const lid=x.myLikeId;x.likedByMe=false;x.likes=Math.max(0,x.likes-1);x.myLikeId=null;postRepaint(id);try{if(lid)await sb.from('publicacoes').delete().eq('id',lid).eq('user_id',me.id);else await sb.from('publicacoes').delete().eq('item_type','post_like').eq('link_url',String(id)).eq('user_id',me.id)}catch(_){}}
+  else{x.likedByMe=true;x.likes++;postRepaint(id);try{const {data}=await sb.from('publicacoes').insert({user_id:me.id,name:'like',price:0,position:0,item_type:'post_like',active:true,link_url:String(id),description:''}).select('id').single();if(data)x.myLikeId=data.id}catch(_){}}
 }
 function cmCommentsOpen(id){const x=postFind(id);if(!x)return;openModal(`<div class="modalHead"><h2>Comentários</h2><button class="close" onclick="closeModal()">×</button></div><div id="cmtList" class="cmtList"></div><form class="igAddC cmtForm" onsubmit="event.preventDefault();postComment('${esc(id)}',this)"><img src="${esc(profileData().photo)}" alt=""><input placeholder="Escreva um comentário..." maxlength="500" autocomplete="off" enterkeyhint="send"><button>Publicar</button></form>`);document.getElementById('modal')?.classList.add('sheet');cmCommentsPaint(id)}
 function cmCommentsPaint(id){const el=document.getElementById('cmtList'),x=postFind(id);if(!el||!x)return;const cs=x.comments||[];el.innerHTML=cs.length?cs.map(c=>{const pp=c.ownerId===me?.id?{photo:profileData().photo}:(personById(c.ownerId)||{});return `<div class="cmt"><img src="${esc(pp.photo||avatar(c.name))}" alt="" onclick="closeModal();postOpenProfile('${esc(c.ownerId)}')"><div><b>${esc(c.name)}</b> ${esc(c.text)}<small>${c.created?postAgo(c.created):''}</small></div>${(c.ownerId===me?.id||x.ownerId===me?.id)&&c.id?`<button type="button" aria-label="Excluir comentário" onclick="cmCommentDelete('${esc(id)}','${esc(c.id)}')">🗑</button>`:''}</div>`}).join(''):'<div class="cmEmpty small"><b>Nenhum comentário ainda</b><span>Seja o primeiro a comentar.</span></div>';el.scrollTop=el.scrollHeight}
-async function cmCommentDelete(pid,cid){if(!confirm('Excluir este comentário?'))return;const x=postFind(pid);if(!x)return;const c=x.comments.find(q=>String(q.id)===String(cid));if(!c)return;try{let q=sb.from('vitrine_items').delete().eq('id',cid).eq('item_type','post_comment');if(c.ownerId===me.id)q=q.eq('user_id',me.id);const {error}=await q;if(error)throw error;x.comments=x.comments.filter(q=>q!==c);cmCommentsPaint(pid);postRepaint(pid)}catch(_){alert(c.ownerId===me.id?'Não foi possível excluir agora.':'Só quem escreveu pode excluir este comentário.')}}
+async function cmCommentDelete(pid,cid){if(!confirm('Excluir este comentário?'))return;const x=postFind(pid);if(!x)return;const c=x.comments.find(q=>String(q.id)===String(cid));if(!c)return;try{let q=sb.from('publicacoes').delete().eq('id',cid).eq('item_type','post_comment');if(c.ownerId===me.id)q=q.eq('user_id',me.id);const {error}=await q;if(error)throw error;x.comments=x.comments.filter(q=>q!==c);cmCommentsPaint(pid);postRepaint(pid)}catch(_){alert(c.ownerId===me.id?'Não foi possível excluir agora.':'Só quem escreveu pode excluir este comentário.')}}
 function postFocusComment(id){document.querySelector(`#post-${CSS.escape(String(id))} .igAddC input`)?.focus()}
 async function postComment(id,form){
   const inp=form.querySelector('input'),text=inp.value.trim();if(!text||!me?.id)return;const x=postFind(id);if(!x)return;inp.value='';
   const p=profileData();x.comments.push({ownerId:me.id,name:p.name,text,created:Date.now()});postRepaint(id);
   const c=x.comments[x.comments.length-1];
-  try{const r=await sb.from('vitrine_items').insert({user_id:me.id,name:'comment',price:0,position:0,item_type:'post_comment',active:true,link_url:String(id),description:JSON.stringify({text,n:p.name})}).select('id').single();if(r.error)throw r.error;if(r.data)c.id=r.data.id;if(document.getElementById('cmtList'))cmCommentsPaint(id)}catch(e){x.comments=x.comments.filter(q=>q!==c);postRepaint(id);alert('Não foi possível comentar agora.')}
+  try{const r=await sb.from('publicacoes').insert({user_id:me.id,name:'comment',price:0,position:0,item_type:'post_comment',active:true,link_url:String(id),description:JSON.stringify({text,n:p.name})}).select('id').single();if(r.error)throw r.error;if(r.data)c.id=r.data.id;if(document.getElementById('cmtList'))cmCommentsPaint(id)}catch(e){x.comments=x.comments.filter(q=>q!==c);postRepaint(id);alert('Não foi possível comentar agora.')}
 }
 function postMenu(id){
   const x=postFind(id);if(!x)return;const mine=x.ownerId===me?.id,sv=POSTS.saved.has(String(id)),canStory=postMedia(x).length||x.text;
@@ -2051,8 +2051,8 @@ function postMenu(id){
 }
 function postUrl(id){return CONECTA_APP_URL+'?post='+encodeURIComponent(id)}
 function postVisMenu(id){const x=postFind(id);if(!x)return;const o=[['public','🌎','Público','Todo mundo no Conecta'],['followers','👥','Seguidores','Só quem segue você'],['private','🔒','Somente eu','Só você vê']];openModal(`<div class="modalHead"><h2>Quem pode ver?</h2><button class="close" onclick="closeModal()">×</button></div><div class="cmSheetList">${o.map(([k,ic,t,st])=>`<button type="button" class="${(x.vis||'public')===k?'sel':''}" onclick="postSetVis('${esc(id)}','${k}')"><i>${ic}</i><span><b>${t}</b><small>${st}</small></span>${(x.vis||'public')===k?'<em>✓</em>':''}</button>`).join('')}</div>`)}
-async function postSetVis(id,vis){const x=postFind(id);if(!x)return;closeModal();const d={...(x._d||{}),vis};try{const {error}=await sb.from('vitrine_items').update({description:JSON.stringify(d)}).eq('id',id).eq('user_id',me.id);if(error)throw error;x.vis=vis;x._d=d;postRepaint(id);shareToast('Visibilidade atualizada')}catch(e){alert('Não foi possível mudar agora.')}}
-async function postDelete(id){if(!confirm('Excluir esta publicação?'))return;closeModal();try{const {error}=await sb.from('vitrine_items').delete().eq('id',id).eq('user_id',me.id);if(error)throw error;POSTS.list=POSTS.list.filter(x=>x.id!==String(id));POSTS.sig='';document.getElementById('post-'+id)?.remove();if(document.getElementById('profilePages'))go('profile')}catch(e){alert('Não foi possível excluir: '+((e&&e.message)||''))}}
+async function postSetVis(id,vis){const x=postFind(id);if(!x)return;closeModal();const d={...(x._d||{}),vis};try{const {error}=await sb.from('publicacoes').update({description:JSON.stringify(d)}).eq('id',id).eq('user_id',me.id);if(error)throw error;x.vis=vis;x._d=d;postRepaint(id);shareToast('Visibilidade atualizada')}catch(e){alert('Não foi possível mudar agora.')}}
+async function postDelete(id){if(!confirm('Excluir esta publicação?'))return;closeModal();try{const {error}=await sb.from('publicacoes').delete().eq('id',id).eq('user_id',me.id);if(error)throw error;POSTS.list=POSTS.list.filter(x=>x.id!==String(id));POSTS.sig='';document.getElementById('post-'+id)?.remove();if(document.getElementById('profilePages'))go('profile')}catch(e){alert('Não foi possível excluir: '+((e&&e.message)||''))}}
 function newPost(){cmCreate()}
 async function saveNewPost(){try{const p=profileData(),file=document.getElementById("postFile").files[0],text=document.getElementById("postText").value.trim(),url=document.getElementById("postImage").value.trim();if(!text&&!file&&!url)return alert("Adicione uma foto ou escreva alguma coisa.");const btn=document.querySelector('.modal .primary');if(btn){btn.disabled=true;btn.textContent='Publicando…'}await postsCreate(text,file,url);closeModal();POSTS.shown=20;if(document.getElementById('feed'))renderFeed();else go('home');shareToast('Publicado! Todo mundo já pode ver.')}catch(e){alert(e.message||'Não foi possível publicar a mídia.')}}
 function likePost(id){postLike(id)}
@@ -6163,7 +6163,7 @@ async function uploadMedia(file,folder='media',kind='post'){
   throw new Error('Não consegui enviar a mídia agora. Tente de novo. ['+(x.c||'')+' '+x.m.slice(0,80)+']');
 }
 /* mensagens de erro: mostram o motivo real, sem esconder */
-function cmPubErr(e,generic){const m=String(e?.message||e||'');if(/^(Formato|O vídeo|A foto|Sem conexão|Sua sessão|Não deu permissão|Não consegui enviar|Nenhum arquivo)/.test(m))return m;if(/não existe mais|permissão|públicas|atualização do banco|Amigos próximos/i.test(m))return m;if(/too large|payload|413/i.test(m))return 'O arquivo é muito grande. Escolha um vídeo menor (até 50 MB).';if(/fetch|network/i.test(m))return 'Sem conexão. Verifique sua internet e tente de novo.';if(/jwt|sess/i.test(m))return 'Sua sessão expirou. Saia e entre de novo.';return generic+(m?' ['+m.slice(0,80)+']':'')}
+function cmPubErr(e,generic){const m=String(e?.message||e||'');if(/publicacoes/i.test(m)&&/does not exist|schema cache|relation/i.test(m))return 'O administrador precisa rodar a atualização do banco (separar-publicacoes.sql).';if(/^(Formato|O vídeo|A foto|Sem conexão|Sua sessão|Não deu permissão|Não consegui enviar|Nenhum arquivo)/.test(m))return m;if(/não existe mais|permissão|públicas|atualização do banco|Amigos próximos/i.test(m))return m;if(/too large|payload|413/i.test(m))return 'O arquivo é muito grande. Escolha um vídeo menor (até 50 MB).';if(/fetch|network/i.test(m))return 'Sem conexão. Verifique sua internet e tente de novo.';if(/jwt|sess/i.test(m))return 'Sua sessão expirou. Saia e entre de novo.';return generic+(m?' ['+m.slice(0,80)+']':'')}
 function storyErrPt(e){return cmPubErr(e,'Não foi possível publicar o story. Tente de novo.')}
 function ccErrPt(e){return cmPubErr(e,'Não foi possível publicar agora. Tente de novo.')}
 
@@ -7520,7 +7520,7 @@ window.profUserPosts=function(uid){return ppPinSort(getPosts().filter(x=>x.owner
 async function ppDescUpdate(id,patch,msg){
   const x=postFind(id);if(!x||x.ownerId!==me?.id)return false;const d={...(x._d||{})};
   Object.entries(patch).forEach(([k,v])=>{if(v==null||v===false)delete d[k];else d[k]=v});
-  try{const {error}=await sb.from('vitrine_items').update({description:JSON.stringify(d)}).eq('id',id).eq('user_id',me.id);if(error)throw error;
+  try{const {error}=await sb.from('publicacoes').update({description:JSON.stringify(d)}).eq('id',id).eq('user_id',me.id);if(error)throw error;
     x._d=d;if('text' in patch){x.text=d.text||'';x.tags=d.tags||[];x.men=d.men||{}}
     POSTS.sig='';if(msg)shareToast(msg);ppxRefresh(id);return true}
   catch(e){alert('Não foi possível salvar agora.');return false}
@@ -7599,7 +7599,7 @@ window.postComment=async function(id,form){
   const re=PPX.reply&&PPX.reply.pid===String(id)?PPX.reply.re:'';inp.value='';PPX.reply=null;form.querySelector('.cmtReplying')?.remove();
   if(re)PPX.openC.add(re);
   const p=profileData();const c={ownerId:me.id,name:p.name,text,created:Date.now(),re};x.comments.push(c);postRepaint(id);if(document.getElementById('cmtList'))cmCommentsPaint(id);
-  try{const d={text,n:p.name};if(re)d.re=re;const r=await sb.from('vitrine_items').insert({user_id:me.id,name:'comment',price:0,position:0,item_type:'post_comment',active:true,link_url:String(id),description:JSON.stringify(d)}).select('id').single();if(r.error)throw r.error;if(r.data)c.id=r.data.id;if(document.getElementById('cmtList'))cmCommentsPaint(id)}
+  try{const d={text,n:p.name};if(re)d.re=re;const r=await sb.from('publicacoes').insert({user_id:me.id,name:'comment',price:0,position:0,item_type:'post_comment',active:true,link_url:String(id),description:JSON.stringify(d)}).select('id').single();if(r.error)throw r.error;if(r.data)c.id=r.data.id;if(document.getElementById('cmtList'))cmCommentsPaint(id)}
   catch(e){x.comments=x.comments.filter(q=>q!==c);postRepaint(id);if(document.getElementById('cmtList'))cmCommentsPaint(id);alert(/cm_comment_rules/.test(e?.message||'')?'Não é possível comentar nesta publicação.':'Não foi possível comentar agora.')}
 };
 
@@ -7691,7 +7691,7 @@ window.ccPublish=async function(){
     ccProgress(CC.sch?'Agendando…':'Publicando…',1);
     const p=profileData(),tags=ccHashtags(text);const men={};Object.entries(CC.men).forEach(([n,uid])=>{if(text.includes('@'+n))men[n]=uid});
     const desc={v:2,text,type,n:p.name,c:p.city,media,th:thumb,vis:CC.vis,loc:CC.loc||'',tags,men,tg:CC.tg,...ccExtraDesc()};if(CC.sch)desc.sch=CC.sch;
-    const {data,error}=await sb.from('vitrine_items').insert({user_id:me.id,name:'post',price:0,position:0,item_type:'post',active:true,image_url:media[0]?.th&&media[0].t==='video'?media[0].u:(media[0]?.u||''),link_url:'',description:JSON.stringify(desc)}).select('id,created_at').single();
+    const {data,error}=await sb.from('publicacoes').insert({user_id:me.id,name:'post',price:0,position:0,item_type:'post',active:true,image_url:media[0]?.th&&media[0].t==='video'?media[0].u:(media[0]?.u||''),link_url:'',description:JSON.stringify(desc)}).select('id,created_at').single();
     if(error)throw error;const pid=String(data.id);
     const extra=[];if(tags.length)extra.push(sb.from('cm_post_hashtags').insert(tags.map(t=>({post_id:pid,tag:t}))));
     const tagRows=[...CC.tg.map(u=>({post_id:pid,user_id:u,kind:'tag',tagged_by:me.id})),...Object.values(men).filter(u=>u!==me.id).map(u=>({post_id:pid,user_id:u,kind:'mention',tagged_by:me.id}))];if(tagRows.length)extra.push(sb.from('cm_post_tags').insert(tagRows));
