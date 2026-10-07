@@ -8628,4 +8628,244 @@ window.ccPublish=async function(){
 };
 })();
 </script>
+<style id="navcss">
+/* transições entre telas */
+.nav{view-transition-name:cmnav}
+::view-transition-group(cmnav){animation:none}
+::view-transition-old(cmnav){animation:none;opacity:0}
+::view-transition-new(cmnav){animation:none}
+html[data-nav=tab]::view-transition-old(root){animation:navFadeOut .14s ease both}
+html[data-nav=tab]::view-transition-new(root){animation:navFadeIn .18s ease both}
+html[data-nav=push]::view-transition-old(root){animation:navOutL .3s cubic-bezier(.2,.8,.2,1) both}
+html[data-nav=push]::view-transition-new(root){animation:navInR .3s cubic-bezier(.2,.8,.2,1) both}
+html[data-nav=back]::view-transition-old(root){animation:navOutR .28s cubic-bezier(.2,.8,.2,1) both;z-index:2}
+html[data-nav=back]::view-transition-new(root){animation:navInL .28s cubic-bezier(.2,.8,.2,1) both;z-index:1}
+@keyframes navFadeOut{to{opacity:0}}@keyframes navFadeIn{from{opacity:0}}
+@keyframes navInR{from{transform:translateX(100%)}}
+@keyframes navOutL{to{transform:translateX(-28%);filter:brightness(.6)}}
+@keyframes navOutR{to{transform:translateX(100%)}}
+@keyframes navInL{from{transform:translateX(-28%);filter:brightness(.6)}}
+@media (prefers-reduced-motion:reduce){::view-transition-old(root),::view-transition-new(root){animation:none!important}}
+.navGhost{position:fixed;inset:0;z-index:40;overflow:hidden;pointer-events:none;background:var(--bg,#04121c)}
+.navGhost>*{min-height:100%}
+#app{will-change:auto}
+/* turbinar discreto */
+.boostRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px 4px}
+.boostStat{display:flex;align-items:center;gap:6px;color:#9db1bd;font-size:13.5px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.boostStat svg{width:17px;height:17px;flex:none;color:#5ab4ff}.boostStat b{color:#fff;font-weight:700}
+.boostPill{flex:none;border:0;border-radius:9px;background:#3d5afe;color:#fff;font-weight:700;font-size:13.5px;padding:8px 14px}
+.boostPill:active{opacity:.8}
+/* perfil em grade */
+.pgGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin:0 -2px}
+.pgTile{position:relative;display:block;aspect-ratio:3/4;padding:0;border:0;border-radius:0;overflow:hidden;background:#12262f;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.pgTile img,.pgTile video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.pgTile:active{opacity:.85}
+.pgBadge{position:absolute;top:6px;right:6px;width:20px;height:20px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+.pgBadge svg{width:100%;height:100%}
+.pgLikes{position:absolute;left:6px;bottom:5px;display:flex;align-items:center;gap:4px;color:#fff;font-size:12.5px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.7)}
+.pgLikes svg{width:14px;height:14px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+.pgPin{position:absolute;top:5px;left:6px;font-style:normal;font-size:13px}
+.pgText{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:10px;background:linear-gradient(150deg,#16424f,#0c2029);color:#e8f3f7;font-size:12.5px;line-height:1.35;text-align:center}
+.pgText span{display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+.pgView{position:fixed;inset:0;z-index:70;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bg,#04121c);overscroll-behavior:contain}
+.pgHead{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 8px) 12px 8px;background:rgba(4,18,28,.92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.pgHead button{width:40px;height:40px;border:0;border-radius:50%;background:rgba(255,255,255,.08);color:#fff;display:grid;place-items:center}
+.pgHead button svg{width:22px;height:22px}
+.pgHead div{flex:1;text-align:center}.pgHead b{display:block;color:#fff;font-size:16px}.pgHead small{color:#9db1bd;font-size:12.5px}
+.pgHead span{width:40px}
+.pgList{padding:6px 0 calc(env(safe-area-inset-bottom,0px) + 30px)}
+body.pgOpen{overflow:hidden}
+</style>
+<script>
+/* ===================== NAVEGAÇÃO SUAVE + PERFIL EM GRADE (estilo Instagram) =====================
+   - Troca de abas sem "piscar" (dados das pessoas ficam em memória)
+   - Abrir conversa/perfil desliza da direita; voltar desliza para a direita
+   - Arrastar da borda esquerda para voltar
+   - Conversas abrem na hora (mensagens ficam guardadas e são pré-carregadas)
+   - Publicações do perfil em grade; toque abre a lista de posts
+   - "Turbinar" discreto, igual ao Instagram
+*/
+(function(){
+const TABS=['home','chat','explore','business','profile'];
+const reduce=()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(_){return false}};
+
+/* ---------- 1) pessoas da região em memória (evita recarregar e redesenhar a tela) ---------- */
+if(typeof loadPublicProfiles==='function'&&!loadPublicProfiles.__memo){
+  const lp=window.loadPublicProfiles;let last=0,inflight=null;
+  const run=()=>{if(!inflight)inflight=Promise.resolve(lp()).finally(()=>{last=Date.now();inflight=null});return inflight};
+  window.loadPublicProfiles=function(force){
+    const has=typeof publicProfilesCache!=='undefined'&&publicProfilesCache&&publicProfilesCache.length;
+    if(!force&&has&&last){if(Date.now()-last>120e3)run();return Promise.resolve()}
+    return run();
+  };
+  window.loadPublicProfiles.__memo=1;
+}
+
+/* ---------- 2) mensagens guardadas + pré-carregamento ---------- */
+const MC=new Map();
+const pairRows=(other)=>{try{return [...CVX.msgs.values()].filter(m=>(m.sender_id===me.id&&m.receiver_id===other)||(m.sender_id===other&&m.receiver_id===me.id)).sort((x,y)=>String(x.created_at).localeCompare(String(y.created_at)))}catch(_){return []}};
+const visible=(other,rows)=>{try{const hid=cvxHidden();return rows.filter(m=>!cvxIsDel(m.body)&&!hid.has(String(m.id))&&!cvxCleared(other,m.created_at))}catch(_){return rows}};
+if(typeof loadConversationMessages==='function'){
+  const lcm=window.loadConversationMessages;
+  window.loadConversationMessages=async function(){
+    const box=document.getElementById('conversationMessages');const other=currentPublicUser&&currentPublicUser.id;
+    const c=other&&MC.get(other);
+    if(box&&c&&c.length){try{box.innerHTML='';visible(other,c).forEach(m=>appendMessageBubble(m,true));msgGroupMedia();msgScrollBottom(true)}catch(_){}}
+    const r=await lcm.apply(this,arguments);
+    if(other&&me?.id){const rows=pairRows(other);if(rows.length)MC.set(other,rows)}
+    return r;
+  };
+}
+async function prefetchChats(){
+  if(!me?.id||typeof sb==='undefined')return;
+  const ids=[...new Set([...document.querySelectorAll('#app [onclick*="chatOpen("]')].map(e=>{const m=/chatOpen\('([^']+)'/.exec(e.getAttribute('onclick')||'');return m&&m[1]}).filter(Boolean))].filter(id=>!MC.has(id)).slice(0,6);
+  await Promise.all(ids.map(async other=>{
+    const filt=`and(sender_id.eq.${me.id},receiver_id.eq.${other}),and(sender_id.eq.${other},receiver_id.eq.${me.id})`;
+    for(const cols of [MSG_COLS+',delivered_at,read_at,reply_to,edited_at',MSG_COLS+',delivered_at,read_at',MSG_COLS]){
+      try{const r=await sb.from('messages').select(cols).or(filt).order('created_at',{ascending:true}).limit(300);if(!r.error){if(r.data&&r.data.length&&!MC.has(other))MC.set(other,r.data);break}}catch(_){break}
+    }
+  }));
+}
+
+/* ---------- 3) transições entre telas ---------- */
+let hist=[];const scrolls={};let skipAnim=false;
+function direction(from,to){
+  if(!from||from===to)return 'none';
+  const toTab=TABS.includes(to),fromTab=TABS.includes(from);
+  if(hist.length>1&&hist[hist.length-2]===to)return 'back';
+  if(toTab)return fromTab?'tab':'back';
+  return 'push';
+}
+function track(dir,from,to){
+  scrolls[from]=window.scrollY||0;
+  if(dir==='back'){const i=hist.lastIndexOf(to);hist=i>=0?hist.slice(0,i+1):[to]}
+  else if(dir==='push')hist.push(to);
+  else hist=[to];
+}
+function afterRender(dir,to){
+  if(dir==='push'||dir==='tab')window.scrollTo(0,0);
+  else if(dir==='back'&&scrolls[to]!=null){const y=scrolls[to];requestAnimationFrame(()=>window.scrollTo(0,y))}
+}
+function ghostAnim(dir,a){
+  /* plano B (celulares sem View Transitions): copia a tela antiga e desliza */
+  try{
+    const host=document.createElement('div');host.className='navGhost '+dir;
+    const clone=a.cloneNode(true);clone.removeAttribute('id');clone.querySelectorAll('video,audio,iframe,[id]').forEach(e=>{if(/^(VIDEO|AUDIO|IFRAME)$/.test(e.tagName))e.remove();else e.removeAttribute('id')});
+    clone.style.transform=`translateY(${-(window.scrollY||0)}px)`;host.appendChild(clone);document.body.appendChild(host);
+    return ()=>{const nw=a;const D=280,E='cubic-bezier(.2,.8,.2,1)';
+      if(dir==='push'){host.animate([{transform:'translateX(0)',filter:'brightness(1)'},{transform:'translateX(-28%)',filter:'brightness(.65)'}],{duration:D,easing:E,fill:'forwards'});
+        nw.animate([{transform:'translateX(100%)'},{transform:'translateX(0)'}],{duration:D,easing:E})}
+      else{host.style.zIndex='60';host.animate([{transform:'translateX(0)'},{transform:'translateX(100%)'}],{duration:D,easing:E,fill:'forwards'});
+        nw.animate([{transform:'translateX(-28%)',filter:'brightness(.65)'},{transform:'translateX(0)',filter:'brightness(1)'}],{duration:D,easing:E})}
+      setTimeout(()=>host.remove(),D+40)};
+  }catch(_){return ()=>{}}
+}
+const g=window.go;
+window.go=function(page,arg){
+  document.getElementById('pgView')?.remove();document.body.classList.remove('pgOpen');
+  const from=window.cmCurrentPage,a=document.getElementById('app');
+  const dir=skipAnim||reduce()||document.hidden?'none':direction(from,page);
+  track(dir==='none'?direction(from,page):dir,from,page);
+  let ret;
+  const doIt=()=>{ret=g(page,arg);afterRender(dir,page);if(page==='chat')Promise.resolve(ret).then(()=>setTimeout(prefetchChats,300));return ret};
+  if(!a||dir==='none'){return doIt()}
+  if(document.startViewTransition&&(dir==='push'||dir==='back'||dir==='tab')){
+    document.documentElement.dataset.nav=dir;
+    try{const vt=document.startViewTransition(()=>{doIt();return new Promise(r=>requestAnimationFrame(()=>r()))});
+      vt.finished.finally(()=>{if(document.documentElement.dataset.nav===dir)delete document.documentElement.dataset.nav});
+      return Promise.resolve(vt.updateCallbackDone).then(()=>ret)}catch(_){delete document.documentElement.dataset.nav;return doIt()}
+  }
+  if(dir==='push'||dir==='back'){const play=ghostAnim(dir,a);doIt();play();return ret}
+  return doIt();
+};
+
+/* ---------- 4) arrastar da borda para voltar ---------- */
+(function(){
+  let sx=0,sy=0,on=false,dx=0,app=null;
+  const backBtn=()=>{const a=document.getElementById('app');if(!a)return null;return a.querySelector('.conversationHeader button, [aria-label="Voltar"], .flBack, .pfBack, button.ghost')};
+  document.addEventListener('touchstart',e=>{
+    const t=e.touches[0];if(!t||t.clientX>24||TABS.includes(window.cmCurrentPage)||document.getElementById('modal')||document.getElementById('cmc'))return;
+    if(!backBtn())return;sx=t.clientX;sy=t.clientY;on=true;dx=0;app=document.getElementById('app');
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{
+    if(!on)return;const t=e.touches[0];dx=Math.max(0,t.clientX-sx);
+    if(Math.abs(t.clientY-sy)>40&&dx<30){on=false;app.style.transform='';return}
+    app.style.transition='none';app.style.transform=`translateX(${dx}px)`;app.style.boxShadow='-12px 0 30px rgba(0,0,0,.45)';
+  },{passive:true});
+  document.addEventListener('touchend',()=>{
+    if(!on)return;on=false;const w=window.innerWidth;
+    if(dx>w*0.3){app.style.transition='transform .18s ease-out';app.style.transform=`translateX(${w}px)`;
+      setTimeout(()=>{const b=backBtn();skipAnim=true;try{b&&b.click()}finally{skipAnim=false}app.style.transition='none';app.style.transform='';app.style.boxShadow='';
+        try{app.animate([{opacity:.6,transform:'translateX(-12%)'},{opacity:1,transform:'none'}],{duration:180,easing:'ease-out'})}catch(_){}},180)}
+    else{app.style.transition='transform .2s ease-out';app.style.transform='';setTimeout(()=>{app.style.transition='';app.style.boxShadow=''},220)}
+  },{passive:true});
+})();
+
+/* ---------- 5) "Turbinar" discreto (igual ao Instagram) ---------- */
+const BOOST_ICO='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>';
+const ph=window.postHtml;
+window.postHtml=function(p){
+  let h=ph.apply(this,arguments);
+  const m=/<button class="boostBtn" onclick="boostOpen\('([^']*)'\)">[^<]*<\/button>/.exec(h);
+  if(m){
+    h=h.replace(m[0],'');
+    const likes=+(p&&p.likes)||0,coms=(p&&p.comments&&p.comments.length)||0;
+    const row=`<div class="boostRow"><span class="boostStat">${BOOST_ICO}<b>${likes}</b> curtida${likes===1?'':'s'} · <b>${coms}</b> comentário${coms===1?'':'s'}</span><button type="button" class="boostPill" onclick="boostOpen('${m[1]}')">Turbinar post</button></div>`;
+    const i=h.indexOf('<div class="igBar">');const j=h.indexOf('<div class="ppExtra">');const at=j>=0&&(i<0||j<i)?j:i;
+    h=at>=0?h.slice(0,at)+row+h.slice(at):h.replace(/<\/article>$/,row+'</article>');
+  }
+  return h;
+};
+
+/* ---------- 6) perfil: publicações em grade ---------- */
+const GI={car:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M7 3h11a3 3 0 0 1 3 3v11a1 1 0 0 1-1 1h-1V6a1 1 0 0 0-1-1H6V4a1 1 0 0 1 1-1z"/><rect x="3" y="7" width="13" height="14" rx="2.5"/></svg>',
+  vid:'<svg viewBox="0 0 24 24" fill="#fff"><rect x="3" y="4" width="18" height="16" rx="4"/><path d="M10 9v6l5-3z" fill="#111"/></svg>',
+  heart:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M12 20.5s-7.5-4.6-9.4-9.6C1.2 7.1 3.7 4 7 4c2 0 3.6 1.1 5 2.8C13.4 5.1 15 4 17 4c3.3 0 5.8 3.1 4.4 6.9-1.9 5-9.4 9.6-9.4 9.6z"/></svg>'};
+function tile(x){
+  const ms=postMedia(x),m0=ms[0],isV=m0&&m0.t==='video';
+  const img=m0?(isV?(m0.th||x.thumb||''):m0.u):'';
+  const badge=ms.length>1?GI.car:isV?GI.vid:'';
+  const likes=+x.likes||0;
+  const inner=img?`<img src="${esc(img)}" loading="lazy" decoding="async" alt="">`:isV?`<video src="${esc(m0.u)}#t=0.5" muted playsinline preload="metadata"></video>`:`<div class="pgText"><span>${esc(String(x.text||'').slice(0,90))}</span></div>`;
+  return `<button type="button" class="pgTile" onclick="cmGridOpen('${esc(x.id)}','${esc(x.ownerId)}')">${inner}${badge?`<i class="pgBadge">${badge}</i>`:''}${likes?`<span class="pgLikes">${GI.heart}${likes}</span>`:''}${x.pinned||x._pinned?'<i class="pgPin">📌</i>':''}</button>`;
+}
+function gridFor(uid){const list=(typeof ppPinSort==='function'?ppPinSort(profUserPosts(uid)):profUserPosts(uid));return list.length?`<div class="pgGrid">${list.map(tile).join('')}</div>`:''}
+function applyGrid(){
+  const own=document.getElementById('profilePages');
+  if(own&&me?.id&&own.querySelector('.igPost')){const g=gridFor(me.id);if(g)own.innerHTML=g}
+  const pub=document.getElementById('publicPosts');
+  if(pub&&typeof currentPublicUser!=='undefined'&&currentPublicUser){const g=gridFor(currentPublicUser.id);if(g)pub.innerHTML=g}
+}
+window.cmGridOpen=function(id,uid){
+  const list=(typeof ppPinSort==='function'?ppPinSort(profUserPosts(uid)):profUserPosts(uid));if(!list.length)return;
+  const who=uid===me?.id?profileData():(personById(uid)||{name:''});
+  document.getElementById('pgView')?.remove();
+  document.body.insertAdjacentHTML('beforeend',`<div id="pgView" class="pgView"><header class="pgHead"><button type="button" aria-label="Voltar" onclick="cmGridClose()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button><div><b>Publicações</b><small>${esc(who.name||'')}</small></div><span></span></header><div class="pgList">${list.map(postHtml).join('')}</div></div>`);
+  document.body.classList.add('pgOpen');
+  const v=document.getElementById('pgView');
+  const el=document.getElementById('post-'+id);if(el)v.scrollTop=Math.max(0,el.offsetTop-56);
+  if(!reduce())try{v.animate([{transform:'translateX(100%)'},{transform:'none'}],{duration:280,easing:'cubic-bezier(.2,.8,.2,1)'})}catch(_){}
+};
+window.cmGridClose=function(){const v=document.getElementById('pgView');if(!v)return;try{if(typeof ppFeedStop==='function')ppFeedStop()}catch(_){}
+  document.body.classList.remove('pgOpen');
+  if(reduce()){v.remove();applyGrid();return}
+  const an=v.animate([{transform:'none'},{transform:'translateX(100%)'}],{duration:220,easing:'ease-in',fill:'forwards'});an.onfinish=()=>v.remove();
+  setTimeout(applyGrid,0)};
+/* deslizar da borda também fecha a lista de posts */
+(function(){let sx=0,on=false,dx=0,v=null;
+  document.addEventListener('touchstart',e=>{v=document.getElementById('pgView');const t=e.touches[0];if(!v||!t||t.clientX>24)return;sx=t.clientX;on=true;dx=0},{passive:true});
+  document.addEventListener('touchmove',e=>{if(!on||!v)return;dx=Math.max(0,e.touches[0].clientX-sx);v.style.transform=`translateX(${dx}px)`},{passive:true});
+  document.addEventListener('touchend',()=>{if(!on||!v)return;on=false;if(dx>innerWidth*.3){v.style.transition='transform .16s ease-out';v.style.transform='translateX(100%)';setTimeout(()=>{v.remove();document.body.classList.remove('pgOpen');applyGrid()},170)}else{v.style.transition='transform .2s';v.style.transform='';setTimeout(()=>{if(v)v.style.transition=''},220)}},{passive:true});
+})();
+/* aplica a grade sempre que o perfil for desenhado */
+const gp=window.go;
+window.go=function(page,arg){const r=gp.apply(this,arguments);if(page==='profile'||page==='publicProfile'){applyGrid();Promise.resolve(r).then(()=>setTimeout(applyGrid,0))}return r};
+const rp=window.postRepaint;
+window.postRepaint=function(id){if(!document.getElementById('post-'+id)&&(document.getElementById('profilePages')||document.getElementById('publicPosts'))&&!document.getElementById('pgView')){applyGrid();return}return rp.apply(this,arguments)};
+/* lista pública carregada depois */
+const mo=new MutationObserver(()=>{const p=document.getElementById('publicPosts');if(p&&p.querySelector('.igPost, .pubGrid')&&!p.querySelector('.pgGrid'))applyGrid()});
+document.addEventListener('DOMContentLoaded',()=>{const a=document.getElementById('app');if(a)mo.observe(a,{childList:true,subtree:true})});
+const a0=document.getElementById('app');if(a0)mo.observe(a0,{childList:true,subtree:true});
+})();
+</script>
 </body></html>
