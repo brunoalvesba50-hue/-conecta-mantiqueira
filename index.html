@@ -6429,14 +6429,27 @@ function ccNext(){
   if(CC.step==='details')ccPublish();
 }
 
-/* --------- 1) escolher o tipo --------- */
+/* --------- 1) escolher o tipo (visual premium) --------- */
+const CPX_ICO={
+ gal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="9" cy="9" r="1.8"/><path d="m21 15-4.5-4.5L7 20"/></svg>',
+ cam:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.6"/></svg>',
+ vid:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="14" height="14" rx="3"/><path d="m16.5 10 5-3v10l-5-3"/></svg>',
+ car:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="15" height="15" rx="3"/><path d="M3 7v11a3 3 0 0 0 3 3h11"/></svg>',
+ txt:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6h14M5 11h14M5 16h9"/></svg>',
+ go:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>'
+};
+function ccCamInput(){let i=document.getElementById('ccCamIn');if(!i){(document.getElementById('cmc')||document.body).insertAdjacentHTML('beforeend','<input id="ccCamIn" type="file" accept="image/*" capture="environment" class="hidden" onchange="ccPicked(this,\'photo\')">');i=document.getElementById('ccCamIn')}return i}
 function ccPick(){
-  ccStep('pick');CC.kind='';CC.panel='';ccSetTop('Novo post','','close');
-  document.getElementById('ccBody').innerHTML=`<div class="ccPick"><p class="ccHint">O que você quer publicar?</p>
-  <button type="button" onclick="CC.multi=false;document.getElementById('ccPhotoIn').click()"><i>📸</i><span><b>Foto</b><small>Uma foto da sua galeria</small></span></button>
-  <button type="button" onclick="document.getElementById('ccVideoIn').click()"><i>🎬</i><span><b>Vídeo</b><small>De 3 segundos até ${CC_MAX_VIDEO_MIN} minutos · aparece também em Vídeos</small></span></button>
-  <button type="button" onclick="CC.multi=true;document.getElementById('ccMultiIn').click()"><i>🖼️</i><span><b>Carrossel</b><small>Até ${CC_MAX_PHOTOS} fotos em uma publicação</small></span></button>
-  <button type="button" onclick="ccStartText()"><i>📝</i><span><b>Texto</b><small>Só uma mensagem, sem foto</small></span></button></div>`;
+  ccStep('pick');CC.kind='';CC.panel='';ccSetTop('Novo post','','close');ccCamInput();
+  document.getElementById('ccBody').innerHTML=`<div class="ccPick cpx">
+  <div class="cpxHero"><span>Criar</span><h3>O que você quer publicar?</h3><p>Toque em uma opção para começar.</p></div>
+  <div class="cpxDuo">
+    <button type="button" class="cpxTile" onclick="CC.multi=false;document.getElementById('ccPhotoIn').click()"><i class="cpxIc g">${CPX_ICO.gal}</i><b>Foto</b><small>Escolher da galeria</small></button>
+    <button type="button" class="cpxTile" onclick="CC.multi=false;ccCamInput().click()"><i class="cpxIc a">${CPX_ICO.cam}</i><b>Câmera</b><small>Tirar foto agora</small></button>
+  </div>
+  <button type="button" class="cpxRow" onclick="document.getElementById('ccVideoIn').click()"><i class="cpxIc r">${CPX_ICO.vid}</i><span><b>Vídeo</b><small>De 3 segundos até ${CC_MAX_VIDEO_MIN} minutos · aparece também em Vídeos</small></span><em>${CPX_ICO.go}</em></button>
+  <button type="button" class="cpxRow" onclick="CC.multi=true;document.getElementById('ccMultiIn').click()"><i class="cpxIc b">${CPX_ICO.car}</i><span><b>Carrossel</b><small>Até ${CC_MAX_PHOTOS} fotos em uma publicação</small></span><em>${CPX_ICO.go}</em></button>
+  <button type="button" class="cpxRow" onclick="ccStartText()"><i class="cpxIc t">${CPX_ICO.txt}</i><span><b>Texto</b><small>Só uma mensagem, sem foto</small></span><em>${CPX_ICO.go}</em></button></div>`;
 }
 async function ccLoadPhoto(f){
   let url=URL.createObjectURL(f);let dim=await ccImgSize(url).catch(()=>null);
@@ -7970,5 +7983,168 @@ async function favToggle(uid,btn){const had=FEEDM.fav.has(uid);if(!had&&FEEDM.fa
   try{const r=had?await sb.from('cm_favorites').delete().eq('user_id',me.id).eq('fav_id',uid):await sb.from('cm_favorites').insert({user_id:me.id,fav_id:uid});if(r.error&&!/duplicate/i.test(r.error.message||''))throw r.error}catch(e){if(typeof cvxMissing==='function'&&cvxMissing(e))cvxSqlToast()}}
 /* ===================== fim FEED ===================== */
 
+</script>
+
+<style id="cmPremiumPickMusic">
+/* Novo post premium */
+.ccPick.cpx{display:grid;gap:12px;padding-bottom:24px}.ccPick.cpx>button{width:100%}
+.cpxHero{padding:4px 2px 6px}
+.cpxHero span{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#20df9a}
+.cpxHero h3{margin:6px 0 4px;font-size:24px;line-height:1.2;color:#fff}
+.cpxHero p{margin:0;color:#8fa6b3;font-size:14.5px}
+.cpxDuo{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ccPick.cpx>button,.ccPick.cpx .cpxTile{-webkit-tap-highlight-color:transparent;transition:transform .15s ease,border-color .2s ease,background .2s ease}
+.ccPick.cpx>button:active,.ccPick.cpx .cpxTile:active{transform:scale(.97)}
+.cpxTile{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-height:148px;padding:18px 16px;border-radius:24px;border:1px solid rgba(255,255,255,.08);background:radial-gradient(120% 90% at 0% 0%,rgba(32,223,154,.14),transparent 60%),linear-gradient(160deg,#10252f,#0b1820);color:#fff;text-align:left;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.cpxTile:nth-child(2){background:radial-gradient(120% 90% at 0% 0%,rgba(255,170,64,.16),transparent 60%),linear-gradient(160deg,#10252f,#0b1820)}
+.cpxTile .cpxIc{margin-bottom:auto}
+.cpxTile b{font-size:18px;margin-top:14px}
+.cpxTile small{color:#9db1bd;font-size:13px}
+.ccPick.cpx>.cpxRow,.ccPick.cpx>.ppxDraftBtn{display:flex;align-items:center;gap:14px;padding:14px 14px 14px 14px;border-radius:22px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(160deg,#10252f,#0b1820);color:#fff;text-align:left;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.cpxRow span,.ccPick.cpx>.ppxDraftBtn span{flex:1;min-width:0}
+.cpxRow b{display:block;font-size:17px}
+.cpxRow small{display:block;color:#9db1bd;font-size:13px;margin-top:2px;line-height:1.35}
+.cpxRow em{flex:0 0 auto;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.06);color:#8fa6b3;font-style:normal}
+.cpxRow em svg{width:16px;height:16px}
+.cpxIc{flex:0 0 auto;width:48px;height:48px;border-radius:16px;display:grid;place-items:center;color:#fff;font-style:normal;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 6px 16px rgba(0,0,0,.25)}
+.cpxIc svg{width:25px;height:25px}
+.cpxIc.g{background:linear-gradient(135deg,#2ee6a6,#0fa3a3)}
+.cpxIc.a{background:linear-gradient(135deg,#ffc24a,#ff7a45)}
+.cpxIc.r{background:linear-gradient(135deg,#ff6a7f,#d9468f)}
+.cpxIc.b{background:linear-gradient(135deg,#5ab4ff,#7a5cff)}
+.cpxIc.t{background:linear-gradient(135deg,#5f7d8c,#34505e)}
+.ccPick.cpx>.ppxDraftBtn i{font-style:normal;width:48px;height:48px;border-radius:16px;display:grid;place-items:center;background:rgba(255,255,255,.07);font-size:22px}
+@media (max-width:340px){.cpxTile{min-height:128px;padding:14px}.cpxHero h3{font-size:21px}}
+
+/* Música estilo Instagram */
+.muxSearch{display:flex;align-items:center;gap:10px;height:46px;padding:0 12px 0 14px;border-radius:14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.06);color:#9db1bd}
+.muxSearch svg{width:19px;height:19px;flex:0 0 auto}
+.muxSearch input{flex:1;min-width:0;height:100%;border:0;outline:0;background:transparent;color:#fff;font-size:16px;-webkit-appearance:none;appearance:none;padding:0}
+.muxSearch input::-webkit-search-cancel-button{display:none}
+.muxClr{flex:0 0 auto;width:24px;height:24px;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#0b1820;font-weight:800;font-size:13px;line-height:24px;padding:0;display:none}
+.muxSearch.has .muxClr{display:block}
+.muxChips{display:flex;gap:8px;overflow-x:auto;padding:12px 0 4px;margin:0 -2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.muxChips::-webkit-scrollbar{display:none}
+.muxChip{flex:0 0 auto;padding:8px 14px;border-radius:999px;border:0;background:rgba(255,255,255,.08);color:#d5e3ea;font-weight:700;font-size:14px;white-space:nowrap}
+.muxChip.on{background:#fff;color:#07141b}
+.muxLbl{margin:12px 2px 4px;font-size:13px;font-weight:800;color:#8fa6b3;letter-spacing:.02em}
+.muxList{max-height:56vh;overflow-y:auto;-webkit-overflow-scrolling:touch;margin:0 -4px;padding:0 4px}
+.muxRow{display:flex;align-items:center;gap:12px;padding:8px 6px;border-radius:14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.muxRow:active{background:rgba(255,255,255,.06)}
+.muxCov{position:relative;flex:0 0 52px;width:52px;height:52px;border-radius:10px;overflow:hidden;border:0;padding:0;background:linear-gradient(135deg,#1a4a5e,#0f2c38);color:#fff;font-size:20px}
+.muxCov img{width:100%;height:100%;object-fit:cover;display:block}
+.muxCov .muxPl{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.32)}
+.muxCov .muxPl svg{width:20px;height:20px}
+.muxCov .muxPa{display:none}
+.muxCov.on .muxPa{display:block}.muxCov.on .muxPy{display:none}
+.muxCov.on{box-shadow:0 0 0 2px #20df9a}
+.muxInfo{flex:1;min-width:0}
+.muxInfo b{display:block;font-size:15px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.muxInfo span{display:block;font-size:13px;color:#9db1bd;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
+.muxGo{flex:0 0 auto;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(32,223,154,.14);color:#20df9a}
+.muxGo svg{width:18px;height:18px}
+.muxSk{display:flex;align-items:center;gap:12px;padding:8px 6px}
+.muxSk i{flex:0 0 52px;height:52px;border-radius:10px}
+.muxSk span{flex:1}.muxSk s{display:block;height:12px;border-radius:6px;margin:6px 0;width:70%}.muxSk s+s{width:45%}
+.muxSk i,.muxSk s{background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.13),rgba(255,255,255,.06));background-size:200% 100%;animation:muxSh 1.2s linear infinite}
+@keyframes muxSh{to{background-position:-200% 0}}
+.muxEmpty{text-align:center;padding:26px 12px;color:#9db1bd;font-size:14.5px;line-height:1.45}
+.muxEmpty b{display:block;color:#fff;font-size:16px;margin-bottom:4px}
+.muxRemove{width:100%;margin-top:10px}
+</style>
+<script>
+/* ===================== MÚSICA v3 — busca forte + seletor estilo Instagram (stories, posts e vídeos) ===================== */
+(function(){
+const ICO={
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+  play:'<svg class="muxPy" viewBox="0 0 24 24" fill="#fff"><path d="M8 5.5v13l11-6.5z"/></svg>',
+  pause:'<svg class="muxPa" viewBox="0 0 24 24" fill="#fff"><rect x="6.5" y="5" width="4" height="14" rx="1"/><rect x="13.5" y="5" width="4" height="14" rx="1"/></svg>',
+  go:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'
+};
+const CHIPS=[['','Em alta'],['sertanejo','Sertanejo'],['pagode','Pagode'],['funk','Funk'],['gospel','Gospel'],['mpb','MPB'],['forró','Forró'],['piseiro','Piseiro'],['rock nacional','Rock'],['lofi relax','Relaxar'],['natureza som ambiente','Natureza']];
+const ST={sc:{chip:'',seq:0},pp:{chip:'',seq:0}};
+
+/* ---------- catálogo: Deezer + Apple juntos (se um falhar, o outro responde) ---------- */
+function jsonp(url,ms){return new Promise((res,rej)=>{const cb='cmx'+Date.now()+Math.floor(Math.random()*1e5);const sc=document.createElement('script');let to=0;const clean=()=>{clearTimeout(to);try{delete window[cb]}catch(_){window[cb]=undefined}sc.remove()};to=setTimeout(()=>{clean();rej(new Error('tempo'))},ms||8000);window[cb]=d=>{clean();res(d)};sc.onerror=()=>{clean();rej(new Error('falha'))};sc.src=url+(url.includes('?')?'&':'?')+'output=jsonp&callback='+cb;document.head.appendChild(sc)})}
+function dzMap(arr){return (arr||[]).filter(x=>x&&x.preview&&x.id).map(x=>({id:'d'+x.id,dz:String(x.id),title:x.title_short||x.title||'Música',artist:(x.artist&&x.artist.name)||'',url:x.preview,cover:(x.album&&(x.album.cover_medium||x.album.cover))||'',dur:30}))}
+async function dzSearch(q){const j=await jsonp('https://api.deezer.com/search?q='+encodeURIComponent(q)+'&limit=30');return dzMap(j&&j.data)}
+async function dzTop(){try{const j=await jsonp('https://api.deezer.com/playlist/1111141961/tracks?limit=40');const a=dzMap(j&&j.data);if(a.length)return a}catch(_){}const j=await jsonp('https://api.deezer.com/chart/0/tracks?limit=40');return dzMap(j&&j.data)}
+async function itSearch(q){const j=await itunesFetch('https://itunes.apple.com/search?term='+encodeURIComponent(q)+'&media=music&entity=song&limit=30&country=BR');return itunesMap(j&&j.results)}
+function merge(lists){const seen=new Set(),out=[];const max=Math.max(0,...lists.map(l=>l.length));for(let i=0;i<max;i++)for(const l of lists){const t=l[i];if(!t)continue;const k=normText(t.title+'|'+t.artist).replace(/\s*\(.*?\)\s*/g,'').trim();if(seen.has(k))continue;seen.add(k);out.push(t)}return out.slice(0,50)}
+const CACHE={};
+window.musicSearch=async function(q){
+  q=String(q||'').trim();const key=normText(q);if(CACHE[key]&&Date.now()-CACHE[key].t<10*60e3)return CACHE[key].r;
+  let jobs;
+  if(!q)jobs=[itunesTop().catch(()=>[]),dzTop().catch(()=>[])];
+  else jobs=[dzSearch(q).catch(()=>[]),itSearch(q).catch(()=>[])];
+  let r=merge(await Promise.all(jobs));
+  if(!r.length&&q){const nq=normText(q);r=(typeof storyMusicList!=='undefined'?storyMusicList:[]).map((m,i)=>({id:'f'+i,title:m[0],artist:m[1],url:m[2],cover:'',dur:0})).filter(t=>normText(t.title+' '+t.artist).includes(nq))}
+  if(r.length)CACHE[key]={t:Date.now(),r};
+  return r;
+};
+
+/* ---------- músicas do Deezer: guarda o ID e pega a prévia na hora de tocar (o link do Deezer expira) ---------- */
+const enc=window.musicEncode;
+window.musicEncode=function(t){if(t&&t.dz)t={...t,url:'dz:'+t.dz};return enc(t)};
+const DZP={};
+async function dzPreview(id){const c=DZP[id];if(c&&Date.now()-c.t<30*60e3)return c.u;const j=await jsonp('https://api.deezer.com/track/'+encodeURIComponent(id),8000);const u=j&&j.preview||'';if(u)DZP[id]={t:Date.now(),u};return u}
+const play=window.cmAudioPlay,stop=window.cmAudioStop;let tok=0;
+window.cmAudioPlay=function(url,start,muted,onBlocked,seg){
+  const my=++tok;
+  if(!/^dz:/.test(String(url||'')))return play(url,start,muted,onBlocked,seg);
+  const a=cmAudio();try{a.pause()}catch(_){}
+  dzPreview(String(url).slice(3)).then(u=>{if(my===tok&&u)play(u,start,muted,onBlocked,seg)}).catch(()=>{});
+  return a;
+};
+window.cmAudioStop=function(){tok++;return stop()};
+
+/* ---------- seletor visual (o mesmo para stories, posts e vídeos) ---------- */
+function head(k,inputId){
+  return `<div class="muxSearch" id="${k}MuxBox">${ICO.search}<input id="${inputId}" type="search" enterkeyhint="search" placeholder="Pesquisar música ou artista" autocomplete="off" autocorrect="off" spellcheck="false" oninput="muxType('${k}',this)"><button type="button" class="muxClr" aria-label="Limpar" onclick="muxClear('${k}','${inputId}')">×</button></div>
+  <div class="muxChips" id="${k}MuxChips">${CHIPS.map(([q,l])=>`<button type="button" class="muxChip${ST[k].chip===q?' on':''}" data-q="${esc(q)}" onclick="muxChip('${k}',this)">${esc(l)}</button>`).join('')}</div>`;
+}
+function skeleton(){return Array.from({length:6},()=>'<div class="muxSk"><i></i><span><s></s><s></s></span></div>').join('')}
+function fmt(d){d=Math.round(d||30);return Math.floor(d/60)+':'+String(d%60).padStart(2,'0')}
+function rows(list,k){
+  const prev=k==='sc'?'muPreview':'ppMuPrev',use=k==='sc'?'muChoose':'ppMuChoose';
+  return list.map((t,i)=>`<div class="muxRow" onclick="${use}(${i})"><button type="button" class="muxCov" data-${k}="${k==='sc'?esc(t.id):'r'+i}" aria-label="Ouvir prévia" onclick="event.stopPropagation();${prev}(${i})">${t.cover?`<img src="${esc(t.cover)}" alt="" loading="lazy">`:'🎵'}<span class="muxPl">${ICO.play}${ICO.pause}</span></button><div class="muxInfo"><b>${esc(t.title)}</b><span>${esc(t.artist||'Artista')} · ${fmt(t.dur)}</span></div><span class="muxGo" aria-hidden="true">${ICO.go}</span></div>`).join('');
+}
+function label(k,q){if(q&&!ST[k].chip)return 'Resultados';const c=CHIPS.find(x=>x[0]===ST[k].chip);return ST[k].chip?(c?c[1]:'Músicas'):'Em alta no Brasil'}
+async function load(k,q,listId,store){
+  const box=document.getElementById(listId);if(!box)return;const my=++ST[k].seq;
+  box.innerHTML=skeleton();
+  let r=[];try{r=await musicSearch(q)}catch(_){}
+  if(my!==ST[k].seq||!document.getElementById(listId))return;
+  store(r);
+  const el=document.getElementById(listId);
+  if(!r.length){el.innerHTML=`<div class="muxEmpty"><b>${q?'Nada encontrado para “'+esc(q)+'”':'Não consegui carregar as músicas'}</b>${navigator.onLine===false?'Você está sem internet. Conecte e tente de novo.':(q?'Confira a escrita ou pesquise pelo nome do artista.':'Tente de novo em instantes.')}</div>`;return}
+  el.innerHTML=`<div class="muxLbl">${esc(label(k,q))}</div>`+rows(r,k);
+  if(k==='sc')musicPaintPlay();else ppMuPaint();
+}
+const T={};
+window.muxType=function(k,inp){document.getElementById(k+'MuxBox')?.classList.toggle('has',!!inp.value);clearTimeout(T[k]);T[k]=setTimeout(()=>{const v=inp.value.trim();if(v){ST[k].chip='';document.querySelectorAll('#'+k+'MuxChips .muxChip').forEach(b=>b.classList.remove('on'))}else{ST[k].chip='';document.querySelector('#'+k+'MuxChips .muxChip')?.classList.add('on')}(k==='sc'?muLoad:ppMuLoad)(v)},380)};
+window.muxClear=function(k,id){const i=document.getElementById(id);if(i){i.value='';muxType(k,i);i.focus()}};
+window.muxChip=function(k,b){const q=b.dataset.q||'';ST[k].chip=q;document.querySelectorAll('#'+k+'MuxChips .muxChip').forEach(x=>x.classList.toggle('on',x===b));const i=document.getElementById(k==='sc'?'muQ':'ppMuQ');if(i){i.value='';document.getElementById(k+'MuxBox')?.classList.remove('has')}(k==='sc'?muLoad:ppMuLoad)(q)};
+
+/* stories */
+window.scMusicPanel=function(){
+  ST.sc.chip='';
+  scPanelShow(`<div class="scPanelHead"><b>Música</b><button onclick="scMusicClose()">×</button></div>${head('sc','muQ')}<div id="muList" class="muxList"></div>${SC.music?`<button class="secondary muxRemove" onclick="scPickMusic(-1)">Remover música</button>`:''}`);
+  muLoad('');
+};
+window.muLoad=function(q){return load('sc',q,'muList',r=>{MP.results=r})};
+const paintSc=window.musicPaintPlay;
+window.musicPaintPlay=function(){try{paintSc()}catch(_){}document.querySelectorAll('.muxCov[data-sc]').forEach(b=>b.classList.toggle('on',!!MP.audio&&b.dataset.sc===MP.id))};
+
+/* posts e vídeos */
+window.ppMuOpen=function(){
+  if(!CC)return;if(typeof ccCapSave==='function'&&CC.step==='details')ccCapSave();ppMuStopPreview();ST.pp.chip='';
+  openModal(`<div class="modalHead"><h2>Música</h2><button class="close" onclick="ppMuClose()">×</button></div>${head('pp','ppMuQ')}<div id="ppMuList" class="muxList"></div>${CC.mu?`<button class="secondary muxRemove" onclick="CC.mu='';ppMuClose();ppAfterChange()">Tirar música</button>`:''}`);
+  document.getElementById('modal')?.classList.add('sheet');ppMuLoad('');
+};
+window.ppMuLoad=function(q){return load('pp',q,'ppMuList',r=>{PPM.res=r})};
+const paintPp=window.ppMuPaint;
+window.ppMuPaint=function(){try{paintPp()}catch(_){}document.querySelectorAll('.muxCov[data-pp]').forEach(b=>b.classList.toggle('on',PPM.prev===b.dataset.pp))};
+})();
 </script>
 </body></html>
