@@ -8833,4 +8833,148 @@ document.addEventListener('DOMContentLoaded',()=>{const a=document.getElementByI
 const a0=document.getElementById('app');if(a0)mo.observe(a0,{childList:true,subtree:true});
 })();
 </script>
+<style id="stcamcss">
+.stCamFreeze{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:3;pointer-events:none}
+.stCamHint{text-align:center;color:rgba(255,255,255,.8);font-size:12.5px;font-weight:600;margin-bottom:8px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+#stShutter{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+#stShutter.rec{transform:scale(1.18);transition:transform .2s ease}
+</style>
+<script>
+/* ===================== STORIES: câmera igual ao Instagram =====================
+   - Tocar no botão = foto · Segurar = grava vídeo (solta para parar) · no modo Vídeo, tocar liga/desliga
+   - Depois de tirar/gravar vai direto para a edição (sem tela intermediária com a câmera ao vivo)
+   - Câmera da frente: o vídeo sai igual ao que você viu na tela (sem inverter)
+   - Vídeo grava com som (microfone) e o som toca na edição
+*/
+(function(){
+const MAXS=60;
+const _u1='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+const _u2='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9 6 6M22 9l-6 6"/></svg>';
+let rec=null;           /* {r:MediaRecorder, chunks, raf, hold, t0} */
+
+/* ---------- abrir a câmera: pede microfone junto (como o Instagram) ---------- */
+window.stCamStart=async function(){
+  stCamStopTracks();
+  const v=document.getElementById('stCamV'),msg=document.getElementById('stCamMsg');if(!v)return;
+  const video={facingMode:CAM.facing,width:{ideal:1920},height:{ideal:1080}};
+  try{
+    let s;
+    try{s=await navigator.mediaDevices.getUserMedia({video,audio:{echoCancellation:true,noiseSuppression:true}})}
+    catch(e){s=await navigator.mediaDevices.getUserMedia({video,audio:false})}
+    if(!document.getElementById('stCam')){s.getTracks().forEach(t=>t.stop());return}
+    CAM.stream=s;v.srcObject=s;v.muted=true;v.classList.toggle('mirror',CAM.facing==='user');await v.play().catch(()=>{});
+    if(msg)msg.style.display='none';
+    CAM.torch=false;const fb=document.getElementById('stCamFlashBtn');if(fb)fb.classList.remove('on');
+  }catch(e){
+    if(msg){msg.style.display='grid';msg.innerHTML=`<div><b style="color:#fff;font-size:17px">Não foi possível abrir a câmera aqui</b><br>Permita o acesso à câmera e ao microfone nas configurações do navegador, ou use a câmera do celular.<br><br><button class="primary" onclick="stCamClose();document.getElementById('scCam').click()">Usar câmera do celular</button></div>`}
+  }
+};
+/* trocar Foto/Vídeo não reabre a câmera (mais rápido, sem tela preta) */
+window.stCamMode=function(m){if(CAM.mode===m||rec)return;CAM.mode=m;stCamPaintBot()};
+
+/* ---------- botão: tocar = foto, segurar = vídeo ---------- */
+const paintBot=window.stCamPaintBot;
+window.stCamPaintBot=function(){
+  CAM.shot=null;paintBot();
+  const sh=document.getElementById('stShutter');if(!sh)return;
+  sh.removeAttribute('onclick');sh.style.touchAction='none';
+  const hint=document.getElementById('stCamHint')||(()=>{document.getElementById('stCamBot')?.insertAdjacentHTML('afterbegin','<div class="stCamHint" id="stCamHint"></div>');return document.getElementById('stCamHint')})();
+  if(hint)hint.textContent=CAM.mode==='video'?'Toque para gravar':'Toque para foto · segure para vídeo';
+  let holdT=0,held=false,down=false;
+  sh.addEventListener('pointerdown',e=>{e.preventDefault();down=true;held=false;
+    if(CAM.mode==='video')return;
+    holdT=setTimeout(()=>{if(!down)return;held=true;startRec(true)},260)});
+  const up=e=>{if(!down)return;down=false;clearTimeout(holdT);
+    if(CAM.mode==='video'){if(rec)stopRec();else startRec(false);return}
+    if(held){stopRec();return}
+    takePhoto()};
+  sh.addEventListener('pointerup',up);sh.addEventListener('pointercancel',()=>{if(held&&rec)stopRec();down=false;clearTimeout(holdT)});
+  sh.addEventListener('contextmenu',e=>e.preventDefault());
+};
+window.stCamShutter=function(){if(CAM.mode==='video'){rec?stopRec():startRec(false)}else takePhoto()};
+
+async function takePhoto(){
+  const v=document.getElementById('stCamV');if(!v||!CAM.stream||rec)return;
+  const fx=document.getElementById('stCamFx');
+  if(CAM.torch&&!stCamHasTorch()&&fx){fx.classList.add('on');await new Promise(r=>setTimeout(r,180))}
+  const vw=v.videoWidth||1080,vh=v.videoHeight||1920,box=document.getElementById('stCam');
+  const ar=box&&box.clientHeight?box.clientWidth/box.clientHeight:9/16;
+  let sw=vw,sh=vh;if(vw/vh>ar)sw=vh*ar;else sh=vw/ar;const sx=(vw-sw)/2,sy=(vh-sh)/2;
+  const sc=Math.min(1,1920/Math.max(sw,sh)),w=Math.round(sw*sc),h=Math.round(sh*sc),c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+  if(CAM.facing==='user'){x.translate(w,0);x.scale(-1,1)}
+  x.drawImage(v,sx,sy,sw,sh,0,0,w,h);
+  /* congela a foto na tela na hora (nada de câmera ao vivo por trás) */
+  try{const fr=document.createElement('img');fr.className='stCamFreeze';fr.src=c.toDataURL('image/jpeg',.6);box&&box.appendChild(fr)}catch(_){}
+  if(fx)setTimeout(()=>fx.classList.remove('on'),80);
+  const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.92));if(!blob)return;
+  useFile(new File([blob],'camera.jpg',{type:'image/jpeg'}));
+}
+
+function pickMime(hasAudio){
+  const list=hasAudio?['video/mp4;codecs=avc1,mp4a.40.2','video/mp4;codecs="avc1.42E01E, mp4a.40.2"','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm']:['video/mp4','video/webm;codecs=vp9','video/webm'];
+  return list.find(t=>{try{return MediaRecorder.isTypeSupported(t)}catch(_){return false}})||'';
+}
+function startRec(hold){
+  const v=document.getElementById('stCamV');if(!v||!CAM.stream||rec)return;
+  if(typeof MediaRecorder==='undefined'){alert('Seu navegador não grava vídeo aqui. Use a câmera do celular.');stCamClose();document.getElementById('scCam').click();return}
+  const audio=CAM.stream.getAudioTracks().filter(t=>t.readyState==='live');
+  let stream=CAM.stream,raf=0;
+  /* câmera da frente: grava espelhado, igual ao que aparece na tela */
+  if(CAM.facing==='user'&&HTMLCanvasElement.prototype.captureStream){
+    const vw=v.videoWidth||720,vh=v.videoHeight||1280,box=document.getElementById('stCam');
+    const ar=box&&box.clientHeight?box.clientWidth/box.clientHeight:9/16;
+    let sw=vw,sh=vh;if(vw/vh>ar)sw=vh*ar;else sh=vw/ar;const sx=(vw-sw)/2,sy=(vh-sh)/2;
+    const sc=Math.min(1,1280/Math.max(sw,sh)),w=Math.round(sw*sc/2)*2,h=Math.round(sh*sc/2)*2;
+    const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{alpha:false});x.translate(w,0);x.scale(-1,1);
+    const draw=()=>{try{x.drawImage(v,sx,sy,sw,sh,0,0,w,h)}catch(_){}raf=requestAnimationFrame(draw)};draw();
+    stream=new MediaStream([...c.captureStream(30).getVideoTracks(),...audio]);
+  }
+  const mt=pickMime(audio.length>0);
+  let r;try{r=new MediaRecorder(stream,mt?{mimeType:mt,videoBitsPerSecond:3500000,audioBitsPerSecond:128000}:undefined)}catch(_){try{r=new MediaRecorder(stream)}catch(e){cancelAnimationFrame(raf);alert('Não foi possível gravar agora.');return}}
+  rec={r,chunks:[],raf,hold,t0:Date.now(),mt};CAM.rec=r;
+  r.ondataavailable=e=>{if(e.data&&e.data.size)rec&&rec.chunks.push(e.data)};
+  r.onstop=()=>{
+    const R=rec;rec=null;CAM.rec=null;cancelAnimationFrame(R.raf);clearInterval(CAM.timer);
+    document.getElementById('stCamTime')?.classList.remove('on');document.getElementById('stShutter')?.classList.remove('rec');
+    const type=(R.r.mimeType||R.mt||'video/webm').split(';')[0];const blob=new Blob(R.chunks,{type});
+    if(blob.size<1000||Date.now()-R.t0<400){stCamPaintBot();return}
+    const lv=document.getElementById('stCamV');const box=document.getElementById('stCam');
+    try{if(lv&&box){const c=document.createElement('canvas');c.width=lv.videoWidth||360;c.height=lv.videoHeight||640;const x=c.getContext('2d');if(CAM.facing==='user'){x.translate(c.width,0);x.scale(-1,1)}x.drawImage(lv,0,0,c.width,c.height);const fr=document.createElement('img');fr.className='stCamFreeze';fr.src=c.toDataURL('image/jpeg',.5);box.appendChild(fr)}}catch(_){}
+    useFile(new File([blob],'camera.'+(type.includes('mp4')?'mp4':'webm'),{type}));
+  };
+  r.start(250);
+  const sh=document.getElementById('stShutter');sh&&sh.classList.add('rec');
+  const tm=document.getElementById('stCamTime');tm&&tm.classList.add('on');
+  const circ=sh&&sh.querySelector('circle');
+  CAM.t0=Date.now();clearInterval(CAM.timer);
+  CAM.timer=setInterval(()=>{const s=(Date.now()-CAM.t0)/1000;if(tm)tm.textContent=Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');if(circ)circ.style.strokeDashoffset=String(245-245*Math.min(1,s/MAXS));if(s>=MAXS)stopRec()},200);
+}
+function stopRec(){if(rec&&rec.r.state==='recording'){try{rec.r.requestData&&rec.r.requestData()}catch(_){}rec.r.stop()}}
+/* direto para a edição, igual ao Instagram */
+function useFile(f){CAM.shot=null;stCamClose();SC.queue=[];SC.qTotal=1;SC.qDone=0;stSetFile(f);scRenderEdit()}
+window.stCamShow=function(f){useFile(f)};
+const close=window.stCamClose;
+window.stCamClose=function(){if(rec){try{rec.r.onstop=null;rec.r.stop()}catch(_){}cancelAnimationFrame(rec.raf);rec=null;CAM.rec=null}return close.apply(this,arguments)};
+
+/* ---------- edição: o vídeo toca com som (antes ficava mudo) ---------- */
+const edit=window.scRenderEdit;
+window.scRenderEdit=function(){
+  const r=edit.apply(this,arguments);
+  try{const v=document.querySelector('#scBg');
+    if(v&&v.tagName==='VIDEO'){v.muted=!!SC.music;const p=v.play();if(p&&p.catch)p.catch(()=>{v.muted=true;v.play().catch(()=>{});
+      /* navegador bloqueou o som: o primeiro toque na tela libera */
+      const un=()=>{const x=document.querySelector('#scBg');if(x&&x.tagName==='VIDEO'&&!SC.music){x.muted=false;x.play().catch(()=>{})}};document.addEventListener('pointerdown',un,{once:true,capture:true})})}
+  }catch(_){}
+  return r;
+};
+/* com música escolhida, o som do vídeo abaixa (como no Instagram); ao tirar a música, volta */
+const muDone=window.muxTrDone;
+if(typeof muDone==='function')window.muxTrDone=function(){const r=muDone.apply(this,arguments);const v=document.querySelector('#scBg');if(v&&v.tagName==='VIDEO'&&SC.music)v.muted=true;return r};
+const pick=window.scPickMusic;
+if(typeof pick==='function')window.scPickMusic=function(i){const r=pick.apply(this,arguments);const v=document.querySelector('#scBg');if(v&&v.tagName==='VIDEO'&&!SC.music){v.muted=false;v.play().catch(()=>{})}return r};
+/* sair da edição sempre silencia */
+const back=window.scBackToPick;
+if(typeof back==='function')window.scBackToPick=function(){const v=document.querySelector('#scBg');if(v&&v.tagName==='VIDEO'){try{v.pause()}catch(_){}}return back.apply(this,arguments)};
+})();
+</script>
 </body></html>
