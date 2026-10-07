@@ -1,6 +1,6 @@
 /* Conecta Mantiqueira — trabalha em segundo plano no celular:
    notificações, app instalado e abrir mesmo com internet fraca. */
-const CACHE = 'conecta-v14';
+const CACHE = 'conecta-v15';
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./', './manifest.json', './icon-192.png'])).catch(() => {}));
@@ -20,8 +20,10 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+  /* página do site: sempre confere se há versão nova (sem esperar o cache do navegador) */
+  const fresh = req.mode === 'navigate' ? fetch(req, { cache: 'no-cache' }) : fetch(req);
   e.respondWith(
-    fetch(req)
+    fresh
       .then(res => {
         if (res && res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {}); }
         return res;
