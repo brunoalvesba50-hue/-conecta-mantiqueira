@@ -7697,7 +7697,7 @@ async function blkLoad(){
 }
 async function blkPairsLoad(){
   const owners=[...new Set((POSTS.list||[]).map(x=>x.ownerId).filter(Boolean))];if(!owners.length)return;
-  try{const {data,error}=await sb.rpc('cm_restricted_pairs',{p_owners:owners.slice(0,500)});if(error)throw error;BLK.rpairs=new Set((data||[]).map(r=>r.blocker+'|'+r.blocked))}catch(_){}
+  try{const {data,error}=await sb.rpc('cm_ig_restricted_pairs',{p_owners:owners.slice(0,500)});if(error)throw error;BLK.rpairs=new Set((data||[]).map(r=>r.blocker+'|'+r.blocked))}catch(_){}
 }
 /* carrega junto com as publicações */
 (function(){
@@ -7717,7 +7717,7 @@ function blkAsk(uid,kind){
 }
 async function blkDo(uid,kind){
   closeModal();
-  try{let r=await sb.rpc('cm_block',{p_user:uid,p_kind:kind});
+  try{let r=await sb.rpc('cm_ig_block',{p_user:uid,p_kind:kind});
     if(r.error){if(!(typeof cvxMissing==='function'&&cvxMissing(r.error)))throw r.error;r=await sb.from('cm_blocks').upsert({blocker_id:me.id,blocked_id:uid,kind},{onConflict:'blocker_id,blocked_id'});if(r.error)throw r.error;if(kind==='block')await sb.from('follows').delete().eq('follower_id',me.id).eq('following_id',uid)}
     if(kind==='block'){BLK.blocked.add(uid);BLK.restricted.delete(uid);followCache.delete(uid)}else{BLK.restricted.add(uid);BLK.blocked.delete(uid)}
     POSTS.sig='';shareToast(kind==='block'?'Conta bloqueada':'Conta restrita');
@@ -7744,7 +7744,7 @@ function blkPostMenuRows(uid){if(!uid||uid===me?.id)return '';const row=(ic,t,st
   window.msgMenu=function(){mm();const box=document.querySelector('#msgSheet .msgMenu');const p=currentPublicUser;if(!box||!p)return;const danger=box.querySelector('.danger');const h=`<button onclick="blkAsk('${esc(p.id)}','restrict')">🚫 ${BLK.restricted.has(p.id)?'Já está restrita':'Restringir'}</button><button class="danger" onclick="blkAsk('${esc(p.id)}','block')">⛔ Bloquear</button>`;if(danger){danger.insertAdjacentHTML('beforebegin',h);danger.innerHTML='⚑ Denunciar'}else box.insertAdjacentHTML('beforeend',h)};
   const mr=window.markConversationRead;window.markConversationRead=function(id){if(BLK.restricted.has(id))return loadUnreadBadges();return mr(id)};
 })();
-async function blkFollowsMe(uid){closeModal();if(!confirm('Remover esta pessoa dos seus seguidores? Ela não recebe aviso.'))return;try{const {error}=await sb.rpc('cm_remove_follower',{p_user:uid});if(error)throw error;shareToast('Removida dos seus seguidores');if(window.cmCurrentPage==='publicProfile')go('publicProfile')}catch(e){typeof cvxMissing==='function'&&cvxMissing(e)?cvxSqlToast():alert('Não foi possível agora.')}}
+async function blkFollowsMe(uid){closeModal();if(!confirm('Remover esta pessoa dos seus seguidores? Ela não recebe aviso.'))return;try{const {error}=await sb.rpc('cm_ig_remove_follower',{p_user:uid});if(error)throw error;shareToast('Removida dos seus seguidores');if(window.cmCurrentPage==='publicProfile')go('publicProfile')}catch(e){typeof cvxMissing==='function'&&cvxMissing(e)?cvxSqlToast():alert('Não foi possível agora.')}}
 
 /* ---------- conta privada: seguir com pedido ---------- */
 (function(){
@@ -7784,7 +7784,7 @@ function blkReqChip(){const box=document.querySelector('#profilePages .ppxChips'
 function blkReqList(){
   const a=BLK.inReq;openModal(`<div class="modalHead"><h2>Pedidos para seguir</h2><button class="close" onclick="closeModal()">×</button></div>${a.length?`<div class="cmPeopleList">${a.map(r=>{const p=blkPerson(r.requester_id);return `<div class="blkReqRow"><img src="${esc(p.photo||avatar(p.name))}" alt="" onclick="closeModal();postOpenProfile('${esc(p.id)}')"><span><b>${esc(p.name)}</b><small>${esc(personCity(p)||'')}</small></span><button type="button" class="ok" onclick="blkReqAnswer('${esc(p.id)}',true)">Aceitar</button><button type="button" onclick="blkReqAnswer('${esc(p.id)}',false)">Recusar</button></div>`}).join('')}</div>`:'<div class="cmEmpty small"><b>Nenhum pedido agora</b></div>'}`);document.getElementById('modal')?.classList.add('sheet')}
 async function blkReqAnswer(uid,ok){
-  try{if(ok){const {data,error}=await sb.rpc('cm_follow_accept',{p_requester:uid});if(error)throw error;shareToast('Pedido aceito ✓')}else{const {error}=await sb.from('cm_follow_requests').delete().eq('requester_id',uid).eq('target_id',me.id);if(error)throw error}
+  try{if(ok){const {data,error}=await sb.rpc('cm_ig_follow_accept',{p_requester:uid});if(error)throw error;shareToast('Pedido aceito ✓')}else{const {error}=await sb.from('cm_follow_requests').delete().eq('requester_id',uid).eq('target_id',me.id);if(error)throw error}
     BLK.inReq=BLK.inReq.filter(r=>r.requester_id!==uid);blkReqList();if(window.cmCurrentPage==='profile')go('profile')}
   catch(e){typeof cvxMissing==='function'&&cvxMissing(e)?cvxSqlToast():alert('Não foi possível agora.')}
 }
