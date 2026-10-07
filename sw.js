@@ -1,35 +1,106 @@
 /* Conecta Mantiqueira — trabalha em segundo plano no celular:
-   notificações, app instalado e abrir mesmo com internet fraca. */
-const CACHE = 'conecta-v15';
+   notificações, app instalado, abrir rápido e funcionar sem internet (como o Instagram). */
+const VER = 'v16';
+const CACHE = 'conecta-' + VER;          /* páginas e arquivos do site */
+const LIB = 'conecta-lib-' + VER;        /* biblioteca do Supabase (necessária para abrir) */
+const API = 'conecta-api';               /* últimos dados vistos (feed, perfis, conversas) */
+const IMG = 'conecta-img';               /* fotos e capas já vistas */
+const SDK = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+const IMG_MAX = 400, API_MAX = 300;
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./', './manifest.json', './icon-192.png'])).catch(() => {}));
+  e.waitUntil((async () => {
+    try { const c = await caches.open(CACHE); await c.addAll(['./', './manifest.json', './icon-192.png']); } catch (_) {}
+    try { const c = await caches.open(LIB); const r = await fetch(SDK, { mode: 'cors' }); if (r.ok) await c.put(SDK, r); } catch (_) {}
+  })());
   self.skipWaiting();
 });
 
 self.addEventListener('activate', e => {
+  const keep = [CACHE, LIB, API, IMG];
   e.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+    caches.keys().then(keys => Promise.all(keys.filter(k => !keep.includes(k)).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
 
-/* Sempre busca a versão nova do site primeiro; só usa a cópia guardada se estiver sem internet. */
+/* limpa os dados guardados quando a pessoa sai da conta */
+self.addEventListener('message', e => {
+  if (e.data && e.data.type === 'clear-user-cache') { caches.delete(API); caches.delete(IMG); }
+});
+
+async function trim(name, max) {
+  try { const c = await caches.open(name); const k = await c.keys(); for (let i = 0; i < k.length - max; i++) await c.delete(k[i]); } catch (_) {}
+}
+function timeout(ms) { return new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms)); }
+
+/* rede primeiro; se a internet estiver fraca ou sem sinal, usa o que já foi visto */
+async function networkFirst(req, cacheName, ms, opts) {
+  const c = await caches.open(cacheName);
+  const saved = ms ? await c.match(req, { ignoreVary: true }) : null;
+  try {
+    /* só desiste da rede lenta quando já existe uma cópia guardada para mostrar */
+    const res = await (saved ? Promise.race([fetch(req, opts), timeout(ms)]) : fetch(req, opts));
+    if (res && res.ok) c.put(req, res.clone()).catch(() => {});
+    return res;
+  } catch (err) {
+    const hit = await c.match(req, { ignoreVary: true });
+    if (hit) return hit;
+    throw err;
+  }
+}
+/* guardado primeiro (abre na hora) e atualiza por trás */
+async function staleWhileRevalidate(req, cacheName) {
+  const c = await caches.open(cacheName);
+  const hit = await c.match(req, { ignoreVary: true });
+  const net = fetch(req).then(res => { if (res && (res.ok || res.type === 'opaque')) c.put(req, res.clone()).catch(() => {}); return res; }).catch(() => null);
+  return hit || (await net) || Response.error();
+}
+async function cacheFirst(req, cacheName, max) {
+  const c = await caches.open(cacheName);
+  const hit = await c.match(req, { ignoreVary: true });
+  if (hit) return hit;
+  const res = await fetch(req);
+  if (res && (res.ok || res.type === 'opaque')) { c.put(req, res.clone()).then(() => trim(cacheName, max)).catch(() => {}); }
+  return res;
+}
+
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  if (url.origin !== self.location.origin) return;
-  /* página do site: sempre confere se há versão nova (sem esperar o cache do navegador) */
-  const fresh = req.mode === 'navigate' ? fetch(req, { cache: 'no-cache' }) : fetch(req);
-  e.respondWith(
-    fresh
-      .then(res => {
-        if (res && res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {}); }
-        return res;
-      })
-      .catch(() => caches.match(req).then(r => r || caches.match('./')))
-  );
+
+  /* página do site: sempre confere se há versão nova; sem internet abre a guardada */
+  if (req.mode === 'navigate' && url.origin === self.location.origin) {
+    e.respondWith((async () => {
+      try { return await networkFirst(req, CACHE, 0, { cache: 'no-cache' }); }
+      catch (_) { return (await caches.match('./')) || Response.error(); }
+    })());
+    return;
+  }
+  /* arquivos do próprio site */
+  if (url.origin === self.location.origin) {
+    e.respondWith(networkFirst(req, CACHE, 0).catch(() => caches.match(req).then(r => r || Response.error())));
+    return;
+  }
+  /* biblioteca do Supabase: abre na hora, atualiza por trás */
+  if (url.hostname === 'cdn.jsdelivr.net' && url.pathname.includes('@supabase/supabase-js')) {
+    e.respondWith(staleWhileRevalidate(req, LIB));
+    return;
+  }
+  if (url.hostname.endsWith('.supabase.co')) {
+    /* fotos e vídeos públicos: guarda as fotos já vistas (vídeos não, para não lotar o celular) */
+    if (url.pathname.includes('/storage/v1/object/public/')) {
+      if (/\.(mp4|mov|webm|m4v)$/i.test(url.pathname) || req.headers.get('range')) return;
+      e.respondWith(cacheFirst(req, IMG, IMG_MAX));
+      return;
+    }
+    /* dados (feed, perfis, conversas): rede primeiro, sem sinal usa os últimos vistos */
+    if (url.pathname.startsWith('/rest/v1/')) {
+      e.respondWith(networkFirst(req, API, 7000).then(r => { trim(API, API_MAX); return r; }));
+      return;
+    }
+  }
 });
 
 /* Notificação enviada pelo servidor (push), mesmo com o app fechado. */
