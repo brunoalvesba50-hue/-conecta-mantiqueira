@@ -6438,14 +6438,15 @@ const CPX_ICO={
  txt:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6h14M5 11h14M5 16h9"/></svg>',
  go:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>'
 };
-function ccCamInput(){let i=document.getElementById('ccCamIn');if(!i){(document.getElementById('cmc')||document.body).insertAdjacentHTML('beforeend','<input id="ccCamIn" type="file" accept="image/*" capture="environment" class="hidden" onchange="ccPicked(this,\'photo\')">');i=document.getElementById('ccCamIn')}return i}
+function ccCamInput(){let i=document.getElementById('ccCamIn');if(!i){(document.getElementById('cmc')||document.body).insertAdjacentHTML('beforeend','<input id="ccCamIn" type="file" accept="image/*,video/*" capture="environment" class="hidden" onchange="ccCamPicked(this)">');i=document.getElementById('ccCamIn')}return i}
+function ccCamPicked(inp){const f=inp.files&&inp.files[0];if(!f)return;const isV=/^video\//.test(f.type||'')||/\.(mov|mp4|m4v|webm|3gp)$/i.test(f.name||'');if(!isV)CC.multi=false;ccPicked(inp,isV?'video':'photo')}
 function ccPick(){
   ccStep('pick');CC.kind='';CC.panel='';ccSetTop('Novo post','','close');ccCamInput();
   document.getElementById('ccBody').innerHTML=`<div class="ccPick cpx">
   <div class="cpxHero"><span>Criar</span><h3>O que você quer publicar?</h3><p>Toque em uma opção para começar.</p></div>
   <div class="cpxDuo">
     <button type="button" class="cpxTile" onclick="CC.multi=false;document.getElementById('ccPhotoIn').click()"><i class="cpxIc g">${CPX_ICO.gal}</i><b>Foto</b><small>Escolher da galeria</small></button>
-    <button type="button" class="cpxTile" onclick="CC.multi=false;ccCamInput().click()"><i class="cpxIc a">${CPX_ICO.cam}</i><b>Câmera</b><small>Tirar foto agora</small></button>
+    <button type="button" class="cpxTile" onclick="CC.multi=false;ccCamInput().click()"><i class="cpxIc a">${CPX_ICO.cam}</i><b>Câmera</b><small>Foto ou vídeo na hora</small></button>
   </div>
   <button type="button" class="cpxRow" onclick="document.getElementById('ccVideoIn').click()"><i class="cpxIc r">${CPX_ICO.vid}</i><span><b>Vídeo</b><small>De 3 segundos até ${CC_MAX_VIDEO_MIN} minutos · aparece também em Vídeos</small></span><em>${CPX_ICO.go}</em></button>
   <button type="button" class="cpxRow" onclick="CC.multi=true;document.getElementById('ccMultiIn').click()"><i class="cpxIc b">${CPX_ICO.car}</i><span><b>Carrossel</b><small>Até ${CC_MAX_PHOTOS} fotos em uma publicação</small></span><em>${CPX_ICO.go}</em></button>
