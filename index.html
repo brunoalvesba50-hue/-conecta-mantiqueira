@@ -1131,7 +1131,94 @@ async function refreshNavDot(){if(!me?.id)return;try{const r=await sb.from('mess
 function screen(content,active){return `<main class="screen">${content}</main>${nav(active)}`}
 function officialCity(v){const k=cityKey(v);if(!k)return "";return cities.find(c=>cityKey(c)===k)||""}
 function registeredCities(){const map=new Map();publicProfilesCache.forEach(p=>{const name=officialCity(p.city);if(!name)return;const key=cityKey(name);const row=map.get(key)||{city:name,count:0};row.count++;map.set(key,row)});return [...map.values()].sort((a,b)=>b.count-a.count||a.city.localeCompare(b.city,"pt-BR"))}
-function homeCityHtml(){const rows=registeredCities();if(!rows.length)return '<div class="empty">As cidades aparecerão aqui conforme as pessoas criarem seus perfis.</div>';const pos=['50% 35%','8% 60%','92% 40%','30% 85%','70% 75%','50% 10%'];return rows.slice(0,7).map((x,i)=>`<button class="city" style="--pos:${pos[i%6]}" onclick="go('people','${esc(x.city)}')"><b>${esc(x.city)}</b><small>${x.count} ${x.count===1?'pessoa':'pessoas'}</small></button>`).join("")}
+/* ===== Fotos automáticas das cidades (bolhas "Cidades em destaque") =====
+   Cada cidade ganha uma foto real buscada na Wikipédia/Wikimedia, com crédito do autor e licença.
+   A foto é salva no Supabase (tabela cm_city_photos), então todo mundo vê a mesma.
+   Sem foto encontrada, a bolha continua com a imagem padrão de montanha. */
+const CM_CITY_UF={"Aiuruoca":"MG","Alagoa":"MG","Alfenas":"MG","Atibaia":"SP","Baependi":"MG","Bocaina de Minas":"MG","Bom Jardim de Minas":"MG","Bom Jesus dos Perdões":"SP","Bragança Paulista":"SP","Brasópolis":"MG","Bueno Brandão":"MG","Caconde":"SP","Caldas":"MG","Camanducaia":"MG","Campos do Jordão":"SP","Carvalhos":"MG","Carrancas":"MG","Caxambu":"MG","Cristina":"MG","Cruzeiro":"SP","Delfim Moreira":"MG","Divinolândia":"SP","Extrema":"MG","Gonçalves":"MG","Guaratinguetá":"SP","Itajubá":"MG","Itamonte":"MG","Itanhandu":"MG","Itatiaia":"RJ","Itapeva":"MG","Itutinga":"MG","Joanópolis":"SP","Lavrinhas":"SP","Liberdade":"MG","Lima Duarte":"MG","Lorena":"SP","Maria da Fé":"MG","Marmelópolis":"MG","Mairiporã":"SP","Minduri":"MG","Monteiro Lobato":"SP","Monte Santo de Minas":"MG","Monte Verde":"MG","Olaria":"MG","Paraisópolis":"MG","Passa Quatro":"MG","Passa Vinte":"MG","Pindamonhangaba":"SP","Piracaia":"SP","Piquete":"SP","Piranguçu":"MG","Pouso Alto":"MG","Queluz":"SP","Resende":"RJ","Rio Preto":"MG","Santa Rita de Jacutinga":"MG","Santa Rita de Ibitipoca":"MG","Santo Antônio do Pinhal":"SP","São Bento do Sapucaí":"SP","São Francisco Xavier":"SP","São José do Barreiro":"SP","São José dos Campos":"SP","São Sebastião da Grama":"SP","Sapucaí-Mirim":"MG","Serranos":"MG","Toledo":"MG","Tremembé":"SP","Vargem":"SP","Virgínia":"MG","Wenceslau Braz":"MG","Águas da Prata":"SP","Andradas":"MG","Itumirim":"MG","Monte Sião":"MG","Ouro Fino":"MG","Poços de Caldas":"MG"};
+const CM_UF_NAME={MG:"Minas Gerais",SP:"São Paulo",RJ:"Rio de Janeiro"};
+const CM_CITY_EXTRA_TITLES={"Monte Verde":["Monte Verde (Camanducaia)","Monte Verde (Minas Gerais)"],"São Francisco Xavier":["São Francisco Xavier (São José dos Campos)","São Francisco Xavier (São Paulo)"]};
+const CM_BAD_IMG=/bandeira|bras[aã]o|flag|coat[_ ]of|arms|escudo|mapa|map[_ .-]|locator|localiza|location|logo|selo|seal|icon|hino|assinatura|\.svg|\.gif|\.tiff?$/i;
+const CM_CITY_PHOTOS=(()=>{try{return JSON.parse(localStorage.getItem("cm_city_photos")||"{}")||{}}catch(_){return {}}})();
+const CM_CITY_CREDITS=(()=>{try{return JSON.parse(localStorage.getItem("cm_city_credits")||"{}")||{}}catch(_){return {}}})();
+const cmCityPhotoTried=new Set();
+let cmCityPhotoRunning=false;
+(function(){try{const st=document.createElement("style");st.textContent=".city .cmCityCredit,.premiumCities .city .cmCityCredit{position:absolute;top:6px;right:9px;left:auto;bottom:auto;z-index:2;max-width:72%;margin:0;padding:0;font-size:8px;font-style:normal;font-weight:500;line-height:1.2;color:rgba(255,255,255,.72);text-shadow:0 1px 2px rgba(0,0,0,.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}";document.head.appendChild(st)}catch(_){}})();
+function cmCityPhotoSaveLocal(){try{localStorage.setItem("cm_city_photos",JSON.stringify(CM_CITY_PHOTOS));localStorage.setItem("cm_city_credits",JSON.stringify(CM_CITY_CREDITS))}catch(_){}}
+function cmCssUrl(u){return String(u||"").replace(/["\\\n\r]/g,m=>encodeURIComponent(m))}
+function cmCityCreditText(key){return CM_CITY_CREDITS[key]||(CM_CITY_PHOTOS[key]?"Foto: Wikimedia Commons":"")}
+function cmCityPhotoStyle(key){const u=CM_CITY_PHOTOS[key];return u?`;--cm-hero-image:url(&quot;${esc(cmCssUrl(u))}&quot;);--pos:center`:""}
+function cmCityCreditHtml(key){const c=cmCityCreditText(key);return c?`<i class="cmCityCredit" title="${esc(c)}">${esc(c)}</i>`:""}
+function cmCityPhotoApply(key,url,credit){document.querySelectorAll(".city[data-citykey]").forEach(el=>{if(el.dataset.citykey!==key)return;el.style.setProperty("--cm-hero-image",`url("${cmCssUrl(url)}")`);el.style.setProperty("--pos","center");const c=credit||"Foto: Wikimedia Commons";let tag=el.querySelector(".cmCityCredit");if(!tag){tag=document.createElement("i");tag.className="cmCityCredit";el.appendChild(tag)}tag.textContent=c;tag.title=c})}
+function cmPreloadImg(url){return new Promise(r=>{const i=new Image();let done=false;const end=v=>{if(!done){done=true;r(v)}};i.onload=()=>end(i.naturalWidth>0);i.onerror=()=>end(false);setTimeout(()=>end(false),15000);i.src=url})}
+async function cmWikiApi(base,params){const u=base+"?"+new URLSearchParams(Object.assign({format:"json",formatversion:"2",origin:"*"},params));const r=await fetch(u);if(!r.ok)throw new Error("wiki "+r.status);return r.json()}
+function cmPlainText(html){return String(html||"").replace(/<[^>]*>/g," ").replace(/&nbsp;/g," ").replace(/&amp;/g,"&").replace(/&quot;/g,'"').replace(/&#0?39;/g,"'").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/\s+/g," ").trim()}
+function cmCreditFromInfo(ii){const m=(ii&&ii.extmetadata)||{};let artist=cmPlainText(m.Artist&&m.Artist.value);if(/^(unknown|desconhecido)/i.test(artist))artist="";if(artist.length>40)artist=artist.slice(0,38).trim()+"…";const lic=cmPlainText(m.LicenseShortName&&m.LicenseShortName.value);return "Foto: "+(artist||"Wikimedia Commons")+(lic?" · "+lic:"")}
+function cmPickImage(infos,city){const words=normText(city).split(/[^a-z0-9]+/).filter(w=>w.length>3);let best=null,bestScore=-1;infos.forEach((ii,idx)=>{if(!ii||!ii.url)return;const w=ii.width||0,h=ii.height||0;if(w<700)return;if(ii.mime&&!/jpe?g|webp/i.test(ii.mime))return;if(CM_BAD_IMG.test(ii.title||""))return;const name=normText(ii.title||"");let s=0;if(w>=h*1.15)s+=3;else if(w>=h)s+=1;words.forEach(x=>{if(name.includes(x))s+=2});s-=idx*0.05;if(s>bestScore){bestScore=s;best=ii}});return best}
+async function cmImageInfos(base,fileTitles){if(!fileTitles.length)return [];const j=await cmWikiApi(base,{action:"query",titles:fileTitles.slice(0,20).join("|"),prop:"imageinfo",iiprop:"url|size|mime|extmetadata",iiextmetadatafilter:"Artist|LicenseShortName",iiurlwidth:"1280"});const pages=(j.query&&j.query.pages)||[];const tail=t=>String(t).replace(/^[^:]+:/,"").replace(/_/g," ");return fileTitles.map(t=>{const p=pages.find(x=>x.title===t)||pages.find(x=>tail(x.title)===tail(t));const ii=p&&p.imageinfo&&p.imageinfo[0];return ii?Object.assign({title:p.title},ii):null})}
+async function cmFindCityPhoto(city){
+  const W="https://pt.wikipedia.org/w/api.php",C="https://commons.wikimedia.org/w/api.php";
+  const st=CM_UF_NAME[CM_CITY_UF[city]]||"";
+  const titles=[...(CM_CITY_EXTRA_TITLES[city]||[]),st?`${city} (${st})`:"",city].filter(Boolean);
+  let page=null;
+  for(const t of titles){
+    try{
+      const j=await cmWikiApi(W,{action:"query",redirects:"1",titles:t,prop:"pageimages|pageprops|description",piprop:"name|thumbnail",pithumbsize:"1280",ppprop:"disambiguation"});
+      const p=j.query&&j.query.pages&&j.query.pages[0];
+      if(!p||p.missing||p.invalid)continue;
+      if(p.pageprops&&("disambiguation" in p.pageprops))continue;
+      const d=String(p.description||"").toLowerCase();
+      if(d){const looksPlace=/munic[ií]pio|distrito|cidade|localidade|vila/.test(d);const otherState=st&&/estado|brasil/.test(d)&&!d.includes(st.toLowerCase());if(!looksPlace||otherState)continue}
+      page=p;break;
+    }catch(_){}
+  }
+  if(page){
+    if(page.pageimage&&!CM_BAD_IMG.test(page.pageimage)&&page.thumbnail&&page.thumbnail.source&&(page.thumbnail.width||0)>=500){
+      let credit="Foto: Wikimedia Commons";
+      try{const [ii]=await cmImageInfos(W,["File:"+page.pageimage]);if(ii)credit=cmCreditFromInfo(ii)}catch(_){}
+      return {url:page.thumbnail.source,credit,source:"wikipedia:"+page.title};
+    }
+    try{
+      const j=await cmWikiApi(W,{action:"query",titles:page.title,prop:"images",imlimit:"60"});
+      const files=(((j.query&&j.query.pages&&j.query.pages[0])||{}).images||[]).map(x=>x.title).filter(t=>/\.(jpe?g|webp)$/i.test(t)&&!CM_BAD_IMG.test(t));
+      const best=cmPickImage(await cmImageInfos(W,files),city);
+      if(best)return {url:best.thumburl||best.url,credit:cmCreditFromInfo(best),source:"wikipedia:"+page.title};
+    }catch(_){}
+  }
+  try{
+    const q=`"${city}"${st?" "+st:""} filetype:bitmap`;
+    const j=await cmWikiApi(C,{action:"query",generator:"search",gsrnamespace:"6",gsrsearch:q,gsrlimit:"20",prop:"imageinfo",iiprop:"url|size|mime|extmetadata",iiextmetadatafilter:"Artist|LicenseShortName",iiurlwidth:"1280"});
+    const pages=((j.query&&j.query.pages)||[]).sort((a,b)=>(a.index||0)-(b.index||0));
+    const best=cmPickImage(pages.map(p=>p.imageinfo&&p.imageinfo[0]?Object.assign({title:p.title},p.imageinfo[0]):null),city);
+    if(best)return {url:best.thumburl||best.url,credit:cmCreditFromInfo(best),source:"commons"};
+  }catch(_){}
+  return null;
+}
+async function cmEnsureCityPhotos(rows){
+  if(cmCityPhotoRunning)return;cmCityPhotoRunning=true;
+  try{
+    const list=(rows||[]).map(r=>({city:r.city,key:cityKey(r.city)})).filter(x=>x.key);
+    if(!list.length)return;
+    let dbOk=false;const inDb=new Set();
+    try{
+      const {data,error}=await sb.from("cm_city_photos").select("city_key,image_url,credit").in("city_key",list.map(x=>x.key));
+      if(!error){dbOk=true;(data||[]).forEach(r=>{if(!r.image_url)return;inDb.add(r.city_key);const cr=r.credit||"Foto: Wikimedia Commons";if(CM_CITY_PHOTOS[r.city_key]!==r.image_url||CM_CITY_CREDITS[r.city_key]!==cr){CM_CITY_PHOTOS[r.city_key]=r.image_url;CM_CITY_CREDITS[r.city_key]=cr;cmCityPhotoApply(r.city_key,r.image_url,cr)}});cmCityPhotoSaveLocal()}
+    }catch(_){}
+    for(const x of list){
+      if(inDb.has(x.key))continue;
+      let found=CM_CITY_PHOTOS[x.key]?{url:CM_CITY_PHOTOS[x.key],credit:cmCityCreditText(x.key),source:"auto"}:null;
+      if(!found){
+        if(cmCityPhotoTried.has(x.key))continue;
+        cmCityPhotoTried.add(x.key);
+        found=await cmFindCityPhoto(x.city);
+        if(!found||!(await cmPreloadImg(found.url)))continue;
+        CM_CITY_PHOTOS[x.key]=found.url;CM_CITY_CREDITS[x.key]=found.credit;cmCityPhotoSaveLocal();cmCityPhotoApply(x.key,found.url,found.credit);
+      }
+      if(dbOk&&me?.id){try{await sb.from("cm_city_photos").upsert({city_key:x.key,city:x.city,image_url:found.url,credit:found.credit,source:found.source},{onConflict:"city_key",ignoreDuplicates:true})}catch(_){}}
+    }
+  }finally{cmCityPhotoRunning=false}
+}
+function homeCityHtml(){const rows=registeredCities();if(!rows.length)return '<div class="empty">As cidades aparecerão aqui conforme as pessoas criarem seus perfis.</div>';const pos=['50% 35%','8% 60%','92% 40%','30% 85%','70% 75%','50% 10%'];const shown=rows.slice(0,7);setTimeout(()=>cmEnsureCityPhotos(shown),0);return shown.map((x,i)=>`<button class="city" data-citykey="${esc(cityKey(x.city))}" style="--pos:${pos[i%6]}${cmCityPhotoStyle(cityKey(x.city))}" onclick="go('people','${esc(x.city)}')"><b>${esc(x.city)}</b><small>${x.count} ${x.count===1?'pessoa':'pessoas'}</small>${cmCityCreditHtml(cityKey(x.city))}</button>`).join("")}
 function home(){const p=profileData();setTimeout(openPendingProfile,500);setTimeout(async()=>{await loadStories();const el=document.getElementById("homeStories");if(el)el.innerHTML=stories();},0);const realPeople=getPublicPeople().filter(x=>x.id!==me?.id&&x.photo).slice(0,12);return screen(`<div class="homePremium"><div class="premiumTop"><div class="premiumBrand">Conecta<br><span>Mantiqueira</span></div><button class="premiumBell" type="button" onclick="cmNotifOpen()" aria-label="Notificações">🔔<i class="bellDot"></i></button></div><div class="heroSpace"></div><div class="premiumGreeting">Olá, ${esc(p.name)}! 👋</div><div class="premiumSub">Pessoas, lugares e histórias da nossa região.</div><div id="homeStories">${stories()}</div><input id="homePeopleSearch" class="search premiumSearch" placeholder="⌕  Buscar pessoas, cidades, interesses..." oninput="filterPeopleLive(this.value)" autocomplete="off"><div id="homeSearchResults"></div><div class="grid4 homeGrid3"><button class="quick premiumQuick" onclick="go('people')"><div class="ico">♙</div><small>Pessoas</small></button><button class="quick premiumQuick" onclick="go('groups')"><div class="ico">♧</div><small>Grupos</small></button><button class="quick premiumQuick" onclick="go('business')"><div class="ico">★</div><small>Eventos</small></button></div><div class="sectionHead premiumSection"><h2>Cidades em destaque</h2><button class="link" onclick="citySearch()">Ver todas ›</button></div><div class="cityGrid premiumCities">${homeCityHtml()}</div><div class="sectionHead premiumSection"><h2>Pessoas da região</h2><button class="link" onclick="go('people')">Ver todas ›</button></div><div class="peopleRow premiumPeople">${realPeople.length?realPeople.map(p=>`<div class="personMini" onclick="publicProfile('${esc(p.id)}')"><img class="avatar" src="${esc(p.photo)}"><small>${esc(p.name.split(" ")[0])}<br>${esc(p.city||"")}</small></div>`).join(""):"<div class='empty'>Ainda não há outros perfis cadastrados.</div>"+profilesHint()}</div><div class="sectionHead premiumSection"><h2>Grupos da região</h2><button class="link" onclick="go('groups')">Ver todos ›</button></div><div class="premiumGroups">${groupPreview()}</div><div class="sectionHead premiumSection"><h2>Publicações</h2><span><button class="link" onclick="adsChoosePost()">📣 Anunciar</button> <button class="link" onclick="newPost()">＋ Publicar</button></span></div><div id="feed" class="igFeed"></div></div>`,'home')}
 
 function normText(v){return String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")}
