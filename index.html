@@ -6886,4 +6886,45 @@ setInterval(ppFeedTick,1200);
 /* ===================== fim POSTS: MÚSICA · ENQUETE · COMANDO ===================== */
 
 </script>
+<style id="pvcss">.cmReelMu{display:flex;align-items:center;gap:6px;margin-top:8px;max-width:78%;padding:6px 11px;border-radius:14px;background:rgba(0,0,0,.42);font-size:13px;color:#fff;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.cmReelMu svg{width:14px;height:14px;flex:none;color:var(--green)}.cmReelMu span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+</style>
+<script>
+/* ===================== MÚSICA DO POST TAMBÉM EM VÍDEOS (Reels) E NO VISUALIZADOR ===================== */
+const PPVM={v:null,x:null,blocked:false};
+function ppPostByVideo(v){
+  const pid=v.closest('[data-pid]')?.dataset.pid;if(pid){const x=postFind(pid);if(x)return x}
+  const src=v.getAttribute('src')||v.currentSrc||'';if(!src)return null;
+  return (POSTS.list||[]).find(x=>postMedia(x).some(m=>m.u&&(m.u===src||src.indexOf(m.u)===0)))||null;
+}
+function ppVMWantMuted(v){return v.closest('#reelsRoot')?!!RL.muted:!!PPF.muted}
+function ppVMStart(v,x){
+  const m=musicDecode(x._d.mu);if(!m.url)return;
+  if(PPVM.v===v&&PPVM.x===x&&CMA&&CMA._vm){if(CMA.paused)CMA.play().catch(()=>{PPVM.blocked=true});return}
+  PPVM.v=v;PPVM.x=x;PPVM.blocked=false;
+  cmAudioPlay(m.url,m.start||0,ppVMWantMuted(v),()=>{PPVM.blocked=true},m.seg||PP_SEG);if(CMA)CMA._vm=1;
+}
+function ppVMStop(){if(CMA&&CMA._vm){CMA._vm=0;cmAudioStop()}PPVM.v=null;PPVM.x=null;PPVM.blocked=false}
+function ppVMSetMute(v,muted){v.__ppSet=true;v.muted=true;setTimeout(()=>{v.__ppSet=false},0);if(CMA&&CMA._vm&&PPVM.v===v){CMA.muted=muted;if(!muted&&CMA.paused&&!v.paused)CMA.play().catch(()=>{PPVM.blocked=true})}}
+document.addEventListener('play',e=>{
+  const v=e.target;if(!(v instanceof HTMLVideoElement)||v.closest('.igPost'))return;
+  const x=ppPostByVideo(v);if(!x?._d?.mu)return;
+  v.__ppmu=true;v.__ppSet=true;v.muted=true;setTimeout(()=>{v.__ppSet=false},0);
+  ppVMStart(v,x);
+},true);
+document.addEventListener('pause',e=>{const v=e.target;if(v===PPVM.v&&CMA&&CMA._vm)try{CMA.pause()}catch(_){}},true);
+/* botão de som dos Vídeos: o som do vídeo vira o som da música */
+document.addEventListener('volumechange',e=>{const v=e.target;if(!(v instanceof HTMLVideoElement)||!v.__ppmu||v.__ppSet)return;const wantMuted=v.muted;ppVMSetMute(v,wantMuted)},true);
+document.addEventListener('pointerup',()=>{if(PPVM.blocked&&PPVM.v&&CMA&&CMA._vm&&!PPVM.v.paused){CMA.play().then(()=>{PPVM.blocked=false}).catch(()=>{})}},{passive:true});
+setInterval(()=>{const v=PPVM.v;if(!v)return;if(!v.isConnected||!v.getAttribute('src')||document.hidden){ppVMStop();return}if(CMA&&!CMA._vm){PPVM.v=null;PPVM.x=null}},700);
+(function(){
+  const rs=window.reelStop;window.reelStop=function(){ppVMStop();return rs.apply(this,arguments)};
+  const g=window.go;window.go=function(){ppVMStop();return g.apply(this,arguments)};
+  const ui=window.cmReelUI;window.cmReelUI=function(x){let h=ui(x);const p=postFind(x.pid);if(p?._d?.mu){const m=musicDecode(p._d.mu);h=h.replace('</div><div class="reelRail">',`<div class="cmReelMu">${PP_ICO.music}<span><b>${esc(m.title)}</b>${m.artist?' · '+esc(m.artist):''}</span></div></div><div class="reelRail">`)}return h};
+  ['reelMute','reelUnmute'].forEach(n=>{const f=window[n];if(f)window[n]=function(){const r=f.apply(this,arguments);if(CMA&&CMA._vm&&PPVM.v&&PPVM.v.closest('#reelsRoot')){CMA.muted=!!RL.muted;if(!RL.muted&&CMA.paused&&!PPVM.v.paused)CMA.play().catch(()=>{PPVM.blocked=true})}return r}});
+  const cvc=window.cmVidViewerClose;if(cvc)window.cmVidViewerClose=function(){ppVMStop();return cvc.apply(this,arguments)};
+})();
+/* ===================== fim MÚSICA EM VÍDEOS ===================== */
+
+</script>
 </body></html>
