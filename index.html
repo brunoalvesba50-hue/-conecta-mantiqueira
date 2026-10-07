@@ -8052,41 +8052,93 @@ async function favToggle(uid,btn){const had=FEEDM.fav.has(uid);if(!had&&FEEDM.fa
 .muxEmpty{text-align:center;padding:26px 12px;color:#9db1bd;font-size:14.5px;line-height:1.45}
 .muxEmpty b{display:block;color:#fff;font-size:16px;margin-bottom:4px}
 .muxRemove{width:100%;margin-top:10px}
+.muxChip svg{width:14px;height:14px;vertical-align:-2px;margin-right:5px}
+.muxChip.sv{background:rgba(32,223,154,.14);color:#7ff0c6}.muxChip.sv.on{background:#20df9a;color:#04140d}
+.muxChip:disabled{opacity:.35}
+.muxSv{flex:0 0 auto;width:36px;height:36px;border-radius:50%;border:0;background:transparent;color:#8fa6b3;display:grid;place-items:center;padding:0}
+.muxSv svg{width:21px;height:21px}
+.muxSv.on{color:#20df9a}.muxSv.on svg{fill:currentColor}
+.muxInl{width:15px;height:15px;vertical-align:-3px}
+.muxEnd{text-align:center;color:#6f8794;font-size:13px;padding:14px 0 6px}
+.trSong{display:flex;align-items:center;gap:12px;padding:6px 0 4px}
+.muxCov.big{flex:0 0 58px;width:58px;height:58px;display:grid;place-items:center}
+.trPlay{flex:0 0 auto;width:46px;height:46px;border-radius:50%;border:0;background:#20df9a;display:grid;place-items:center;padding:0}
+.trPlay svg{width:20px;height:20px;fill:#04140d}
+.trPlay .muxPa{display:none}.trPlay.on .muxPa{display:block}.trPlay.on .muxPy{display:none}
+.trDurs{display:flex;gap:8px;margin:14px 0 4px}
+.trDurs .muxChip{flex:1;text-align:center;padding:9px 0}
+.trTime{display:flex;justify-content:center;align-items:baseline;gap:8px;margin:14px 0 8px;color:#8fa6b3;font-size:13px}
+.trTime b{color:#fff;font-size:20px;font-variant-numeric:tabular-nums}
+.trWave{position:relative;height:74px;border-radius:14px;background:rgba(255,255,255,.04);touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;overflow:hidden}
+.trBars,.trBarsOn{position:absolute;top:0;bottom:0;display:flex;align-items:center;gap:2px;padding:0}
+.trBars{left:0;right:0}
+.trBars i,.trBarsOn i{flex:1;border-radius:2px;background:rgba(255,255,255,.22);min-width:2px}
+.trBarsOn i{background:#fff}
+.trWin{position:absolute;top:0;bottom:0;border:2.5px solid #fff;border-radius:12px;overflow:hidden;box-shadow:0 0 0 999px rgba(4,12,16,.35);transition:width .2s ease}
+.trBarsOn{width:100%}
+.trHead{position:absolute;top:6px;bottom:6px;width:3px;margin-left:-1.5px;border-radius:2px;background:#20df9a;box-shadow:0 0 8px #20df9a;left:0;opacity:0}
+.trHint{text-align:center;color:#8fa6b3;font-size:13px;margin:10px 0 4px}
+.trDone{width:100%;margin-top:10px}
+
 </style>
 <script>
-/* ===================== MÚSICA v3 — busca forte + seletor estilo Instagram (stories, posts e vídeos) ===================== */
+/* ===================== MÚSICA v4 — estilo Instagram (stories, posts e vídeos) =====================
+   - Busca no Deezer + Apple ao mesmo tempo, por nome, artista e CLIMA (ex.: "triste", "feliz") via playlists
+   - Busca por trecho de LETRA quando MUSIXMATCH_KEY estiver preenchida (chave grátis em developer.musixmatch.com)
+   - Rolagem infinita, músicas salvas, trecho com onda arrastável e durações 5s/10s/15s/30s
+   - Nenhuma música fica tocando depois de publicar ou fechar
+*/
+const MUSIXMATCH_KEY='';
 (function(){
 const ICO={
   search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
   play:'<svg class="muxPy" viewBox="0 0 24 24" fill="#fff"><path d="M8 5.5v13l11-6.5z"/></svg>',
   pause:'<svg class="muxPa" viewBox="0 0 24 24" fill="#fff"><rect x="6.5" y="5" width="4" height="14" rx="1"/><rect x="13.5" y="5" width="4" height="14" rx="1"/></svg>',
-  go:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'
+  save:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3.5h12a1 1 0 0 1 1 1V21l-7-4.5L5 21V4.5a1 1 0 0 1 1-1z"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>'
 };
-const CHIPS=[['','Em alta'],['sertanejo','Sertanejo'],['pagode','Pagode'],['funk','Funk'],['gospel','Gospel'],['mpb','MPB'],['forró','Forró'],['piseiro','Piseiro'],['rock nacional','Rock'],['lofi relax','Relaxar'],['natureza som ambiente','Natureza']];
-const ST={sc:{chip:'',seq:0},pp:{chip:'',seq:0}};
+const CHIPS=[['@saved','Salvas'],['','Em alta'],['triste','Triste'],['feliz','Feliz'],['romântica','Romântica'],['sertanejo','Sertanejo'],['pagode','Pagode'],['funk','Funk'],['gospel','Gospel'],['mpb','MPB'],['forró','Forró'],['piseiro','Piseiro'],['rap nacional','Rap'],['rock nacional','Rock'],['relaxar','Relaxar'],['natureza','Natureza']];
+const ST={sc:{chip:'',seq:0,q:'',page:0,done:false,busy:false,keys:null},pp:{chip:'',seq:0,q:'',page:0,done:false,busy:false,keys:null}};
+const kOf=t=>normText((t.title||'')+'|'+(t.artist||'')).replace(/\s*\(.*?\)\s*/g,'').trim();
+const src=t=>t&&t.dz?'dz:'+t.dz:(t&&t.url)||'';
 
-/* ---------- catálogo: Deezer + Apple juntos (se um falhar, o outro responde) ---------- */
-function jsonp(url,ms){return new Promise((res,rej)=>{const cb='cmx'+Date.now()+Math.floor(Math.random()*1e5);const sc=document.createElement('script');let to=0;const clean=()=>{clearTimeout(to);try{delete window[cb]}catch(_){window[cb]=undefined}sc.remove()};to=setTimeout(()=>{clean();rej(new Error('tempo'))},ms||8000);window[cb]=d=>{clean();res(d)};sc.onerror=()=>{clean();rej(new Error('falha'))};sc.src=url+(url.includes('?')?'&':'?')+'output=jsonp&callback='+cb;document.head.appendChild(sc)})}
-function dzMap(arr){return (arr||[]).filter(x=>x&&x.preview&&x.id).map(x=>({id:'d'+x.id,dz:String(x.id),title:x.title_short||x.title||'Música',artist:(x.artist&&x.artist.name)||'',url:x.preview,cover:(x.album&&(x.album.cover_medium||x.album.cover))||'',dur:30}))}
-async function dzSearch(q){const j=await jsonp('https://api.deezer.com/search?q='+encodeURIComponent(q)+'&limit=30');return dzMap(j&&j.data)}
-async function dzTop(){try{const j=await jsonp('https://api.deezer.com/playlist/1111141961/tracks?limit=40');const a=dzMap(j&&j.data);if(a.length)return a}catch(_){}const j=await jsonp('https://api.deezer.com/chart/0/tracks?limit=40');return dzMap(j&&j.data)}
-async function itSearch(q){const j=await itunesFetch('https://itunes.apple.com/search?term='+encodeURIComponent(q)+'&media=music&entity=song&limit=30&country=BR');return itunesMap(j&&j.results)}
-function merge(lists){const seen=new Set(),out=[];const max=Math.max(0,...lists.map(l=>l.length));for(let i=0;i<max;i++)for(const l of lists){const t=l[i];if(!t)continue;const k=normText(t.title+'|'+t.artist).replace(/\s*\(.*?\)\s*/g,'').trim();if(seen.has(k))continue;seen.add(k);out.push(t)}return out.slice(0,50)}
+/* ---------- conexões ---------- */
+function jsonp(url,ms,param){return new Promise((res,rej)=>{const cb='cmx'+Date.now()+Math.floor(Math.random()*1e5);const sc=document.createElement('script');let to=0;const clean=()=>{clearTimeout(to);try{delete window[cb]}catch(_){window[cb]=undefined}sc.remove()};to=setTimeout(()=>{clean();rej(new Error('tempo'))},ms||8000);window[cb]=d=>{clean();res(d)};sc.onerror=()=>{clean();rej(new Error('falha'))};sc.src=url+(url.includes('?')?'&':'?')+(param||'output=jsonp')+'&callback='+cb;document.head.appendChild(sc)})}
+function dzMap(arr){return (arr||[]).filter(x=>x&&x.preview&&x.id&&x.readable!==false).map(x=>({id:'d'+x.id,dz:String(x.id),title:x.title_short||x.title||'Música',artist:(x.artist&&x.artist.name)||'',url:x.preview,cover:(x.album&&(x.album.cover_medium||x.album.cover))||'',dur:30}))}
+async function dzSearch(q,page){const j=await jsonp('https://api.deezer.com/search?q='+encodeURIComponent(q)+'&limit=25&index='+(page*25));return dzMap(j&&j.data)}
+const PL={};
+async function dzPlaylistFor(q){const k=normText(q);if(k in PL)return PL[k];const j=await jsonp('https://api.deezer.com/search/playlist?q='+encodeURIComponent(q)+'&limit=8');const l=(j&&j.data)||[];const p=l.find(x=>(x.nb_tracks||0)>=15)||l[0];PL[k]=p?String(p.id):'';return PL[k]}
+async function dzPlaylistTracks(id,page){if(!id)return [];const j=await jsonp('https://api.deezer.com/playlist/'+id+'/tracks?limit=25&index='+(page*25));return dzMap(j&&j.data)}
+async function dzMood(q,page){return dzPlaylistTracks(await dzPlaylistFor(q),page)}
+async function dzTop(page){try{const a=await dzPlaylistTracks('1111141961',page);if(a.length||page)return a}catch(_){}if(page)return [];const j=await jsonp('https://api.deezer.com/chart/0/tracks?limit=40');return dzMap(j&&j.data)}
+async function itSearch(q,page){const j=await itunesFetch('https://itunes.apple.com/search?term='+encodeURIComponent(q)+'&media=music&entity=song&limit=30&country=BR'+(page?'&offset='+(page*30):''));return itunesMap(j&&j.results)}
+async function lyricSearch(q){
+  if(!MUSIXMATCH_KEY||q.length<4)return [];
+  const j=await jsonp('https://api.musixmatch.com/ws/1.1/track.search?q_lyrics='+encodeURIComponent(q)+'&page_size=8&s_track_rating=desc&apikey='+encodeURIComponent(MUSIXMATCH_KEY),7000,'format=jsonp');
+  const list=((j&&j.message&&j.message.body&&j.message.body.track_list)||[]).map(x=>x.track).filter(Boolean).slice(0,6);
+  const found=await Promise.all(list.map(t=>jsonp('https://api.deezer.com/search?q='+encodeURIComponent('artist:"'+t.artist_name+'" track:"'+t.track_name+'"')+'&limit=1',6000).then(r=>dzMap(r&&r.data)[0]).catch(()=>null)));
+  return found.filter(Boolean);
+}
+function merge(lists){const seen=new Set(),out=[];const max=Math.max(0,...lists.map(l=>l.length));for(let i=0;i<max;i++)for(const l of lists){const t=l[i];if(!t)continue;const k=kOf(t);if(seen.has(k))continue;seen.add(k);out.push(t)}return out}
 const CACHE={};
-window.musicSearch=async function(q){
-  q=String(q||'').trim();const key=normText(q);if(CACHE[key]&&Date.now()-CACHE[key].t<10*60e3)return CACHE[key].r;
-  let jobs;
-  if(!q)jobs=[itunesTop().catch(()=>[]),dzTop().catch(()=>[])];
-  else jobs=[dzSearch(q).catch(()=>[]),itSearch(q).catch(()=>[])];
-  let r=merge(await Promise.all(jobs));
-  if(!r.length&&q){const nq=normText(q);r=(typeof storyMusicList!=='undefined'?storyMusicList:[]).map((m,i)=>({id:'f'+i,title:m[0],artist:m[1],url:m[2],cover:'',dur:0})).filter(t=>normText(t.title+' '+t.artist).includes(nq))}
+window.musicSearch=async function(q,page){
+  q=String(q||'').trim();page=page||0;const key=normText(q)+'#'+page;
+  if(CACHE[key]&&Date.now()-CACHE[key].t<10*60e3)return CACHE[key].r;
+  const safe=p=>p.catch(()=>[]);let lists;
+  if(!q)lists=await Promise.all(page?[safe(dzTop(page))]:[safe(itunesTop()),safe(dzTop(0))]);
+  else{
+    const oneWord=!/\s/.test(q);
+    const [lyr,dz,mood,it]=await Promise.all([page?Promise.resolve([]):safe(lyricSearch(q)),safe(dzSearch(q,page)),safe(dzMood(q,page)),safe(itSearch(q,page))]);
+    lists=oneWord?[lyr,mood,dz,it]:[lyr,dz,mood,it]; /* palavra solta (ex.: triste) puxa o clima primeiro */
+  }
+  let r=merge(lists);
+  if(!r.length&&q&&!page){const nq=normText(q);r=(typeof storyMusicList!=='undefined'?storyMusicList:[]).map((m,i)=>({id:'f'+i,title:m[0],artist:m[1],url:m[2],cover:'',dur:0})).filter(t=>normText(t.title+' '+t.artist).includes(nq))}
   if(r.length)CACHE[key]={t:Date.now(),r};
   return r;
 };
 
-/* ---------- músicas do Deezer: guarda o ID e pega a prévia na hora de tocar (o link do Deezer expira) ---------- */
-const enc=window.musicEncode;
-window.musicEncode=function(t){if(t&&t.dz)t={...t,url:'dz:'+t.dz};return enc(t)};
+/* ---------- Deezer: guarda o ID e pega a prévia na hora (o link expira) ---------- */
+if(!window.__muEncWrapped){const enc=window.musicEncode;window.musicEncode=function(t){if(t&&t.dz)t={...t,url:'dz:'+t.dz};return enc(t)};window.__muEncWrapped=1}
 const DZP={};
 async function dzPreview(id){const c=DZP[id];if(c&&Date.now()-c.t<30*60e3)return c.u;const j=await jsonp('https://api.deezer.com/track/'+encodeURIComponent(id),8000);const u=j&&j.preview||'';if(u)DZP[id]={t:Date.now(),u};return u}
 const play=window.cmAudioPlay,stop=window.cmAudioStop;let tok=0;
@@ -8094,58 +8146,166 @@ window.cmAudioPlay=function(url,start,muted,onBlocked,seg){
   const my=++tok;
   if(!/^dz:/.test(String(url||'')))return play(url,start,muted,onBlocked,seg);
   const a=cmAudio();try{a.pause()}catch(_){}
-  dzPreview(String(url).slice(3)).then(u=>{if(my===tok&&u)play(u,start,muted,onBlocked,seg)}).catch(()=>{});
+  if(!(typeof PPF!=='undefined'&&PPF._starting))a._pp=0;
+  const id=String(url).slice(3);
+  dzPreview(id).then(u=>{if(my===tok&&u)play(u,start,muted,onBlocked,seg)}).catch(()=>{});
   return a;
 };
 window.cmAudioStop=function(){tok++;return stop()};
 
-/* ---------- seletor visual (o mesmo para stories, posts e vídeos) ---------- */
+/* ---------- parar TUDO ao publicar ou fechar (fim da música fantasma) ---------- */
+function hush(){try{TR.stopRaf()}catch(_){}try{if(typeof PPM!=='undefined')PPM.prev=''}catch(_){}try{if(typeof MP!=='undefined'){MP.audio=null;MP.id=''}}catch(_){}try{cmAudioStop()}catch(_){}try{if(CMA){CMA._pp=0;CMA._vm=0;CMA.pause()}}catch(_){}}
+window.cmMusicHush=hush;
+['ccClose','scClose'].forEach(n=>{const f=window[n];if(typeof f==='function'&&!f.__hush){const w=function(){hush();return f.apply(this,arguments)};w.__hush=1;window[n]=w}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&(document.getElementById('cmc')||document.getElementById('scPanel')&&!document.getElementById('scPanel').classList.contains('hidden')))hush()});
+
+/* ---------- músicas salvas (ficam no aparelho) ---------- */
+const SVK='cm_mu_saved';
+function savedList(){try{return JSON.parse(localStorage.getItem(SVK)||'[]')||[]}catch(_){return []}}
+function savedHas(t){const k=kOf(t);return savedList().some(x=>kOf(x)===k)}
+window.muxSave=function(k,i,btn){
+  const arr=k==='sc'?MP.results:PPM.res;const t=arr&&arr[i];if(!t)return;
+  let l=savedList();const key=kOf(t);
+  if(l.some(x=>kOf(x)===key)){l=l.filter(x=>kOf(x)!==key);shareToast('Removida das salvas')}
+  else{l.unshift({id:t.id,dz:t.dz||'',title:t.title,artist:t.artist,url:t.dz?'':t.url,cover:t.cover,dur:t.dur||30});shareToast('🔖 Música salva')}
+  try{localStorage.setItem(SVK,JSON.stringify(l.slice(0,200)))}catch(_){}
+  if(btn)btn.classList.toggle('on',savedHas(t));
+  if(ST[k].chip==='@saved')load(k,'');
+};
+
+/* ---------- lista ---------- */
 function head(k,inputId){
-  return `<div class="muxSearch" id="${k}MuxBox">${ICO.search}<input id="${inputId}" type="search" enterkeyhint="search" placeholder="Pesquisar música ou artista" autocomplete="off" autocorrect="off" spellcheck="false" oninput="muxType('${k}',this)"><button type="button" class="muxClr" aria-label="Limpar" onclick="muxClear('${k}','${inputId}')">×</button></div>
-  <div class="muxChips" id="${k}MuxChips">${CHIPS.map(([q,l])=>`<button type="button" class="muxChip${ST[k].chip===q?' on':''}" data-q="${esc(q)}" onclick="muxChip('${k}',this)">${esc(l)}</button>`).join('')}</div>`;
+  return `<div class="muxSearch" id="${k}MuxBox">${ICO.search}<input id="${inputId}" type="search" enterkeyhint="search" placeholder="Música, artista, clima ou trecho da letra" autocomplete="off" autocorrect="off" spellcheck="false" oninput="muxType('${k}',this)"><button type="button" class="muxClr" aria-label="Limpar" onclick="muxClear('${k}','${inputId}')">×</button></div>
+  <div class="muxChips" id="${k}MuxChips">${CHIPS.map(([q,l])=>`<button type="button" class="muxChip${ST[k].chip===q?' on':''}${q==='@saved'?' sv':''}" data-q="${esc(q)}" onclick="muxChip('${k}',this)">${q==='@saved'?ICO.save:''}${esc(l)}</button>`).join('')}</div>`;
 }
-function skeleton(){return Array.from({length:6},()=>'<div class="muxSk"><i></i><span><s></s><s></s></span></div>').join('')}
-function fmt(d){d=Math.round(d||30);return Math.floor(d/60)+':'+String(d%60).padStart(2,'0')}
-function rows(list,k){
-  const prev=k==='sc'?'muPreview':'ppMuPrev',use=k==='sc'?'muChoose':'ppMuChoose';
-  return list.map((t,i)=>`<div class="muxRow" onclick="${use}(${i})"><button type="button" class="muxCov" data-${k}="${k==='sc'?esc(t.id):'r'+i}" aria-label="Ouvir prévia" onclick="event.stopPropagation();${prev}(${i})">${t.cover?`<img src="${esc(t.cover)}" alt="" loading="lazy">`:'🎵'}<span class="muxPl">${ICO.play}${ICO.pause}</span></button><div class="muxInfo"><b>${esc(t.title)}</b><span>${esc(t.artist||'Artista')} · ${fmt(t.dur)}</span></div><span class="muxGo" aria-hidden="true">${ICO.go}</span></div>`).join('');
+const skeleton=n=>Array.from({length:n||6},()=>'<div class="muxSk"><i></i><span><s></s><s></s></span></div>').join('');
+const fmt=d=>{d=Math.max(0,Math.round(d||0));return Math.floor(d/60)+':'+String(d%60).padStart(2,'0')};
+function rows(list,k,off){
+  off=off||0;const prev=k==='sc'?'muPreview':'ppMuPrev',use=k==='sc'?'muChoose':'ppMuChoose';
+  return list.map((t,j)=>{const i=off+j;return `<div class="muxRow" onclick="${use}(${i})"><button type="button" class="muxCov" data-${k}="${k==='sc'?esc(t.id):'r'+i}" aria-label="Ouvir prévia" onclick="event.stopPropagation();${prev}(${i})">${t.cover?`<img src="${esc(t.cover)}" alt="" loading="lazy">`:'🎵'}<span class="muxPl">${ICO.play}${ICO.pause}</span></button><div class="muxInfo"><b>${esc(t.title)}</b><span>${esc(t.artist||'Artista')} · ${fmt(t.dur||30)}</span></div><button type="button" class="muxSv${savedHas(t)?' on':''}" aria-label="Salvar música" onclick="event.stopPropagation();muxSave('${k}',${i},this)">${ICO.save}</button></div>`}).join('');
 }
-function label(k,q){if(q&&!ST[k].chip)return 'Resultados';const c=CHIPS.find(x=>x[0]===ST[k].chip);return ST[k].chip?(c?c[1]:'Músicas'):'Em alta no Brasil'}
-async function load(k,q,listId,store){
-  const box=document.getElementById(listId);if(!box)return;const my=++ST[k].seq;
+function label(k,q){if(ST[k].chip==='@saved')return 'Suas músicas salvas';if(q&&!ST[k].chip)return 'Resultados para “'+q+'”';const c=CHIPS.find(x=>x[0]===ST[k].chip);return ST[k].chip?(c?c[1]:'Músicas'):'Em alta no Brasil'}
+function listId(k){return k==='sc'?'muList':'ppMuList'}
+function getArr(k){return k==='sc'?MP.results:PPM.res}
+function setArr(k,r){if(k==='sc')MP.results=r;else PPM.res=r}
+function paint(k){if(k==='sc')musicPaintPlay();else ppMuPaint()}
+async function load(k,q){
+  const id=listId(k);const box=document.getElementById(id);if(!box)return;const s=ST[k];const my=++s.seq;
+  s.q=q;s.page=0;s.done=false;s.busy=true;box.scrollTop=0;
+  if(s.chip==='@saved'){const r=savedList();setArr(k,r);s.done=true;s.busy=false;
+    box.innerHTML=r.length?`<div class="muxLbl">${esc(label(k,q))}</div>`+rows(r,k):`<div class="muxEmpty"><b>Nenhuma música salva ainda</b>Toque no ${ICO.save.replace('<svg','<svg class="muxInl"')} ao lado de uma música para guardar e usar de novo depois.</div>`;paint(k);return}
   box.innerHTML=skeleton();
-  let r=[];try{r=await musicSearch(q)}catch(_){}
-  if(my!==ST[k].seq||!document.getElementById(listId))return;
-  store(r);
-  const el=document.getElementById(listId);
-  if(!r.length){el.innerHTML=`<div class="muxEmpty"><b>${q?'Nada encontrado para “'+esc(q)+'”':'Não consegui carregar as músicas'}</b>${navigator.onLine===false?'Você está sem internet. Conecte e tente de novo.':(q?'Confira a escrita ou pesquise pelo nome do artista.':'Tente de novo em instantes.')}</div>`;return}
-  el.innerHTML=`<div class="muxLbl">${esc(label(k,q))}</div>`+rows(r,k);
-  if(k==='sc')musicPaintPlay();else ppMuPaint();
+  let r=[];try{r=await musicSearch(q,0)}catch(_){}
+  if(my!==s.seq||!document.getElementById(id))return;
+  s.busy=false;s.keys=new Set(r.map(kOf));setArr(k,r.slice());
+  const el=document.getElementById(id);
+  if(!r.length){s.done=true;el.innerHTML=`<div class="muxEmpty"><b>${q?'Nada encontrado para “'+esc(q)+'”':'Não consegui carregar as músicas'}</b>${navigator.onLine===false?'Você está sem internet. Conecte e tente de novo.':(q?'Tente o nome do artista, um clima (triste, feliz, festa…) ou outro trecho.':'Tente de novo em instantes.')}</div>`;return}
+  el.innerHTML=`<div class="muxLbl">${esc(label(k,q))}</div>`+rows(r,k)+'<div class="muxMore"></div>';
+  el.onscroll=()=>{if(el.scrollTop+el.clientHeight>=el.scrollHeight-260)more(k)};
+  paint(k);
+  if(el.scrollHeight<=el.clientHeight+20)more(k);
+}
+async function more(k){
+  const s=ST[k];if(s.busy||s.done||s.chip==='@saved')return;const id=listId(k);const el=document.getElementById(id);if(!el)return;
+  s.busy=true;const my=s.seq;const page=s.page+1;const tail=el.querySelector('.muxMore');if(tail)tail.innerHTML=skeleton(2);
+  let r=[];try{r=await musicSearch(s.q,page)}catch(_){}
+  if(my!==s.seq||!document.getElementById(id))return;
+  const fresh=r.filter(t=>{const kk=kOf(t);if(s.keys.has(kk))return false;s.keys.add(kk);return true});
+  s.page=page;s.busy=false;const t2=el.querySelector('.muxMore');
+  if(!fresh.length){s.done=true;if(t2)t2.innerHTML='<div class="muxEnd">Isso é tudo por aqui. Tente outra busca.</div>';return}
+  const arr=getArr(k);const off=arr.length;fresh.forEach(t=>arr.push(t));
+  if(t2){t2.insertAdjacentHTML('beforebegin',rows(fresh,k,off));t2.innerHTML=''}
+  paint(k);
 }
 const T={};
-window.muxType=function(k,inp){document.getElementById(k+'MuxBox')?.classList.toggle('has',!!inp.value);clearTimeout(T[k]);T[k]=setTimeout(()=>{const v=inp.value.trim();if(v){ST[k].chip='';document.querySelectorAll('#'+k+'MuxChips .muxChip').forEach(b=>b.classList.remove('on'))}else{ST[k].chip='';document.querySelector('#'+k+'MuxChips .muxChip')?.classList.add('on')}(k==='sc'?muLoad:ppMuLoad)(v)},380)};
+window.muxType=function(k,inp){document.getElementById(k+'MuxBox')?.classList.toggle('has',!!inp.value);clearTimeout(T[k]);T[k]=setTimeout(()=>{const v=inp.value.trim();ST[k].chip='';document.querySelectorAll('#'+k+'MuxChips .muxChip').forEach(b=>b.classList.toggle('on',!v&&b.dataset.q===''));load(k,v)},380)};
 window.muxClear=function(k,id){const i=document.getElementById(id);if(i){i.value='';muxType(k,i);i.focus()}};
-window.muxChip=function(k,b){const q=b.dataset.q||'';ST[k].chip=q;document.querySelectorAll('#'+k+'MuxChips .muxChip').forEach(x=>x.classList.toggle('on',x===b));const i=document.getElementById(k==='sc'?'muQ':'ppMuQ');if(i){i.value='';document.getElementById(k+'MuxBox')?.classList.remove('has')}(k==='sc'?muLoad:ppMuLoad)(q)};
+window.muxChip=function(k,b){const q=b.dataset.q||'';ST[k].chip=q;document.querySelectorAll('#'+k+'MuxChips .muxChip').forEach(x=>x.classList.toggle('on',x===b));const i=document.getElementById(k==='sc'?'muQ':'ppMuQ');if(i){i.value='';document.getElementById(k+'MuxBox')?.classList.remove('has')}load(k,q==='@saved'?'':q)};
 
-/* stories */
+/* ---------- prévia ao tocar na capa ---------- */
+window.muPreview=function(i){const t=MP.results[i];if(!t)return;if(MP.id===t.id&&MP.audio){musicStop()}else musicPlay(src(t),0,t.id,30);musicPaintPlay()};
+window.ppMuPrev=function(i){const t=PPM.res[i];if(!t)return;if(PPM.prev==='r'+i){ppMuStopPreview()}else{PPM.prev='r'+i;cmAudioPlay(src(t),0,false,null,30)}ppMuPaint()};
+const paintSc=window.musicPaintPlay.__mux?window.musicPaintPlay.__orig:window.musicPaintPlay;
+window.musicPaintPlay=function(){try{paintSc()}catch(_){}document.querySelectorAll('.muxCov[data-sc]').forEach(b=>b.classList.toggle('on',!!MP.audio&&b.dataset.sc===MP.id))};window.musicPaintPlay.__mux=1;window.musicPaintPlay.__orig=paintSc;
+const paintPp=window.ppMuPaint.__mux?window.ppMuPaint.__orig:window.ppMuPaint;
+window.ppMuPaint=function(){try{paintPp()}catch(_){}document.querySelectorAll('.muxCov[data-pp]').forEach(b=>b.classList.toggle('on',PPM.prev===b.dataset.pp))};window.ppMuPaint.__mux=1;window.ppMuPaint.__orig=paintPp;
+
+/* ---------- abrir o seletor ---------- */
 window.scMusicPanel=function(){
-  ST.sc.chip='';
+  hush();ST.sc.chip='';
   scPanelShow(`<div class="scPanelHead"><b>Música</b><button onclick="scMusicClose()">×</button></div>${head('sc','muQ')}<div id="muList" class="muxList"></div>${SC.music?`<button class="secondary muxRemove" onclick="scPickMusic(-1)">Remover música</button>`:''}`);
-  muLoad('');
+  load('sc','');
 };
-window.muLoad=function(q){return load('sc',q,'muList',r=>{MP.results=r})};
-const paintSc=window.musicPaintPlay;
-window.musicPaintPlay=function(){try{paintSc()}catch(_){}document.querySelectorAll('.muxCov[data-sc]').forEach(b=>b.classList.toggle('on',!!MP.audio&&b.dataset.sc===MP.id))};
-
-/* posts e vídeos */
+window.scMusicClose=function(){hush();scPanelHide()};
+window.muLoad=function(q){return load('sc',q)};
 window.ppMuOpen=function(){
-  if(!CC)return;if(typeof ccCapSave==='function'&&CC.step==='details')ccCapSave();ppMuStopPreview();ST.pp.chip='';
+  if(!CC)return;if(typeof ccCapSave==='function'&&CC.step==='details')ccCapSave();hush();ST.pp.chip='';
   openModal(`<div class="modalHead"><h2>Música</h2><button class="close" onclick="ppMuClose()">×</button></div>${head('pp','ppMuQ')}<div id="ppMuList" class="muxList"></div>${CC.mu?`<button class="secondary muxRemove" onclick="CC.mu='';ppMuClose();ppAfterChange()">Tirar música</button>`:''}`);
-  document.getElementById('modal')?.classList.add('sheet');ppMuLoad('');
+  document.getElementById('modal')?.classList.add('sheet');load('pp','');
 };
-window.ppMuLoad=function(q){return load('pp',q,'ppMuList',r=>{PPM.res=r})};
-const paintPp=window.ppMuPaint;
-window.ppMuPaint=function(){try{paintPp()}catch(_){}document.querySelectorAll('.muxCov[data-pp]').forEach(b=>b.classList.toggle('on',PPM.prev===b.dataset.pp))};
+window.ppMuClose=function(){hush();closeModal()};
+window.ppMuLoad=function(q){return load('pp',q)};
+
+/* ---------- escolher o trecho (estilo Instagram) ---------- */
+const DURS=[5,10,15,30];
+const TR={k:'',t:null,start:0,seg:15,dur:30,raf:0,playing:false,drag:null,
+  stopRaf(){cancelAnimationFrame(this.raf);this.raf=0;this.playing=false;const b=document.getElementById('trPlay');if(b)b.classList.remove('on')}};
+function bars(id){let h=0;const s=String(id||'x');for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;const out=[];for(let i=0;i<64;i++){h=(h*1103515245+12345)>>>0;const base=0.35+0.65*Math.abs(Math.sin(i/3.1+(h%7)));out.push(Math.round(18+((h>>8)%60)*0.5*base+base*30))}return out}
+function trHTML(){
+  const t=TR.t;const b=bars(t.id);
+  const back=TR.k==='sc'?'scMusicPanel()':'ppMuOpen()',close=TR.k==='sc'?'scMusicClose()':'ppMuClose()';
+  const headH=TR.k==='sc'?`<div class="scPanelHead"><button onclick="${back}" aria-label="Voltar">←</button><b>Escolha o trecho</b><button onclick="${close}">×</button></div>`:`<div class="modalHead"><button class="close" onclick="${back}" aria-label="Voltar">‹</button><h2>Escolha o trecho</h2><button class="close" onclick="${close}">×</button></div>`;
+  return `${headH}<div class="trSong"><div class="muxCov big">${t.cover?`<img src="${esc(t.cover)}" alt="">`:'🎵'}</div><div class="muxInfo"><b>${esc(t.title)}</b><span>${esc(t.artist||'')}</span></div><button type="button" id="trPlay" class="trPlay" onclick="muxTrToggle()" aria-label="Tocar">${ICO.play}${ICO.pause}</button></div>
+  <div class="trDurs" id="trDurs">${DURS.map(d=>`<button type="button" class="muxChip${TR.seg===d?' on':''}" ${d>TR.dur+0.5?'disabled':''} onclick="muxTrDur(${d})">${d}s</button>`).join('')}</div>
+  <div class="trTime"><b id="trFrom">${fmt(TR.start)}</b><span>até</span><b id="trTo">${fmt(TR.start+TR.seg)}</b></div>
+  <div class="trWave" id="trWave"><div class="trBars">${b.map(h=>`<i style="height:${h}%"></i>`).join('')}</div><div class="trWin" id="trWin"><div class="trBarsOn" id="trBarsOn">${b.map(h=>`<i style="height:${h}%"></i>`).join('')}</div><span class="trHead" id="trHead"></span></div></div>
+  <p class="trHint">Arraste para escolher o trecho que vai tocar</p>
+  <button class="primary trDone" onclick="muxTrDone()">Concluir</button>`;
+}
+function trLayout(){
+  const win=document.getElementById('trWin'),wave=document.getElementById('trWave'),on=document.getElementById('trBarsOn');if(!win||!wave)return;
+  const L=TR.start/TR.dur*100,W=Math.min(100,TR.seg/TR.dur*100);
+  win.style.left=L+'%';win.style.width=W+'%';
+  if(on){on.style.width=(100/W*100)+'%';on.style.left=(-L/W*100)+'%'}
+  const f=document.getElementById('trFrom'),to=document.getElementById('trTo');if(f)f.textContent=fmt(TR.start);if(to)to.textContent=fmt(TR.start+TR.seg);
+}
+function trBind(){
+  const wave=document.getElementById('trWave');if(!wave)return;
+  const x2s=x=>{const r=wave.getBoundingClientRect();return (x-r.left)/r.width*TR.dur};
+  wave.addEventListener('pointerdown',e=>{e.preventDefault();try{wave.setPointerCapture(e.pointerId)}catch(_){}const s=x2s(e.clientX);const inWin=s>=TR.start&&s<=TR.start+TR.seg;TR.drag={off:inWin?s-TR.start:TR.seg/2};move(e)});
+  const move=e=>{if(!TR.drag)return;let st=x2s(e.clientX)-TR.drag.off;st=Math.max(0,Math.min(TR.dur-TR.seg,st));TR.start=Math.round(st*2)/2;trLayout()};
+  wave.addEventListener('pointermove',move);
+  const up=()=>{if(!TR.drag)return;TR.drag=null;trPlay()};
+  wave.addEventListener('pointerup',up);wave.addEventListener('pointercancel',up);
+}
+function trTick(){
+  const a=CMA;const h=document.getElementById('trHead');
+  if(!TR.playing||!h){return}
+  if(a&&!a.paused&&a.currentTime>=TR.start-0.3){const p=Math.max(0,Math.min(1,(a.currentTime-TR.start)/TR.seg));h.style.left=(p*100)+'%';h.style.opacity=1}
+  TR.raf=requestAnimationFrame(trTick);
+}
+function trPlay(){
+  cancelAnimationFrame(TR.raf);TR.playing=true;document.getElementById('trPlay')?.classList.add('on');
+  const a=cmAudioPlay(src(TR.t),TR.start,false,null,TR.seg);
+  if(a&&!TR.t.durReal){const on=()=>{if(a.duration&&isFinite(a.duration)&&a.duration>5){TR.t.durReal=1;const d=Math.floor(a.duration);if(Math.abs(d-TR.dur)>1){TR.dur=d;if(TR.seg>TR.dur)TR.seg=DURS.filter(x=>x<=TR.dur).pop()||5;TR.start=Math.min(TR.start,Math.max(0,TR.dur-TR.seg));const ds=document.getElementById('trDurs');if(ds)ds.innerHTML=DURS.map(x=>`<button type="button" class="muxChip${TR.seg===x?' on':''}" ${x>TR.dur+0.5?'disabled':''} onclick="muxTrDur(${x})">${x}s</button>`).join('');trLayout()}}};a.addEventListener('loadedmetadata',on,{once:true});if(a.readyState>=1)on()}
+  TR.raf=requestAnimationFrame(trTick);
+}
+window.muxTrToggle=function(){if(TR.playing){TR.stopRaf();cmAudioStop()}else trPlay()};
+window.muxTrDur=function(d){if(d>TR.dur+0.5)return;TR.seg=d;TR.start=Math.min(TR.start,Math.max(0,TR.dur-d));document.querySelectorAll('#trDurs .muxChip').forEach(b=>b.classList.toggle('on',b.textContent===d+'s'));trLayout();trPlay()};
+function trOpen(k,t){
+  hush();TR.k=k;TR.t={...t};TR.dur=Math.max(5,Math.round(t.dur||30));TR.seg=Math.min(15,TR.dur);TR.start=0;
+  const html=trHTML();
+  if(k==='sc')scPanelShow(html);else{openModal(html);document.getElementById('modal')?.classList.add('sheet')}
+  trLayout();trBind();trPlay();
+}
+window.muChoose=function(i){const t=MP.results[i];if(t)trOpen('sc',t)};
+window.ppMuChoose=function(i){const t=PPM.res[i];if(t)trOpen('pp',t)};
+window.muxTrDone=function(){
+  const t=TR.t;if(!t)return;const sel={...t,start:TR.start,seg:TR.seg};hush();
+  if(TR.k==='sc'){MP.sel=sel;SC.music=musicEncode(sel);scPanelHide();scUpdateMusicChip()}
+  else{if(!CC)return closeModal();CC.mu=musicEncode(sel);closeModal();ppAfterChange();shareToast('🎵 Música adicionada')}
+};
 })();
+
 </script>
 </body></html>
