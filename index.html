@@ -6175,7 +6175,7 @@ function msgOpenOnce(btn){
   const row=btn.closest('.msgRow');if(!row)return;const p=msgParse(row._body);if(!p)return;
   document.getElementById('msgViewer')?.remove();
   const who=profileData().name||'',when=new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-  const wm=Array.from({length:18},()=>`<span>${esc(who)} · ${esc(when)}</span>`).join('');
+  const wm=Array.from({length:5},()=>`<span>${esc(who)} · ${esc(when)}</span>`).join('');
   document.body.insertAdjacentHTML('beforeend',`<div id="msgViewer" class="msgViewer once onceSafe" oncontextmenu="return false" ondragstart="return false"><div class="onceBar"><i id="onceProg"></i></div><div class="onceTag">${IGI.once} Visualização única</div><div class="onceStage" id="onceStage">${p.t==='vid'?`<video id="onceVid" src="${esc(p.url)}" autoplay playsinline disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback" disableremoteplayback></video>`:`<canvas id="onceCv"></canvas><div class="onceLoad">Abrindo…</div>`}<div class="onceWm">${wm}</div><div class="onceShield"></div></div><button class="onceX" onclick="msgCloseOnce()" aria-label="Fechar">×</button></div>`);
   window._onceRow=row;ONCE={t0:0,dur:p.t==='vid'?0:10000,raf:0};
   msgOnceMark(row,p);
@@ -6184,7 +6184,12 @@ function msgOpenOnce(btn){
   const tick=t=>{if(!ONCE||!document.getElementById('msgViewer'))return;if(ONCE.t0&&ONCE.dur){const k=Math.min(1,(t-ONCE.t0)/ONCE.dur);const b=document.getElementById('onceProg');if(b)b.style.width=(k*100)+'%';if(k>=1){msgCloseOnce();return}}ONCE.raf=requestAnimationFrame(tick)};ONCE.raf=requestAnimationFrame(tick);
   document.addEventListener('visibilitychange',msgOnceHide);window.addEventListener('pagehide',msgOnceHide);window.addEventListener('blur',msgOnceHide);document.addEventListener('keydown',msgOnceKey,true);
 }
-function msgOnceHide(e){if(!ONCE)return;if(e&&e.type==='visibilitychange'&&document.visibilityState!=='hidden')return;msgCloseOnce()}
+function msgOnceHide(e){if(!ONCE)return;const v=document.getElementById('msgViewer');
+  /* perdeu o foco (central de controle / gravação de tela): borra na hora e volta quando a pessoa retorna */
+  if(e&&e.type==='blur'){if(v)v.classList.add('onceBlur');const back=()=>{window.removeEventListener('focus',back);document.getElementById('msgViewer')?.classList.remove('onceBlur')};window.addEventListener('focus',back);return}
+  if(e&&e.type==='visibilitychange'&&document.visibilityState!=='hidden')return;
+  /* saiu do app: borra antes do celular tirar a "foto" da tela e fecha */
+  if(v)v.classList.add('onceBlur');msgCloseOnce()}
 function msgOnceKey(e){if(!ONCE)return;if(e.key==='PrintScreen'||(e.metaKey&&e.shiftKey&&/[345s]/i.test(e.key))){const row=window._onceRow;msgCloseOnce();const peer=currentPublicUser;if(peer&&me?.id&&row&&row.dataset.s!==me.id){sb.from('messages').insert({sender_id:me.id,receiver_id:row.dataset.s,body:'📸 Tirou print da sua foto de visualização única'}).then(()=>{},()=>{})}}}
 async function msgOnceMark(row,p){
   const id=row.dataset.id;try{const a=JSON.parse(localStorage.getItem('cm_once_seen')||'[]');a.push(String(id));localStorage.setItem('cm_once_seen',JSON.stringify(a.slice(-500)))}catch(_){}
@@ -8977,4 +8982,9 @@ const back=window.scBackToPick;
 if(typeof back==='function')window.scBackToPick=function(){const v=document.querySelector('#scBg');if(v&&v.tagName==='VIDEO'){try{v.pause()}catch(_){}}return back.apply(this,arguments)};
 })();
 </script>
+<style id="oncecss2">
+.onceWm{gap:150px 120px!important;inset:-10%!important}
+.onceWm span{color:rgba(255,255,255,.07)!important;font-size:13px!important;font-weight:700!important;text-shadow:none!important}
+.onceBlur .onceStage canvas,.onceBlur .onceStage video,.onceBlur .onceStage .onceBg{filter:blur(28px) brightness(.6)!important}
+</style>
 </body></html>
