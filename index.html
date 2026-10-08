@@ -9934,7 +9934,7 @@ if(typeof _rn==='function')window.refreshNews=async function(){const r=document.
 .caCard #forgotBtn{margin-top:8px}
 .caCard .error:empty{display:none}
 .caCard .error{margin:4px 0 2px}
-.authCard.cmReg .orLine,.authCard.cmReg .googleBtn{display:none!important}
+.auth .orLine,.auth .googleBtn{display:none!important}
 @media (max-height:700px){.caScript{display:none}.auth.caAuth{padding-top:calc(env(safe-area-inset-top,0px) + 18px)}}
 @media (min-width:700px){.authCard.caCard{margin-top:28px}}
 </style>
@@ -9966,7 +9966,7 @@ function dress(){
   loadFont();a.classList.add('caAuth');
   a.insertAdjacentHTML('afterbegin',`<div class="caBg" aria-hidden="true"></div><header class="caHead"><div class="caLogo">${AI.mount}<b>Conecta</b></div><div class="caTag">PESSOAS <i>•</i> LUGARES <i>•</i> HISTÓRIAS</div><div class="caScript">Mais que uma<br>região</div></header>`);
   const card=a.querySelector('.authCard');card&&card.classList.add('caCard');
-  const br=card&&card.querySelector('.brand');br&&br.remove();
+  const br=card&&card.querySelector('.brand');br&&br.remove();card&&card.querySelectorAll('.orLine,.googleBtn').forEach(e=>e.remove());
   wrapField('name',AI.user);wrapField('regCity',AI.pin);wrapField('email',AI.mail);
   ['password','confirmPassword'].forEach(id=>{const inp=document.getElementById(id);if(!inp)return;const pw=inp.closest('.passwordWrap');if(pw&&!pw.classList.contains('caF')){pw.classList.add('caF');pw.insertAdjacentHTML('afterbegin',`<span class="caIco">${AI.lock}</span>`)}eyeBtn(id)});
   const rc=document.getElementById('regCity');if(rc)rc.placeholder='Cidade (obrigatório)';
