@@ -1,7 +1,7 @@
 {
-  "name": "Conecta Mantiqueira",
+  "name": "Conecta",
   "short_name": "Conecta",
-  "description": "A rede social da Serra da Mantiqueira",
+  "description": "Pessoas, lugares e histórias da Serra",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -23,7 +23,7 @@
       "purpose": "any"
     },
     {
-      "src": "icon-512.png",
+      "src": "icon-512-maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
