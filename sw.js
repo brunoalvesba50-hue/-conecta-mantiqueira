@@ -1,6 +1,6 @@
 /* Conecta Mantiqueira — trabalha em segundo plano no celular:
    notificações, app instalado, abrir rápido e funcionar sem internet (como o Instagram). */
-const VER = 'v16';
+const VER = 'v17';
 const CACHE = 'conecta-' + VER;          /* páginas e arquivos do site */
 const LIB = 'conecta-lib-' + VER;        /* biblioteca do Supabase (necessária para abrir) */
 const API = 'conecta-api';               /* últimos dados vistos (feed, perfis, conversas) */
@@ -10,7 +10,7 @@ const IMG_MAX = 400, API_MAX = 300;
 
 self.addEventListener('install', e => {
   e.waitUntil((async () => {
-    try { const c = await caches.open(CACHE); await c.addAll(['./', './manifest.json', './icon-192.png']); } catch (_) {}
+    try { const c = await caches.open(CACHE); await c.addAll(['./', './manifest.json', './icon-192.png', './fundo-serra.jpg', './cadastro-bg.jpg']); } catch (_) {}
     try { const c = await caches.open(LIB); const r = await fetch(SDK, { mode: 'cors' }); if (r.ok) await c.put(SDK, r); } catch (_) {}
   })());
   self.skipWaiting();
@@ -40,9 +40,9 @@ async function networkFirst(req, cacheName, ms, opts) {
   const saved = ms ? await c.match(req, { ignoreVary: true }) : null;
   try {
     /* só desiste da rede lenta quando já existe uma cópia guardada para mostrar */
-    const res = await (saved ? Promise.race([fetch(req, opts), timeout(ms)]) : fetch(req, opts));
-    if (res && res.ok) c.put(req, res.clone()).catch(() => {});
-    return res;
+    /* a busca continua por trás e guarda a versão nova, mesmo se a guardada for mostrada antes */
+    const net = fetch(req, opts).then(res => { if (res && res.ok) c.put(req, res.clone()).catch(() => {}); return res; });
+    return await (saved ? Promise.race([net, timeout(ms)]) : net);
   } catch (err) {
     const hit = await c.match(req, { ignoreVary: true });
     if (hit) return hit;
@@ -73,7 +73,8 @@ self.addEventListener('fetch', e => {
   /* página do site: sempre confere se há versão nova; sem internet abre a guardada */
   if (req.mode === 'navigate' && url.origin === self.location.origin) {
     e.respondWith((async () => {
-      try { return await networkFirst(req, CACHE, 0, { cache: 'no-cache' }); }
+      /* abre na hora: se a internet demorar mais de 2,5s, usa a versão guardada (e atualiza por trás) */
+      try { return await networkFirst(req, CACHE, 2500, { cache: 'no-cache' }); }
       catch (_) { return (await caches.match('./')) || Response.error(); }
     })());
     return;
