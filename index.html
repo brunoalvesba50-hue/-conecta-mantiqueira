@@ -12936,7 +12936,7 @@ const o0=window.rlOrdered;if(typeof o0==='function'){window.rlOrdered=function()
 const p0=window.reelPlay;
 if(typeof p0==='function'){window.reelPlay=function(x){const r=p0.apply(this,arguments);
   if(x&&!x.social){clearTimeout(RL.wd);clearTimeout(RL.wd3);
-    RL.wd3=setTimeout(()=>{if(RL.state!==1&&RL.items[RL.cur]===x){if(RL.ready){reelCmd('loadVideoById',[x.youtubeId,0]);reelCmd('playVideo')}else reelCreateFrame(x,RL.muted)}},3000);
+    RL.wd3=setTimeout(()=>{/* só tenta de novo se nem começou a carregar (carregando = 3 é normal) */if(RL.items[RL.cur]===x&&(RL.state===-1||RL.state===5)){if(RL.ready){reelCmd('loadVideoById',[x.youtubeId,0])}else reelCreateFrame(x,RL.muted)}},3000);
     RL.wd=setTimeout(()=>{if(RL.state!==1&&RL.items[RL.cur]===x)reelFail(false)},7500)}
   return r};try{reelPlay=window.reelPlay}catch(_){}}
 /* 3) toque com o vídeo mudo = liga o som */
@@ -12945,6 +12945,31 @@ if(typeof t0==='function'){window.reelTapUp=function(e,i){const x=RL.items[RL.cu
   if(RL.muted&&RL.want&&x&&(!x.social||x.kind==='px'||x.kind==='cm')&&Math.abs(e.clientX-(RL.px||0))<=10&&Math.abs(e.clientY-(RL.py||0))<=10){
     const now=Date.now();if(now-RL.lastTap<300)return t0.apply(this,arguments);RL.lastTap=now;reelUnmute();if(RL.state!==1)reelCmd('playVideo');return}
   return t0.apply(this,arguments)};try{reelTapUp=window.reelTapUp}catch(_){}}
+})();
+
+/* ===================== VÍDEOS: botão de play/pause que ficava na tela =====================
+   O círculo com ⏸ no meio é do próprio player do YouTube: ele aparece toda vez que o site manda
+   um "play" extra e fica parado enquanto o vídeo carrega. Agora:
+   - o site não manda "play" extra logo depois de trocar de vídeo (o vídeo já começa sozinho);
+   - ao tocar para pausar, só aparece o ícone do YouTube (antes aparecia o nosso junto, dois ícones). */
+(function(){
+if(typeof RL==='undefined'||typeof window.reelCmd!=='function')return;
+const c0=window.reelCmd;
+window.reelCmd=function(func,args){
+  const now=Date.now();
+  if(func==='loadVideoById'){RL._loadT=now;RL._loadId=args&&args[0]}
+  if(func==='playVideo'){
+    const x=RL.items[RL.cur];
+    /* acabou de pedir o vídeo: ele já vai tocar sozinho */
+    if(x&&!x.social&&RL._loadId===x.youtubeId&&now-(RL._loadT||0)<2500&&RL.state!==2)return;
+    /* já está tocando ou carregando: "play" de novo só faria o ícone aparecer */
+    if(RL.state===1||RL.state===3)return;
+  }
+  return c0.apply(this,arguments);
+};
+try{reelCmd=window.reelCmd}catch(_){}
+const f0=window.reelFlash;
+if(typeof f0==='function'){window.reelFlash=function(ch){const x=RL.items[RL.cur];if(x&&!x.social&&(ch==='▶'||ch==='⏸'))return;return f0.apply(this,arguments)};try{reelFlash=window.reelFlash}catch(_){}}
 })();
 </script>
 <style id="rvcss">
@@ -13077,6 +13102,115 @@ if(typeof g0==='function'){window.cmNotifGo=async function(id){const n=(CM_NOTIF
 
 /* ---------- notificação no celular (app fechado): tocar abre direto a sala ---------- */
 try{navigator.serviceWorker&&navigator.serviceWorker.addEventListener('message',e=>{const d=e.data||{};if(d.type==='open-room'&&d.city){const go=()=>{if(me?.id&&typeof PK.roomJoin==='function')PK.roomJoin(d.city);else setTimeout(go,400)};go()}})}catch(_){}
+})();
+</script>
+<style id="cocss">
+.coList{max-height:46vh;overflow-y:auto;margin:8px 0 12px}
+.coRow{position:relative;width:100%}
+.coRow .coChk{margin-left:auto;width:24px;height:24px;border-radius:50%;border:2px solid rgba(255,255,255,.3);display:grid;place-items:center;font-style:normal;font-weight:900;font-size:13px;color:#03231a;flex:none}
+.coRow.on .coChk{background:#20df9a;border-color:#20df9a}
+</style>
+<script id="cojs">
+/* ===================== ENQUETES NOS STORIES + PUBLICAÇÕES COLABORATIVAS (ajustes) =====================
+   As duas funções já existiam. Aqui só completa o que faltava:
+   - Enquete: cada pessoa vota UMA vez (igual Instagram). O banco também garante isso.
+   - Colaboração: no menu ⋯ da publicação
+       · dono: "Convidar colaborador" (também depois de publicar) e "Remover colaborador"
+       · colaborador: "Deixar de colaborar"
+     O banco só aceita convite do dono da publicação e resposta da pessoa convidada. */
+(function(){
+/* ---------------- enquete: um voto por pessoa ---------------- */
+const v0=window.svPollVote;
+if(typeof v0==='function'){window.svPollVote=async function(i){
+  const it=typeof svCur==='function'?svCur():null;
+  if(it&&!(it.owner==='me'||it.user_id===me?.id)){const d=(typeof ST!=='undefined'&&ST.poll&&ST.poll[it.id])||null;
+    if(d&&d.mine!=null){if(d.mine!==i){try{svToast('Você já votou nesta enquete')}catch(_){}}return}}
+  return v0.apply(this,arguments)};
+  try{svPollVote=window.svPollVote}catch(_){}}
+
+/* ---------------- colaboração ---------------- */
+const CO={sel:[],pid:null};
+const ICO={add:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21c1.2-3.8 4-5.8 7-5.8s5.8 2 7 5.8M19 8v6M16 11h6"/></svg>',
+  rm:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21c1.2-3.8 4-5.8 7-5.8s5.8 2 7 5.8M16 11h6"/></svg>'};
+const pname=uid=>typeof cmPersonName==='function'?cmPersonName(uid):((personById(uid)||{}).name||'Pessoa');
+const row=(ic,t,st,act,cls)=>`<button type="button" class="${cls||''}" onclick="${act}"><i>${ic}</i><span><b>${t}</b><small>${st}</small></span></button>`;
+function sqlMsg(e){const m=String(e&&e.message||e||'');if(/does not exist|schema cache|relation/i.test(m))return 'O administrador precisa rodar a atualização do banco.';const k=m.match(/Só [^.]*|Até 3[^.]*|Você não pode[^.]*|Alteração não permitida[^.]*/);return k?k[0]+'.':'Não foi possível agora. Tente de novo.'}
+const pm0=window.postMenu;
+if(typeof pm0==='function'){window.postMenu=function(id){
+  const r=pm0.apply(this,arguments);
+  try{const x=postFind(id);const list=document.querySelector('#modal .cmSheetList');if(!x||!list||x._ad)return r;
+    const mine=x.ownerId===me?.id,col=(x.collabs||[]).filter(u=>u!==x.ownerId),pend=x.collabPend||[];let h='';
+    if(mine){
+      if(col.length+pend.length<3)h+=row(ICO.add,'Convidar colaborador','A publicação aparece no perfil dos dois',`coInvite('${esc(id)}')`);
+      if(col.length||pend.length)h+=row(ICO.rm,'Remover colaborador',[...col,...pend].map(pname).map(esc).join(', '),`coRemoveList('${esc(id)}')`);
+    }else if(col.includes(me?.id)){
+      h+=row(ICO.rm,'Deixar de colaborar','A publicação sai do seu perfil',`coLeave('${esc(id)}')`);
+    }
+    if(h){const danger=list.querySelector('.danger');if(danger)danger.insertAdjacentHTML('beforebegin',h);else list.insertAdjacentHTML('beforeend',h)}
+  }catch(e){console.warn(e)}
+  return r};
+  try{postMenu=window.postMenu}catch(_){}}
+
+function candidates(x,q){
+  const skip=new Set([me?.id,x.ownerId,...(x.collabs||[]),...(x.collabPend||[])]);const out=[];const seen=new Set();
+  const add=p=>{if(!p||!p.id||skip.has(p.id)||seen.has(p.id))return;seen.add(p.id);out.push(p)};
+  try{[...CHAT.rows.values()].forEach(c=>add(typeof chatPerson==='function'?chatPerson(c.peer):personById(c.peer)))}catch(_){}
+  try{[...(followCache||[])].forEach(id=>add(personById(id)))}catch(_){}
+  try{getPublicPeople().forEach(add)}catch(_){}
+  const n=s=>typeof normText==='function'?normText(s||''):String(s||'').toLowerCase();
+  return (q?out.filter(p=>n(p.name+' '+(p.city||'')).includes(n(q))):out).slice(0,40);
+}
+window.coInvite=function(id){
+  const x=postFind(id);if(!x)return;CO.pid=id;CO.sel=[];
+  openModal(`<div class="modalHead"><h2>Convidar colaborador</h2><button class="close" onclick="closeModal()">×</button></div><div class="sub">A pessoa recebe um convite. Quando aceitar, a publicação mostra os dois autores e aparece no perfil de vocês dois, com as mesmas curtidas e comentários.</div><input id="coQ" class="field" placeholder="Buscar pessoa" autocomplete="off" oninput="coPaint()"><div id="coList" class="cmPeopleList coList"></div><button id="coGo" class="primary" onclick="coSend()" disabled>Enviar convite</button>`);
+  coPaint();
+};
+window.coPaint=function(){
+  const x=postFind(CO.pid);const box=document.getElementById('coList');if(!x||!box)return;
+  const q=document.getElementById('coQ')?.value||'';const left=3-((x.collabs||[]).filter(u=>u!==x.ownerId).length+(x.collabPend||[]).length);
+  const list=candidates(x,q);
+  box.innerHTML=list.length?list.map(p=>`<button type="button" class="cmPersonRow coRow${CO.sel.includes(p.id)?' on':''}" onclick="coTog('${esc(p.id)}')"><img src="${esc(p.photo||avatar(p.name))}" alt=""><span><b>${esc(p.name)}</b><small>${esc((typeof personCity==='function'&&personCity(p))||p.city||'Mantiqueira')}</small></span><i class="coChk">${CO.sel.includes(p.id)?'✓':''}</i></button>`).join(''):`<div class="cmEmpty small"><b>Ninguém encontrado</b><span>Tente outro nome.</span></div>`;
+  const g=document.getElementById('coGo');if(g){g.disabled=!CO.sel.length;g.textContent=CO.sel.length?`Enviar convite (${CO.sel.length})`:'Enviar convite'}
+  const s=document.querySelector('#modal .sub');if(s&&left<3)s.dataset.left=left;
+};
+window.coTog=function(uid){const x=postFind(CO.pid);if(!x)return;const i=CO.sel.indexOf(uid);
+  if(i>=0)CO.sel.splice(i,1);else{const left=3-((x.collabs||[]).filter(u=>u!==x.ownerId).length+(x.collabPend||[]).length);if(CO.sel.length>=left){alert('Até 3 colaboradores por publicação.');return}CO.sel.push(uid)}coPaint()};
+window.coSend=async function(){
+  const x=postFind(CO.pid);if(!x||!CO.sel.length||!me?.id)return;const g=document.getElementById('coGo');if(g){g.disabled=true;g.textContent='Enviando…'}
+  try{
+    /* convite antigo recusado/removido: apaga antes para poder convidar de novo */
+    await sb.from('cm_post_collabs').delete().eq('post_id',String(x.id)).eq('owner_id',me.id).in('user_id',CO.sel).neq('status','accepted');
+    const {error}=await sb.from('cm_post_collabs').insert(CO.sel.map(u=>({post_id:String(x.id),owner_id:me.id,user_id:u,status:'pending'})));
+    if(error)throw error;
+    x.collabPend=[...new Set([...(x.collabPend||[]),...CO.sel])];try{POSTS.pend.set(String(x.id),x.collabPend)}catch(_){}
+    closeModal();shareToast(CO.sel.length>1?'Convites enviados 🤝':'Convite enviado 🤝');try{POSTS.sig='';postsLoad()}catch(_){}
+  }catch(e){if(g){g.disabled=false;g.textContent='Enviar convite'}alert(sqlMsg(e))}
+};
+window.coRemoveList=function(id){
+  const x=postFind(id);if(!x)return;const col=(x.collabs||[]).filter(u=>u!==x.ownerId),pend=x.collabPend||[];
+  openModal(`<div class="modalHead"><h2>Remover colaborador</h2><button class="close" onclick="closeModal()">×</button></div><div class="cmSheetList">${[...col.map(u=>[u,'Colaborando']),...pend.map(u=>[u,'Convite pendente'])].map(([u,st])=>row(ICO.rm,esc(pname(u)),st,`coRemove('${esc(id)}','${esc(u)}')`,'danger')).join('')}</div>`);
+};
+window.coRemove=async function(id,uid){
+  if(!confirm(`Remover ${pname(uid)} desta publicação?`))return;
+  try{const {error}=await sb.from('cm_post_collabs').delete().eq('post_id',String(id)).eq('user_id',uid).eq('owner_id',me.id);if(error)throw error;
+    const x=postFind(id);if(x){x.collabs=(x.collabs||[]).filter(u=>u!==uid);x.collabPend=(x.collabPend||[]).filter(u=>u!==uid)}
+    closeModal();shareToast('Colaborador removido');try{POSTS.sig='';postsLoad();renderFeed()}catch(_){}
+  }catch(e){alert(sqlMsg(e))}
+};
+window.coLeave=async function(id){
+  if(!confirm('Deixar de colaborar? A publicação sai do seu perfil.'))return;
+  try{const {error}=await sb.from('cm_post_collabs').update({status:'declined'}).eq('post_id',String(id)).eq('user_id',me.id);if(error)throw error;
+    const x=postFind(id);if(x)x.collabs=(x.collabs||[]).filter(u=>u!==me.id);
+    closeModal();shareToast('Você deixou de colaborar');try{POSTS.sig='';postsLoad();renderFeed()}catch(_){}
+  }catch(e){alert(sqlMsg(e))}
+};
+/* recusou o convite pela notificação: ok; agora a resposta mostra o erro certo do banco */
+const r0=window.cmCollabRespond;
+if(typeof r0==='function'){window.cmCollabRespond=async function(postId,status){
+  try{const {error}=await sb.from('cm_post_collabs').update({status}).eq('post_id',postId).eq('user_id',me.id).eq('status','pending');if(error)throw error;
+    shareToast(status==='accepted'?'Agora você é colaborador! 🤝':'Convite recusado');POSTS.sig='';postsLoad();if(typeof cmNotifLoad==='function')cmNotifLoad()}
+  catch(e){alert('Não foi possível responder: '+sqlMsg(e))}};
+  try{cmCollabRespond=window.cmCollabRespond}catch(_){}}
 })();
 </script>
 </body></html>
