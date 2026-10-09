@@ -12077,4 +12077,705 @@ try{if(typeof CFI!=='undefined'){CFI.music=CFI.music||'<svg viewBox="0 0 24 24" 
 window.__pk=PK;
 })();
 </script>
+<style id="ntcss">
+.cmDot.ntN{width:auto;height:17px;min-width:17px;padding:0 4px;top:3px;right:3px;border-radius:9px;font:800 10px/17px system-ui,-apple-system,sans-serif;color:#fff;text-align:center;font-style:normal;letter-spacing:0;box-sizing:border-box;pointer-events:none}
+.ntHead h2{display:flex;align-items:baseline;gap:8px}
+.ntHead h2 small{font-size:12.5px;font-weight:800;color:var(--green,#20df9a)}
+.ntAllBtn{align-self:flex-end;background:none;border:0;color:var(--green,#20df9a);font-weight:800;font-size:13px;padding:4px 2px 8px;margin:-4px 0 0;cursor:pointer}
+.ntAllBtn:disabled{color:rgba(255,255,255,.35);cursor:default}
+.ntRow{position:relative}
+.ntUnread{flex:0 0 auto;width:26px;height:26px;margin:0 -4px 0 -6px;border:0;background:none;display:grid;place-items:center;padding:0;cursor:pointer}
+.ntUnread i{width:9px;height:9px;border-radius:50%;background:#3b9eff;box-shadow:0 0 0 3px rgba(59,158,255,.18)}
+.ntUnread.hidden{display:none}
+.lightTheme .ntAllBtn:disabled{color:rgba(0,0,0,.3)}
+</style>
+<script id="ntjs">
+/* ===================== CENTRAL DE NOTIFICAÇÕES v2 =====================
+   Mesma tela de notificações (mesmo visual), agora com:
+   - contador com número no sininho
+   - marcar UMA como lida (tocar nela ou no pontinho) e marcar TODAS como lidas
+   - não marca tudo como lido sozinho ao abrir
+   - colaboração recusada, reação no bate-papo
+   As notificações continuam salvas no Supabase (cm_notifications). */
+(function(){
+if(typeof CM_NOTIF==='undefined'||typeof NOTIF_TXT==='undefined')return;
+Object.assign(NOTIF_TXT,{collab_declined:'recusou o convite para colaborar na sua publicação.',chat_reaction:'reagiu à sua mensagem:',comment_reply:'respondeu ao seu comentário:'});
+const NT={busy:false,groups:[]};
+const missing=e=>/does not exist|schema cache|relation|Could not find/i.test(String(e&&e.message||e||''));
+const person=uid=>uid===me?.id?{id:me.id,...profileData()}:(personById(uid)||{id:uid,name:'Alguém',photo:''});
+const ph=p=>esc(p.photo||avatar(p.name||'?'));
+function sectionOf(ts){const d=Date.now()-ts;if(d<864e5&&new Date(ts).toDateString()===new Date().toDateString())return 'Hoje';if(d<7*864e5)return 'Esta semana';if(d<30*864e5)return 'Este mês';return 'Anteriores'}
+function thumbOf(pid){const x=pid&&postFind(String(pid));if(!x)return '';const m=postMedia(x)[0];const u=m?(m.t==='video'?(m.th||x.thumb||''):m.u):'';return u?`<img class="ntThumb" src="${esc(u)}" alt="" loading="lazy">`:`<span class="ntThumb ntTxt">${esc(String(x.text||'').slice(0,40))}</span>`}
+
+/* ---------- contador (número no sininho) ---------- */
+window.cmNotifDots=function(){
+  const n=Math.max(0,CM_NOTIF.unread|0),t=n>9?'9+':String(n);
+  document.querySelectorAll('[data-notif-dot]').forEach(d=>{d.classList.toggle('hidden',!n);d.classList.toggle('ntN',!!n);d.textContent=n?t:'';d.setAttribute('aria-label',n?n+' não lidas':'')});
+  document.querySelectorAll('.bellDot').forEach(d=>d.style.display=n?'block':'');
+  const h=document.getElementById('ntHeadCount');if(h){h.textContent=n?(n===1?'1 nova':n+' novas'):'';}
+  const b=document.getElementById('ntAllBtn');if(b)b.disabled=!n;
+};
+try{cmNotifDots=window.cmNotifDots}catch(_){}
+
+async function markRead(ids){
+  ids=(ids||[]).filter(id=>{const n=CM_NOTIF.list.find(x=>x.id===id);return n&&!n.read_at});if(!ids.length)return true;
+  const now=new Date().toISOString();ids.forEach(id=>{const n=CM_NOTIF.list.find(x=>x.id===id);if(n)n.read_at=now});
+  CM_NOTIF.unread=Math.max(0,CM_NOTIF.unread-ids.length);cmNotifDots();paintRead();
+  try{const r=await sb.from('cm_notifications').update({read_at:now}).in('id',ids).eq('user_id',me.id);if(r.error)throw r.error;return true}
+  catch(_){ids.forEach(id=>{const n=CM_NOTIF.list.find(x=>x.id===id);if(n)n.read_at=null});CM_NOTIF.unread+=ids.length;cmNotifDots();paintRead();shareToast('Não foi possível marcar como lida agora.');return false}
+}
+function paintRead(){document.querySelectorAll('#notifList .ntRow[data-g]').forEach(r=>{const g=NT.groups[+r.dataset.g];if(!g)return;const un=g.ids.some(id=>{const n=CM_NOTIF.list.find(x=>x.id===id);return n&&!n.read_at});r.classList.toggle('new',un);r.querySelector('.ntUnread')?.classList.toggle('hidden',!un)})}
+window.cmNotifMarkGroup=function(gi,ev){if(ev){ev.stopPropagation();ev.preventDefault()}const g=NT.groups[gi];if(g)markRead(g.ids)};
+window.cmNotifMarkAll=async function(){
+  if(!me?.id)return;const b=document.getElementById('ntAllBtn');if(b)b.disabled=true;
+  const now=new Date().toISOString();
+  try{const r=await sb.from('cm_notifications').update({read_at:now}).eq('user_id',me.id).is('read_at',null);if(r.error)throw r.error;
+    CM_NOTIF.list.forEach(n=>{if(!n.read_at)n.read_at=now});CM_NOTIF.unread=0;cmNotifDots();paintRead();shareToast('Todas marcadas como lidas')}
+  catch(_){if(b)b.disabled=false;shareToast('Não foi possível marcar agora. Tente de novo.')}
+};
+
+/* ---------- lista ---------- */
+window.cmNotifLoad=async function(){
+  const el=document.getElementById('notifList');if(!el||!me?.id)return;
+  if(NT.busy){NT.again=true;return}NT.busy=true;
+  try{
+  let r=await sb.from('cm_notifications').select('id,actor_id,kind,story_id,post_id,created_at,read_at,extra').eq('user_id',me.id).order('created_at',{ascending:false}).limit(100);
+  if(r.error&&/extra/i.test(r.error.message||''))r=await sb.from('cm_notifications').select('id,actor_id,kind,story_id,post_id,created_at,read_at').eq('user_id',me.id).order('created_at',{ascending:false}).limit(100);
+  if(r.error){el.innerHTML=`<div class="cmEmpty small"><b>Sem notificações por enquanto</b><span>${missing(r.error)?'O administrador precisa rodar a atualização do banco (atualizacao-notificacoes.sql).':'Não foi possível carregar agora.'}</span><button class="secondary" style="margin-top:10px" onclick="cmNotifLoad()">Tentar de novo</button></div>`;return}
+  CM_NOTIF.list=(r.data||[]).sort((a,b)=>Date.parse(b.created_at)-Date.parse(a.created_at));
+  CM_NOTIF.unread=CM_NOTIF.list.filter(n=>!n.read_at).length;
+  try{const c=await sb.from('cm_notifications').select('id',{count:'exact',head:true}).eq('user_id',me.id).is('read_at',null);if(!c.error&&typeof c.count==='number')CM_NOTIF.unread=c.count}catch(_){}
+  cmNotifDots();
+  const miss=[...new Set(CM_NOTIF.list.map(n=>n.actor_id).filter(id=>id&&!personById(id)))];
+  if(miss.length){try{const pr=await sb.from('profiles').select('id,name,city,photo').in('id',miss);(pr.data||[]).forEach(p=>{if(!publicProfilesCache.some(x=>x.id===p.id))publicProfilesCache.push(p)})}catch(_){}}
+  if(CM_NOTIF.list.some(n=>n.post_id)&&!POSTS.loaded){try{await postsLoad()}catch(_){}}
+  let collabs=new Map();const inv=CM_NOTIF.list.filter(n=>n.kind==='collab_invite').map(n=>n.post_id);
+  if(inv.length){try{const c=await sb.from('cm_post_collabs').select('post_id,status').eq('user_id',me.id).in('post_id',inv);(c.data||[]).forEach(x=>collabs.set(String(x.post_id),x.status))}catch(_){}}
+  const groups=[];const byKey=new Map();
+  CM_NOTIF.list.forEach(n=>{const ts=Date.parse(n.created_at)||Date.now();const sec=sectionOf(ts);
+    if(n.kind==='post_like'||n.kind==='story_like'){const k=sec+'|'+n.kind+'|'+(n.post_id||n.story_id);const g=byKey.get(k);if(g){if(!g.actors.includes(n.actor_id))g.actors.push(n.actor_id);g.ids.push(n.id);return}const ng={n,sec,ts,actors:[n.actor_id],ids:[n.id]};byKey.set(k,ng);groups.push(ng);return}
+    groups.push({n,sec,ts,actors:[n.actor_id],ids:[n.id]})});
+  NT.groups=groups;
+  if(!groups.length){el.innerHTML=`<div class="cmEmpty small"><div class="cmEmptyIco">🔔</div><b>Nenhuma notificação</b><span>Quando alguém seguir você, curtir, comentar, marcar ou responder seu story, aparece aqui.</span></div>`;return}
+  let last='',html='';
+  groups.forEach((g,gi)=>{const n=g.n;if(g.sec!==last){html+=`<div class="ntSec">${g.sec}</div>`;last=g.sec}
+    const a=person(g.actors[0]);const others=g.actors.length-1;
+    const names=others===0?`<b>${esc(a.name)}</b>`:others===1?`<b>${esc(a.name)}</b> e <b>${esc(person(g.actors[1]).name)}</b>`:`<b>${esc(a.name)}</b>, <b>${esc(person(g.actors[1]).name)}</b> e mais ${others-1}`;
+    let txt=NOTIF_TXT[n.kind]||'interagiu com você.';if(others&&n.kind==='post_like')txt='curtiram sua publicação.';if(others&&n.kind==='story_like')txt='curtiram seu story.';
+    const ex=n.extra&&typeof PK!=='undefined'&&PK.cTokenLabel?PK.cTokenLabel(n.extra):n.extra;
+    const extra=ex?` <span class="ntExtra">${esc(ex)}</span>`:'';
+    const avs=others?`<span class="ntAvs"><img src="${ph(person(g.actors[1]))}" alt=""><img src="${ph(a)}" alt=""></span>`:`<img class="ntAv" src="${ph(a)}" alt="" onclick="event.stopPropagation();cmNotifMarkGroup(${gi});postOpenProfile('${esc(a.id)}')">`;
+    let right='';const st=collabs.get(String(n.post_id));
+    if(n.kind==='collab_invite')right=st==='pending'?`<div class="notifAct"><button class="cmBtn sm" onclick="event.stopPropagation();cmNotifMarkGroup(${gi});cmCollabRespond('${esc(n.post_id)}','accepted')">Aceitar</button><button class="secondary" onclick="event.stopPropagation();cmNotifMarkGroup(${gi});cmCollabRespond('${esc(n.post_id)}','declined')">Recusar</button></div>`:`<div class="notifAct small">${st==='accepted'?'✓ Aceito':st==='declined'?'Recusado':''}</div>`;
+    else if(n.kind==='follow'){const f=followCache.has(n.actor_id);right=`<button class="ntFollow${f?' on':''}" onclick="event.stopPropagation();cmNotifMarkGroup(${gi});toggleFollow('${esc(n.actor_id)}').then(()=>cmNotifLoad())">${f?'Seguindo':'Seguir de volta'}</button>`}
+    else if(n.post_id)right=thumbOf(n.post_id);
+    const un=g.ids.some(id=>{const z=CM_NOTIF.list.find(x=>x.id===id);return z&&!z.read_at});
+    html+=`<div class="ntRow${un?' new':''}" data-g="${gi}" onclick="cmNotifGo(${n.id})">${avs}<div class="ntBody">${names} ${esc(txt)}${extra} <small>${esc(timeAgo(g.ts))}</small></div>${right}<button type="button" class="ntUnread${un?'':' hidden'}" onclick="cmNotifMarkGroup(${gi},event)" aria-label="Marcar como lida" title="Marcar como lida"><i></i></button></div>`});
+  el.innerHTML=html;
+  }catch(e){el.innerHTML=`<div class="cmEmpty small"><b>Não foi possível carregar agora</b><span>Verifique a internet.</span><button class="secondary" style="margin-top:10px" onclick="cmNotifLoad()">Tentar de novo</button></div>`}
+  finally{NT.busy=false;if(NT.again){NT.again=false;setTimeout(()=>window.cmNotifLoad(),50)}}
+};
+try{cmNotifLoad=window.cmNotifLoad}catch(_){}
+
+/* ---------- abrir: marca só a que foi tocada ---------- */
+const go1=window.cmNotifGo;
+window.cmNotifGo=async function(id){
+  const n=(CM_NOTIF.list||[]).find(x=>x.id===id);if(!n)return;
+  const g=NT.groups.find(g=>g.ids.includes(id));markRead(g?g.ids:[id]);
+  if(n.kind==='chat_reaction'){const p=personById(n.actor_id);closeModal();if(p){currentPublicUser=p;go('conversation')}else postOpenProfile(n.actor_id);return}
+  if((n.kind==='collab_accepted'||n.kind==='collab_declined')&&n.post_id){closeModal();cmOpenPost(n.post_id);return}
+  if(n.kind==='comment_reply'&&n.post_id){closeModal();await cmOpenPost(n.post_id);setTimeout(()=>{try{cmCommentsOpen(n.post_id)}catch(_){}},350);return}
+  if(!n.post_id&&!n.story_id&&n.actor_id&&!/^(story_reply|follow|follow_request)$/.test(n.kind)){closeModal();postOpenProfile(n.actor_id);return}
+  return go1.apply(this,arguments);
+};
+try{cmNotifGo=window.cmNotifGo}catch(_){}
+
+window.cmNotifOpen=function(){
+  openModal(`<div class="modalHead ntHead"><h2>Notificações <small id="ntHeadCount"></small></h2><button class="close" onclick="closeModal()" aria-label="Fechar">×</button></div><button type="button" id="ntAllBtn" class="ntAllBtn" onclick="cmNotifMarkAll()" disabled>Marcar todas como lidas</button><div id="notifList" class="notifList ntList"><div class="chatSkel"></div><div class="chatSkel"></div><div class="chatSkel"></div></div><button class="secondary notifSettings" onclick="closeModal();settingsScreen()">⚙ Configurações</button>`);
+  document.getElementById('modal')?.classList.add('sheet','ntSheet');cmNotifDots();cmNotifLoad();
+};
+try{cmNotifOpen=window.cmNotifOpen}catch(_){}
+
+/* ---------- tempo real: chegou nova / lida em outro aparelho ---------- */
+function listen2(){
+  if(!me?.id||NT.ch||!sb?.channel)return;
+  try{NT.ch=sb.channel('cm-notif-up-'+me.id).on('postgres_changes',{event:'UPDATE',schema:'public',table:'cm_notifications',filter:`user_id=eq.${me.id}`},()=>{clearTimeout(NT.ct);NT.ct=setTimeout(()=>{if(typeof cmNotifCount==='function')cmNotifCount()},400)}).subscribe()}catch(_){}
+}
+const l0=window.cmNotifListen;
+window.cmNotifListen=function(){const r=l0&&l0.apply(this,arguments);listen2();return r};
+try{cmNotifListen=window.cmNotifListen}catch(_){}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&me?.id&&typeof cmNotifCount==='function')cmNotifCount()});
+
+/* ---------- convite de colaboração recusado / aceito (o banco também avisa; aqui é só reserva) ---------- */
+/* ---------- reação no bate-papo ---------- */
+const r0=window.cvxReact;
+if(typeof r0==='function'){window.cvxReact=async function(id,emo){
+  const m=(typeof CVX!=='undefined'&&CVX.msgs)?CVX.msgs.get(String(id)):null;const before=m&&CVX.rx.get(String(id))?.get(me?.id);
+  const r=await r0.apply(this,arguments);
+  try{const after=CVX.rx.get(String(id))?.get(me?.id);if(m&&m.sender_id&&m.sender_id!==me?.id&&after&&after!==before&&typeof cmNotify==='function'){const k='nt_rx_'+id;if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');cmNotify(m.sender_id,'chat_reaction',{extra:after})}}}catch(_){}
+  return r}}
+})();
+</script>
+<style id="svcss">
+.reel.social.ig .rsThumb,.reel.social.fb .rsThumb{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.35;filter:blur(1px)}
+.reelSocialBox .fb-video{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#000}
+.reelSocialBox .fb-video>span{max-width:100%;max-height:100%}
+.reelSocialBox .fb-video iframe{position:static!important;opacity:1!important;background:#000!important;max-width:100%}
+.rsBadge{position:absolute;left:20px;top:calc(env(safe-area-inset-top,0px) + 88px);z-index:3;display:inline-flex;align-items:center;gap:6px;max-width:calc(100% - 100px);padding:5px 10px 5px 7px;border-radius:999px;background:rgba(8,27,37,.72);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.14);color:#fff;font-size:11.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+.rsBadge em{font-style:normal;font-weight:600;opacity:.8;overflow:hidden;text-overflow:ellipsis}
+.rsBadge i{flex:0 0 auto;width:14px;height:14px;border-radius:4px}
+.rsBadge.ig i{background:radial-gradient(circle at 30% 107%,#fdf497 0,#fd5949 45%,#d6249f 60%,#285aeb 90%)}
+.rsBadge.fb i{background:#1877f2;border-radius:50%}
+.rsOpen{position:absolute;left:50%;transform:translateX(-50%);bottom:18px;z-index:3;padding:7px 14px;border-radius:999px;background:rgba(8,27,37,.72);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.14);color:#fff;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap}
+#reelErr a{color:#20df9a;font-weight:800;margin-left:4px}
+</style>
+<script id="svjs">
+/* ===================== VÍDEOS: INSTAGRAM + FACEBOOK (feed único) =====================
+   Usa a MESMA aba Vídeos e o MESMO botão ＋ que já existiam.
+   - Os links agora ficam salvos no Supabase (cm_social_videos) e aparecem para todo mundo
+     (antes ficavam só no celular de quem colou).
+   - Vídeos que chegam sozinhos pela função automática (contas autorizadas) entram no mesmo lugar.
+   - Facebook: player oficial (SDK do Facebook) com aviso de erro -> pula na hora.
+   - Instagram: incorporação oficial (/embed). Se não carregar em alguns segundos, pula.
+   - Selo discreto com a origem (Instagram / Facebook) em cada vídeo. */
+(function(){
+if(typeof socialFromUrl!=='function'||typeof rlSocialItems!=='function')return;
+const SV2={rows:[],loaded:0,table:true,loading:null,fb:null,fbFail:false,fbSeq:0};
+try{const c=JSON.parse(localStorage.getItem('cm_social_shared')||'[]');if(Array.isArray(c))SV2.rows=c}catch(_){}
+window.SV2=SV2;
+const missing=e=>/does not exist|schema cache|relation|Could not find/i.test(String(e&&e.message||e||''));
+function platOf(x){return x&&(x.kind==='ig'?'Instagram':x.kind==='fb'?'Facebook':'')}
+function fromRow(r){
+  const x=socialFromUrl(r.url,{title:r.title||'',city:r.city||'Mantiqueira',date:r.posted_at&&typeof newsDateText==='function'?newsDateText(new Date(r.posted_at)):''});
+  if(!x)return null;x.dbId=r.id;x.thumb=r.thumb||'';x.author=r.author||'';x.origin=r.origin||'manual';x.addedBy=r.added_by||'';
+  x.source=(x.author?(x.kind==='ig'?'@'+String(x.author).replace(/^@/,''):x.author)+' · ':'')+platOf(x);
+  if(!r.title)x.title=x.kind==='ig'?'Vídeo do Instagram':'Vídeo do Facebook';
+  return x;
+}
+/* ---------- carregar a lista compartilhada ---------- */
+async function load(force){
+  if(!SV2.table||typeof sb==='undefined'||!sb)return SV2.rows;
+  if(!force&&Date.now()-SV2.loaded<4*60*1000)return SV2.rows;
+  if(SV2.loading)return SV2.loading;
+  SV2.loading=(async()=>{try{
+    const r=await sb.from('cm_social_videos').select('id,url,platform,title,city,author,thumb,posted_at,origin,added_by,created_at').eq('status','ok').order('created_at',{ascending:false}).limit(300);
+    if(r.error){if(missing(r.error))SV2.table=false;return SV2.rows}
+    SV2.rows=r.data||[];SV2.loaded=Date.now();
+    try{localStorage.setItem('cm_social_shared',JSON.stringify(SV2.rows.slice(0,300)))}catch(_){}
+    return SV2.rows;
+  }catch(_){return SV2.rows}finally{SV2.loading=null}})();
+  return SV2.loading;
+}
+SV2.load=load;
+/* junta os vídeos do banco com os que já existiam (lista fixa, links locais, Dailymotion...) */
+const items0=window.rlSocialItems;
+window.rlSocialItems=function(){
+  const base=items0.apply(this,arguments);const block=rlBlocked();const seen=new Set(base.map(x=>x.youtubeId));
+  const extra=[];SV2.rows.forEach(r=>{const x=fromRow(r);if(x&&!block.has(x.youtubeId)&&!seen.has(x.youtubeId)){seen.add(x.youtubeId);extra.push(x)}});
+  /* os que vieram do banco ganham autor/miniatura também quando o mesmo link já estava salvo no aparelho */
+  const byId=new Map(SV2.rows.map(r=>{const x=fromRow(r);return x?[x.youtubeId,x]:null}).filter(Boolean));
+  base.forEach(b=>{const d=byId.get(b.youtubeId);if(d){b.dbId=d.dbId;b.thumb=b.thumb||d.thumb;b.source=d.source;b.author=d.author}});
+  return [...extra,...base];
+};
+try{rlSocialItems=window.rlSocialItems}catch(_){}
+
+/* ---------- abrir a aba: busca a lista e encaixa os novos ---------- */
+const setup0=window.setupVideoFeed;
+window.setupVideoFeed=function(){
+  const r=setup0.apply(this,arguments);
+  const before=new Set(SV2.rows.map(r=>r.id));
+  load(true).then(rows=>{if(!document.getElementById('reelsFeed')||RL.saved)return;if(rows.some(r=>!before.has(r.id))&&typeof reelMore==='function'){if(!RL.items.length)renderVideoFeed(false);else renderVideoFeed(true)}});
+  return r;
+};
+const refresh0=window.refreshVideos;
+if(typeof refresh0==='function'){window.refreshVideos=function(force,manual){load(!!manual);return refresh0.apply(this,arguments)};try{refreshVideos=window.refreshVideos}catch(_){}}
+
+/* ---------- selo da origem + miniatura enquanto carrega ---------- */
+const slide0=window.reelSlide;
+window.reelSlide=function(x,i){
+  let h=slide0.apply(this,arguments);
+  if(x&&(x.kind==='ig'||x.kind==='fb')){
+    const p=platOf(x);const who=x.author?(x.kind==='ig'?'@'+String(x.author).replace(/^@/,''):x.author):'';
+    const badge=`<span class="rsBadge ${x.kind}" aria-label="Vídeo do ${p}"><i></i>${esc(p)}${who?` <em>· ${esc(who)}</em>`:''}</span>`;
+    const th=x.thumb?`<img class="rsThumb" src="${esc(x.thumb)}" alt="" decoding="async" loading="lazy" onerror="this.remove()">`:'';
+    h=h.replace('<div class="reelSocialBox">',`<div class="reelSocialBox">${th}`).replace(/<\/section>$/,`${badge}<a class="rsOpen" href="${esc(x.url)}" target="_blank" rel="noopener">Abrir no ${esc(p)} ›</a></section>`);
+  }
+  return h;
+};
+try{reelSlide=window.reelSlide}catch(_){}
+
+/* ---------- Facebook: player oficial com eventos ---------- */
+function fbSdk(){
+  if(window.FB&&window.FB.XFBML)return Promise.resolve(window.FB);
+  if(SV2.fb)return SV2.fb;
+  SV2.fb=new Promise((res,rej)=>{
+    if(!document.getElementById('fb-root')){const d=document.createElement('div');d.id='fb-root';document.body.appendChild(d)}
+    const t=setTimeout(()=>{SV2.fbFail=true;rej(new Error('fb sdk timeout'))},9000);
+    const prev=window.fbAsyncInit;
+    window.fbAsyncInit=function(){try{prev&&prev()}catch(_){}try{FB.init({xfbml:false,version:'v21.0'})}catch(_){}clearTimeout(t);bindFb();res(window.FB)};
+    const s=document.createElement('script');s.async=true;s.defer=true;s.crossOrigin='anonymous';s.src='https://connect.facebook.net/pt_BR/sdk.js';
+    s.onerror=()=>{clearTimeout(t);SV2.fbFail=true;rej(new Error('fb sdk'))};document.head.appendChild(s);
+  });
+  SV2.fb.catch(()=>{SV2.fb=null});
+  return SV2.fb;
+}
+let fbBound=false;
+function bindFb(){
+  if(fbBound||!window.FB||!FB.Event)return;fbBound=true;
+  FB.Event.subscribe('xfbml.ready',msg=>{
+    if(!msg||msg.type!=='video')return;const el=document.getElementById(msg.id);if(!el)return;
+    const p=msg.instance;el._fbp=p;const sec=el.closest('.reel');const i=sec?+sec.dataset.i:-1;
+    const box=el.closest('.reelSocialBox');box&&box.classList.add('ready');
+    if(RL.cur===i){clearTimeout(RL.swd);try{RL.muted?p.mute():p.unmute()}catch(_){}try{p.play()}catch(_){}}
+    try{p.subscribe('startedPlaying',()=>{clearTimeout(RL.swd);document.getElementById('reelErr')?.classList.remove('on')})}catch(_){}
+    try{p.subscribe('error',()=>{if(RL.cur===i)socialFail(RL.items[i],true)})}catch(_){}
+    try{p.subscribe('finishedPlaying',()=>{if(RL.cur===i&&RL.autonext)reelNext()})}catch(_){}
+  });
+}
+function fbMount(x,box){
+  const id='fbv'+(++SV2.fbSeq);const w=Math.max(220,Math.round(box.clientWidth||360));
+  const d=document.createElement('div');d.className='fb-video';d.id=id;
+  d.setAttribute('data-href',x.url);d.setAttribute('data-width',String(w));d.setAttribute('data-show-text','false');d.setAttribute('data-autoplay','true');d.setAttribute('data-allowfullscreen','true');d.setAttribute('data-lazy','false');
+  box.appendChild(d);
+  try{FB.XFBML.parse(box)}catch(_){}
+}
+/* Instagram avisa quando a publicação desenhou (mensagem MEASURE do próprio embed) */
+window.addEventListener('message',ev=>{
+  if(!/(^|\.)instagram\.com$/.test((()=>{try{return new URL(ev.origin).hostname}catch(_){return ''}})()))return;
+  let d=ev.data;if(typeof d==='string'){try{d=JSON.parse(d)}catch(_){return}}
+  if(!d||d.type!=='MEASURE')return;
+  document.querySelectorAll('.reel.social.ig .reelSocialBox iframe').forEach(f=>{if(f.contentWindow===ev.source){f.closest('.reelSocialBox')?.classList.add('ready');const sec=f.closest('.reel');if(sec&&+sec.dataset.i===RL.cur)clearTimeout(RL.swd)}});
+});
+function socialFail(x,hard){
+  clearTimeout(RL.swd);if(!x||RL.items[RL.cur]!==x)return;
+  if(hard){const bad=rlGet('cm_reels_bad',[]);if(!bad.includes(x.youtubeId)){bad.push(x.youtubeId);rlSet('cm_reels_bad',bad.slice(-500))}
+    if(x.dbId&&typeof sb!=='undefined'&&sb){try{sb.rpc('cm_social_video_fail',{vid:x.dbId}).then(()=>{},()=>{})}catch(_){}}}
+  const e=document.getElementById('reelErr');
+  if(e){e.innerHTML=hard?`Este vídeo não pode ser exibido aqui. <a href="${esc(x.url)}" target="_blank" rel="noopener">Ver no ${esc(platOf(x))} ›</a>`:'Vídeo demorou para abrir. Indo para o próximo…';e.classList.add('on')}
+  setTimeout(()=>{if(RL.items[RL.cur]===x)reelNext()},hard?1400:900);
+}
+SV2.fail=socialFail;
+const play0=window.reelSocialPlay;
+window.reelSocialPlay=function(x){
+  clearTimeout(RL.swd);
+  if(!x||(x.kind!=='ig'&&x.kind!=='fb'))return play0.apply(this,arguments);
+  if(x.kind==='fb'&&!SV2.fbFail){
+    clearTimeout(RL.wd);clearTimeout(RL.wd2);clearTimeout(RL.wd3);
+    if(RL.ifr)reelCmd('pauseVideo');RL.pending=null;RL.state=-1;
+    document.getElementById('reelStage')?.classList.remove('on');
+    const sec=document.querySelector(`.reel[data-i="${RL.cur}"]`);reelSocialUnmount(sec);
+    document.querySelectorAll('.reel.social .fb-video').forEach(el=>{if(!sec||!sec.contains(el)){try{el._fbp&&el._fbp.pause()}catch(_){}el.remove()}});
+    const box=sec?.querySelector('.reelSocialBox');if(!box)return;
+    const ex=box.querySelector('.fb-video');
+    if(ex){if(ex._fbp){try{ex._fbp.play()}catch(_){}}return}
+    RL.swd=setTimeout(()=>socialFail(x,false),12000);
+    fbSdk().then(()=>{if(RL.items[RL.cur]===x&&!box.querySelector('.fb-video,iframe'))fbMount(x,box)}).catch(()=>{if(RL.items[RL.cur]===x&&!box.querySelector('iframe')){play0.call(this,x)}});
+    return;
+  }
+  /* pausa um vídeo do Facebook que estava tocando em outro cartão */
+  document.querySelectorAll('.reel.social .fb-video').forEach(el=>{try{el._fbp&&el._fbp.pause()}catch(_){}el.remove()});
+  const r=play0.apply(this,arguments);
+  const box=document.querySelector(`.reel[data-i="${RL.cur}"] .reelSocialBox`);
+  if(box&&!box.classList.contains('ready'))RL.swd=setTimeout(()=>socialFail(x,false),x.kind==='ig'?10000:12000);
+  return r;
+};
+try{reelSocialPlay=window.reelSocialPlay}catch(_){}
+/* ao trocar para um vídeo que não é do Facebook, para o player do Facebook */
+const unm0=window.reelSocialUnmount;
+window.reelSocialUnmount=function(except){
+  document.querySelectorAll('.reel.social .fb-video').forEach(el=>{const s=el.closest('.reel');if(!except||s!==except){try{el._fbp&&el._fbp.pause()}catch(_){}el.remove();s?.querySelector('.reelSocialBox')?.classList.remove('ready')}});
+  return unm0.apply(this,arguments);
+};
+try{reelSocialUnmount=window.reelSocialUnmount}catch(_){}
+const stop0=window.reelStop;
+window.reelStop=function(){clearTimeout(RL.swd);document.querySelectorAll('.reel.social .fb-video').forEach(el=>{try{el._fbp&&el._fbp.pause()}catch(_){}});return stop0.apply(this,arguments)};
+try{reelStop=window.reelStop}catch(_){}
+/* som: o botão 🔊 também vale para o Facebook */
+['reelUnmute','reelMute'].forEach(fn=>{const f0=window[fn];if(typeof f0!=='function')return;window[fn]=function(){const r=f0.apply(this,arguments);try{const el=document.querySelector(`.reel[data-i="${RL.cur}"] .fb-video`);if(el&&el._fbp){RL.muted?el._fbp.mute():el._fbp.unmute()}}catch(_){}return r}});
+
+/* ---------- adicionar link (mesma janela ＋ de antes) — agora vai para todo mundo ---------- */
+const save0=window.reelSaveSocial;
+window.reelSaveSocial=async function(){
+  const url=(document.getElementById('socialUrl')?.value||'').trim();
+  const city=(document.getElementById('socialCity')?.value||'').trim(),title=(document.getElementById('socialTitle')?.value||'').trim();
+  const x=socialFromUrl(url,{city,title});
+  if(!x||!me?.id||!SV2.table)return save0.apply(this,arguments);
+  const btn=document.querySelector('#modal .primary');if(btn){btn.disabled=true;btn.textContent='Salvando…'}
+  const row={url:x.url,platform:x.kind==='ig'?'instagram':'facebook',title:title||null,city:(typeof officialCity==='function'&&officialCity(city))||city||null,origin:'manual',added_by:me.id};
+  let ok=false,dup=false;
+  try{const r=await sb.from('cm_social_videos').insert(row).select('id,url,platform,title,city,author,thumb,posted_at,origin,added_by,created_at').single();
+    if(r.error){if(/duplicate|unique/i.test(r.error.message||''))dup=true;else if(missing(r.error))SV2.table=false;else throw r.error}
+    else{ok=true;SV2.rows.unshift(r.data);try{localStorage.setItem('cm_social_shared',JSON.stringify(SV2.rows.slice(0,300)))}catch(_){}}}
+  catch(_){}
+  const res=save0.apply(this,arguments);/* mantém o comportamento antigo (aparece na hora e fica no aparelho) */
+  if(ok)shareToast('Vídeo adicionado para todos ✅');else if(dup)shareToast('Esse vídeo já está no feed de todos ✅');else shareToast('Vídeo adicionado só neste aparelho (sem conexão com o banco).');
+  return res;
+};
+try{reelSaveSocial=window.reelSaveSocial}catch(_){}
+
+/* ---------- menu do vídeo: quem adicionou (ou o administrador) pode tirar para todos ---------- */
+const menu0=window.reelMenu;
+if(typeof menu0==='function'){window.reelMenu=function(i){
+  const r=menu0.apply(this,arguments);const x=RL.items[i];
+  if(x&&x.dbId&&me?.id&&(x.addedBy===me.id||(typeof cmIsAdmin==='function'&&cmIsAdmin()))){
+    const sh=document.getElementById('reelSheet');const cancel=sh&&sh.querySelector('.rmCancel');
+    if(cancel&&!sh.querySelector('.rsDel'))cancel.insertAdjacentHTML('beforebegin',`<button class="rmRow rsDel danger" type="button" onclick="SV2.remove(${i})"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></i><span><b>Remover do feed de todos</b><small>Tira este vídeo da aba Vídeos</small></span></button>`);
+  }
+  return r}}
+SV2.remove=async function(i){
+  const x=RL.items[i];if(!x||!x.dbId)return;if(!confirm('Remover este vídeo do feed de todos?'))return;
+  try{const r=await sb.from('cm_social_videos').delete().eq('id',x.dbId).select('id');if(r.error)throw r.error;if(!r.data||!r.data.length)throw new Error('sem permissão');
+    SV2.rows=SV2.rows.filter(z=>z.id!==x.dbId);try{localStorage.setItem('cm_social_shared',JSON.stringify(SV2.rows))}catch(_){}
+    const l=rlGet('cm_social_videos',[]).filter(v=>socialFromUrl(v.url)?.youtubeId!==x.youtubeId);rlSet('cm_social_videos',l);
+    const h=rlGet('cm_reels_hidden',[]);h.push(x.youtubeId);rlSet('cm_reels_hidden',h.slice(-500));
+    document.getElementById('reelSheet')?.remove();shareToast('Vídeo removido');reelNext();
+  }catch(_){shareToast('Não foi possível remover agora.')}
+};
+})();
+</script>
+<style id="cfxcss">
+.stCam canvas.cfxOut{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+.stCam video.cfxHide{opacity:0!important;pointer-events:none}
+.cfxRow{display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -20px 10px;padding:4px calc(50% - 30px) 2px;touch-action:pan-x}
+.cfxRow::-webkit-scrollbar{display:none}
+.cfxIt{flex:0 0 auto;width:60px;display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:0;padding:0;color:#fff;scroll-snap-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cfxBall{position:relative;width:50px;height:50px;border-radius:50%;display:grid;place-items:center;border:2px solid rgba(255,255,255,.35);box-shadow:0 4px 14px rgba(0,0,0,.35);transition:transform .18s ease,border-color .18s ease}
+.cfxBall svg{width:22px;height:22px;color:#fff;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45))}
+.cfxIt small{font-size:10.5px;font-weight:700;opacity:.75;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.7);max-width:66px;overflow:hidden;text-overflow:ellipsis}
+.cfxIt.on .cfxBall{transform:scale(1.12);border:3px solid #fff}
+.cfxIt.on small{opacity:1}
+.cfxFaceTag{position:absolute;right:-2px;bottom:-2px;width:16px;height:16px;border-radius:50%;background:#20df9a;border:2px solid rgba(0,0,0,.55)}
+.cfxFaceTag::after{content:"";position:absolute;inset:3px;border-radius:50%;border:1.5px solid #052018;border-top-color:transparent}
+.cfxName{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);z-index:4;color:#fff;font-weight:800;font-size:22px;letter-spacing:.3px;text-shadow:0 2px 12px rgba(0,0,0,.55);opacity:0;pointer-events:none}
+.cfxName.go{animation:cfxName 1.1s ease forwards}
+@keyframes cfxName{0%{opacity:0;transform:translate(-50%,-40%)}15%{opacity:1;transform:translate(-50%,-50%)}75%{opacity:1}100%{opacity:0}}
+.cfxLoad{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);z-index:4;display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:999px;background:rgba(8,27,37,.72);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;font-weight:700;font-size:13px}
+.cfxLoad i{width:16px;height:16px;border-radius:50%;border:2.5px solid rgba(255,255,255,.3);border-top-color:#20df9a;animation:cfxSpin .8s linear infinite}
+@keyframes cfxSpin{to{transform:rotate(360deg)}}
+.cfxHint{position:absolute;left:50%;top:22%;transform:translateX(-50%);z-index:4;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff;font-size:13px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.cfxHint.on{opacity:1}
+</style>
+<script id="cfxjs">
+/* ===================== CÂMERA DO STORY: EFEITOS AO VIVO (igual ao Instagram) =====================
+   - Fileira de efeitos acima de FOTO / VÍDEO / BOOMERANG. Toque ou arraste a tela para o lado para trocar.
+   - O efeito aparece na hora na câmera e fica GRAVADO na foto, no vídeo e no boomerang.
+   - Efeitos de cor/estilo: WebGL (leve, roda liso).
+   - Efeitos de rosto: reconhecimento de rosto do Google (MediaPipe Face Mesh), carregado só quando
+     a pessoa escolhe um efeito de rosto (não pesa para quem não usa).
+   Como funciona: com um efeito ligado, a câmera passa por um "quadro" (canvas) que recebe o id stCamV.
+   Foto, vídeo e boomerang continuam usando o mesmo código de antes — só que agora leem o quadro com efeito. */
+(function(){
+if(typeof CAM==='undefined'||typeof window.stCamPaintBot!=='function')return;
+const FM_BASE='https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/';
+const MAXDIM=1280;
+const S=(p,sw)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw||2}" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+/* id do shader: 0 normal, 1 vívido, 2 serra, 3 p&b, 4 vhs, 5 sonho, 6 frio, 7 neon, 8 arco-íris, 9 espelho, 10 foco, 11 pele suave */
+const FX=[
+  {id:'normal',name:'Normal',sh:0,bg:'linear-gradient(135deg,#2b3a44,#11202a)',ic:S('<circle cx="12" cy="12" r="7"/>')},
+  {id:'vivido',name:'Vívido',sh:1,bg:'linear-gradient(135deg,#ff5f6d,#ffc371)',ic:S('<path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3.5"/>')},
+  {id:'serra',name:'Serra',sh:2,bg:'linear-gradient(135deg,#f7b733,#fc4a1a)',ic:S('<path d="M3 19l6-9 4 5 3-3 5 7z"/>')},
+  {id:'pele',name:'Pele suave',sh:11,bg:'linear-gradient(135deg,#ffd1dc,#f7a8b8)',ic:S('<path d="M12 3c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11z"/>')},
+  {id:'oculos',name:'Óculos',sh:0,face:'glasses',bg:'linear-gradient(135deg,#232526,#5b6770)',ic:S('<circle cx="7" cy="13" r="3.5"/><circle cx="17" cy="13" r="3.5"/><path d="M10.5 13h3M3 11l1-3M21 11l-1-3"/>')},
+  {id:'cachorro',name:'Cachorrinho',sh:1,face:'dog',bg:'linear-gradient(135deg,#c79a6b,#7b4b2a)',ic:S('<path d="M5 5c-2 2-2 7 0 9M19 5c2 2 2 7 0 9"/><circle cx="12" cy="13" r="6"/><path d="M11 14h2"/>')},
+  {id:'gatinho',name:'Gatinho',sh:0,face:'cat',bg:'linear-gradient(135deg,#ffafbd,#c9a7eb)',ic:S('<path d="M5 4l3 5M19 4l-3 5"/><circle cx="12" cy="14" r="6"/><path d="M4 15h4M16 15h4"/>')},
+  {id:'coroa',name:'Coroa',sh:2,face:'crown',bg:'linear-gradient(135deg,#f9d423,#e65c00)',ic:S('<path d="M3 8l4 4 5-7 5 7 4-4-2 11H5z"/>')},
+  {id:'coracoes',name:'Corações',sh:1,face:'hearts',bg:'linear-gradient(135deg,#ff6a88,#ff99ac)',ic:S('<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>')},
+  {id:'make',name:'Make leve',sh:11,face:'blush',bg:'linear-gradient(135deg,#f093fb,#f5576c)',ic:S('<path d="M8 15c1.5 2 6.5 2 8 0"/><circle cx="7" cy="11" r="2"/><circle cx="17" cy="11" r="2"/>')},
+  {id:'bigode',name:'Bigode',sh:0,face:'stache',bg:'linear-gradient(135deg,#8e9eab,#3a4750)',ic:S('<path d="M4 13c2 2 5 2 8-1 3 3 6 3 8 1-2 0-4-3-8-1-4-2-6 1-8 1z"/>')},
+  {id:'pb',name:'P&B',sh:3,bg:'linear-gradient(135deg,#eee,#333)',ic:S('<circle cx="12" cy="12" r="8"/><path d="M12 4v16" stroke-width="2"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/>')},
+  {id:'retro',name:'Retrô VHS',sh:4,bg:'linear-gradient(135deg,#41295a,#2f0743)',ic:S('<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="8.5" cy="12" r="2"/><circle cx="15.5" cy="12" r="2"/>')},
+  {id:'sonho',name:'Sonho',sh:5,bg:'linear-gradient(135deg,#a1c4fd,#c2e9fb)',ic:S('<path d="M7 18a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.5A3.5 3.5 0 0 1 17 18z"/>')},
+  {id:'brilhos',name:'Brilhos',sh:1,over:'sparkle',bg:'linear-gradient(135deg,#fceabb,#f8b500)',ic:S('<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2 2.2.8-2.2.8L19 22l-.8-2.2-2.2-.8 2.2-.8z"/>')},
+  {id:'neon',name:'Neon',sh:7,bg:'linear-gradient(135deg,#00f260,#0575e6)',ic:S('<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>')},
+  {id:'arcoiris',name:'Arco-íris',sh:8,bg:'linear-gradient(135deg,#ff0080,#ff8c00,#40e0d0,#7b68ee)',ic:S('<path d="M3 17a9 9 0 0 1 18 0M6 17a6 6 0 0 1 12 0M9 17a3 3 0 0 1 6 0"/>')},
+  {id:'frio',name:'Frio',sh:6,bg:'linear-gradient(135deg,#83a4d4,#b6fbff)',ic:S('<path d="M12 2v20M4 6l16 12M20 6L4 18"/>')},
+  {id:'foco',name:'Foco',sh:10,bg:'radial-gradient(circle,#fff 0 22%,#7a8a96 60%,#33424d)',ic:S('<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="2 3"/>')},
+  {id:'espelho',name:'Espelho',sh:9,bg:'linear-gradient(90deg,#4facfe 50%,#00f2fe 50%)',ic:S('<path d="M12 3v18M8 7l-4 5 4 5M16 7l4 5-4 5"/>')}
+];
+const ST={i:0,on:false,gl:null,raf:0,vfc:0,fm:null,fmState:'',lm:null,lmS:null,lmT:0,busy:false,t0:performance.now(),sp:[],noFaceT:0};
+window.CFX=ST;ST.list=FX;
+const cur=()=>FX[ST.i]||FX[0];
+
+/* ---------------- WebGL ---------------- */
+const VS='attribute vec2 p;varying vec2 v_uv;void main(){v_uv=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0.,1.);}';
+const FS=`precision mediump float;
+uniform sampler2D u_tex;uniform vec2 u_px;uniform float u_t;uniform int u_mode;varying vec2 v_uv;
+float luma(vec3 c){return dot(c,vec3(.299,.587,.114));}
+vec3 sat(vec3 c,float s){return mix(vec3(luma(c)),c,s);}
+float rnd(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
+vec3 T(vec2 uv){return texture2D(u_tex,clamp(uv,0.001,.999)).rgb;}
+vec3 blur8(vec2 uv,float r){vec2 d=u_px*r;return (T(uv+vec2(d.x,0.))+T(uv-vec2(d.x,0.))+T(uv+vec2(0.,d.y))+T(uv-vec2(0.,d.y))+T(uv+d*.7)+T(uv-d*.7)+T(uv+vec2(d.x,-d.y)*.7)+T(uv+vec2(-d.x,d.y)*.7))/8.;}
+void main(){
+  vec2 uv=v_uv;vec3 c;
+  if(u_mode==9&&uv.x>.5)uv.x=1.-uv.x;
+  if(u_mode==4){float w=sin(uv.y*220.+u_t*7.)*.0018+(rnd(vec2(floor(uv.y*60.),floor(u_t*12.)))-.5)*.004;
+    c=vec3(T(uv+vec2(.0045+w,0.)).r,T(uv+vec2(w,0.)).g,T(uv-vec2(.0045-w,0.)).b);
+    c*=.88+.12*sin(uv.y*1100.);c+=(rnd(uv*vec2(731.,913.)+u_t)-.5)*.09;c=sat(c,.75);c=c*vec3(1.07,.98,.88)+vec3(.03,.0,.04);
+  }else c=T(uv);
+  if(u_mode==1){c=sat((c-.5)*1.1+.5,1.38);}
+  else if(u_mode==2){c=c*vec3(1.09,1.0,.85)+vec3(.035,.015,0.);c=sat((c-.5)*1.06+.5,1.18);}
+  else if(u_mode==3){float l=smoothstep(.04,.96,luma(c));c=vec3(l);}
+  else if(u_mode==5){vec3 b=blur8(uv,9.);c=mix(c,1.-(1.-c)*(1.-b),.55);c=sat(c,.82)+vec3(.05,.02,.07);}
+  else if(u_mode==6){c=c*vec3(.88,1.0,1.12)+vec3(0.,.01,.03);c=sat(c,1.05);}
+  else if(u_mode==7){vec2 d=u_px*1.5;
+    float tl=luma(T(uv+vec2(-d.x,-d.y))),tc=luma(T(uv+vec2(0.,-d.y))),tr=luma(T(uv+vec2(d.x,-d.y))),ml=luma(T(uv+vec2(-d.x,0.))),mr=luma(T(uv+vec2(d.x,0.))),bl=luma(T(uv+vec2(-d.x,d.y))),bc=luma(T(uv+vec2(0.,d.y))),br=luma(T(uv+vec2(d.x,d.y)));
+    float gx=-tl-2.*ml-bl+tr+2.*mr+br,gy=-tl-2.*tc-tr+bl+2.*bc+br;float e=smoothstep(.12,.55,sqrt(gx*gx+gy*gy));
+    vec3 nc=.55+.45*cos(6.2831*(uv.y*.8+uv.x*.3+u_t*.12+vec3(0.,.33,.67)));c=c*.22+nc*e*1.6;}
+  else if(u_mode==8){vec3 rb=.5+.5*cos(6.2831*(uv.y*.9-u_t*.12+vec3(0.,.33,.67)));c=mix(c,clamp(c*rb*1.7,0.,1.),.42);}
+  else if(u_mode==10){float d=distance(uv,vec2(.5,.45));float k=smoothstep(.22,.62,d);if(k>.01){vec3 b=(blur8(uv,6.*k+1.)+blur8(uv,12.*k+1.))*.5;c=mix(c,b,k);}c*=1.-.35*smoothstep(.45,.9,d);}
+  else if(u_mode==11){vec3 b=(blur8(uv,2.5)+blur8(uv,5.))*.5;float k=1.-smoothstep(.035,.14,length(c-b));c=mix(c,b,k*.8);c=pow(c,vec3(.93))*vec3(1.02,1.0,.99);}
+  gl_FragColor=vec4(clamp(c,0.,1.),1.);
+}`;
+function glInit(cv){
+  const gl=cv.getContext('webgl',{alpha:false,antialias:false,preserveDrawingBuffer:true,premultipliedAlpha:false})||cv.getContext('experimental-webgl',{alpha:false,preserveDrawingBuffer:true});
+  if(!gl)return null;
+  const sh=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o};
+  const pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,VS));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw new Error('link');gl.useProgram(pr);
+  const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const pl=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(pl);gl.vertexAttribPointer(pl,2,gl.FLOAT,false,0,0);
+  const tx=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tx);
+  [[gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]].forEach(([k,v])=>gl.texParameteri(gl.TEXTURE_2D,k,v));
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
+  return {gl,pr,u:{px:gl.getUniformLocation(pr,'u_px'),t:gl.getUniformLocation(pr,'u_t'),mode:gl.getUniformLocation(pr,'u_mode'),tex:gl.getUniformLocation(pr,'u_tex')}};
+}
+
+/* ---------------- elementos ---------------- */
+function els(){const box=document.getElementById('stCam');if(!box)return null;
+  let out=box.querySelector('canvas.cfxOut');
+  if(!out){out=document.createElement('canvas');out.className='cfxOut';out.setAttribute('aria-hidden','true');const v0=box.querySelector('video#stCamV,video#stCamVraw');if(v0)box.insertBefore(out,v0.nextSibling);else box.prepend(out)}
+  const v=box.querySelector('video#stCamVraw')||box.querySelector('video#stCamV');
+  return {box,out,v};
+}
+function sizeFor(v){const vw=v.videoWidth||0,vh=v.videoHeight||0;if(!vw||!vh)return null;const k=Math.min(1,MAXDIM/Math.max(vw,vh));return {w:Math.round(vw*k/2)*2,h:Math.round(vh*k/2)*2}}
+/* liga o quadro com efeito: o canvas vira "stCamV" para foto/vídeo/boomerang */
+function activate(){
+  const E=els();if(!E)return;const {box,out,v}=E;
+  if(!v||!CAM.stream){return}
+  const sz=sizeFor(v);if(!sz){v.addEventListener('loadedmetadata',()=>{if(ST.i)activate()},{once:true});return}
+  if(out.width!==sz.w||out.height!==sz.h){out.width=sz.w;out.height=sz.h;ST.glc=null}
+  if(!ST.glc){ST.glc=document.createElement('canvas');ST.glc.width=sz.w;ST.glc.height=sz.h;try{ST.gl=glInit(ST.glc)}catch(e){console.warn('cfx gl',e);ST.gl=null}}
+  if(!ST.gl&&cur().sh){shareToast('Este celular não consegue mostrar efeitos ao vivo.');select(0,true);return}
+  ST.ctx=out.getContext('2d',{alpha:false});
+  try{Object.defineProperty(out,'videoWidth',{configurable:true,get:()=>out.width});Object.defineProperty(out,'videoHeight',{configurable:true,get:()=>out.height})}catch(_){}
+  if(v.id==='stCamV'){v.id='stCamVraw';out.id='stCamV'}
+  out.classList.toggle('mirror',CAM.facing==='user');out.style.display='block';v.classList.add('cfxHide');
+  ST.on=true;ST.v=v;ST.out=out;loop();
+}
+function deactivate(){
+  ST.on=false;cancelAnimationFrame(ST.raf);ST.raf=0;
+  const box=document.getElementById('stCam');if(!box)return;
+  const v=box.querySelector('video#stCamVraw'),out=box.querySelector('canvas.cfxOut');
+  if(out){if(out.id==='stCamV')out.id='';out.style.display='none'}
+  if(v){v.id='stCamV';v.classList.remove('cfxHide')}
+}
+
+/* ---------------- desenho de cada quadro ---------------- */
+function loop(){
+  cancelAnimationFrame(ST.raf);
+  const step=()=>{if(!ST.on)return;try{frame()}catch(e){console.warn('cfx',e)}ST.raf=requestAnimationFrame(step)};
+  ST.raf=requestAnimationFrame(step);
+}
+function frame(){
+  const v=ST.v,out=ST.out,ctx=ST.ctx;if(!v||!out||!ctx||!document.body.contains(out)){ST.on=false;return}
+  if(v.readyState<2)return;
+  /* boomerang já capturou as imagens e está montando o vídeo: pausa o efeito ao vivo para não pesar */
+  if(window.PK&&PK.boomBusy&&!document.getElementById('stShutter')?.classList.contains('rec'))return;
+  const fx=cur(),W=out.width,H=out.height,t=(performance.now()-ST.t0)/1000;
+  if(fx.sh&&ST.gl){const {gl,u}=ST.gl;
+    gl.viewport(0,0,W,H);
+    try{gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,v)}catch(_){ctx.drawImage(v,0,0,W,H);return}
+    gl.uniform2f(u.px,1/W,1/H);gl.uniform1f(u.t,t);gl.uniform1i(u.mode,fx.sh);gl.uniform1i(u.tex,0);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);ctx.drawImage(ST.glc,0,0,W,H);
+  }else ctx.drawImage(v,0,0,W,H);
+  if(fx.face){faceTick(v);const L=smoothLm();if(L){if(ST.noFaceT){ST.noFaceT=0;document.getElementById('cfxHint')?.classList.remove('on')}try{drawFace(ctx,fx.face,L,W,H,t)}catch(e){}}else faceHint()}
+  if(fx.over==='sparkle')sparkles(ctx,W,H,t);
+}
+
+/* ---------------- rosto (MediaPipe Face Mesh) ---------------- */
+function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.crossOrigin='anonymous';s.async=true;s.onload=res;s.onerror=()=>rej(new Error('script'));document.head.appendChild(s)})}
+async function fmReady(){
+  if(ST.fm&&ST.fmState==='ok')return ST.fm;
+  if(ST.fmP)return ST.fmP;
+  ST.fmState='loading';showLoad(true);
+  ST.fmP=(async()=>{
+    if(!window.FaceMesh)await loadScript(FM_BASE+'face_mesh.js');
+    const fm=new window.FaceMesh({locateFile:f=>FM_BASE+f});
+    fm.setOptions({maxNumFaces:1,refineLandmarks:false,minDetectionConfidence:.5,minTrackingConfidence:.5,selfieMode:false});
+    fm.onResults(r=>{const l=r&&r.multiFaceLandmarks&&r.multiFaceLandmarks[0];ST.lm=l&&l.length>=468?l:null;ST.lmT=performance.now()});
+    if(fm.initialize)await fm.initialize();
+    ST.fm=fm;ST.fmState='ok';return fm;
+  })();
+  try{return await ST.fmP}
+  catch(e){ST.fmState='fail';ST.fm=null;throw e}
+  finally{ST.fmP=null;showLoad(false)}
+}
+function faceTick(v){
+  if(ST.fmState!=='ok'||!ST.fm||ST.busy)return;
+  ST.busy=true;const t0=performance.now();
+  Promise.resolve().then(()=>ST.fm.send({image:v})).catch(()=>{}).finally(()=>{ST.busy=false;ST.fmMs=performance.now()-t0});
+}
+function smoothLm(){
+  const l=ST.lm;if(!l||performance.now()-ST.lmT>700){ST.lmS=null;return null}
+  if(!ST.lmS||ST.lmS.length!==l.length){ST.lmS=l.map(p=>({x:p.x,y:p.y,z:p.z||0}));return ST.lmS}
+  const a=.55;for(let i=0;i<l.length;i++){const s=ST.lmS[i],p=l[i];s.x+=(p.x-s.x)*a;s.y+=(p.y-s.y)*a}
+  return ST.lmS;
+}
+function faceHint(){
+  if(ST.fmState!=='ok')return;ST.noFaceT=ST.noFaceT||performance.now();
+  const h=document.getElementById('cfxHint');if(h)h.classList.toggle('on',performance.now()-ST.noFaceT>900);
+}
+function geo(L,W,H){
+  const P=i=>({x:L[i].x*W,y:L[i].y*H});
+  const eR=P(33),eL=P(263),eRi=P(133),eLi=P(362);
+  const ang=Math.atan2(eL.y-eR.y,eL.x-eR.x);
+  const fw=Math.hypot(P(454).x-P(234).x,P(454).y-P(234).y);
+  const up={x:Math.sin(ang),y:-Math.cos(ang)};
+  return {P,eR,eL,eRi,eLi,ang,fw,up,top:P(10),nose:P(1),noseB:P(2),chin:P(152),mid:{x:(eR.x+eL.x)/2,y:(eR.y+eL.y)/2}};
+}
+function heart(ctx,x,y,s,col){ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.beginPath();ctx.moveTo(0,.35);ctx.bezierCurveTo(-.9,-.3,-.45,-1,0,-.45);ctx.bezierCurveTo(.45,-1,.9,-.3,0,.35);ctx.fillStyle=col;ctx.fill();ctx.restore()}
+function drawFace(ctx,kind,L,W,H,t){
+  const g=geo(L,W,H),{P,ang,fw,up}=g;
+  ctx.save();
+  if(kind==='glasses'){
+    ctx.translate(g.mid.x,g.mid.y);ctx.rotate(ang);
+    const w=fw*.98,r=w*.2,dx=w*.25;
+    const lens=x=>{ctx.beginPath();ctx.ellipse(x,r*.05,r*1.05,r*.82,0,0,Math.PI*2);const gr=ctx.createLinearGradient(0,-r,0,r);gr.addColorStop(0,'rgba(20,24,30,.92)');gr.addColorStop(1,'rgba(55,62,74,.88)');ctx.fillStyle=gr;ctx.fill();ctx.lineWidth=r*.16;ctx.strokeStyle='#0b0d10';ctx.stroke();
+      ctx.beginPath();ctx.ellipse(x-r*.35,-r*.3,r*.32,r*.14,-.5,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.28)';ctx.fill()};
+    lens(-dx);lens(dx);
+    ctx.beginPath();ctx.moveTo(-dx+r*1.0,-r*.15);ctx.quadraticCurveTo(0,-r*.55,dx-r*1.0,-r*.15);ctx.lineWidth=r*.18;ctx.strokeStyle='#0b0d10';ctx.stroke();
+    ctx.beginPath();ctx.moveTo(-dx-r*1.02,-r*.2);ctx.lineTo(-w*.52,-r*.45);ctx.moveTo(dx+r*1.02,-r*.2);ctx.lineTo(w*.52,-r*.45);ctx.stroke();
+  }else if(kind==='dog'){
+    const ear=(side)=>{const base={x:g.top.x+Math.cos(ang)*fw*.42*side+up.x*fw*.02,y:g.top.y+Math.sin(ang)*fw*.42*side+up.y*fw*.02};
+      ctx.save();ctx.translate(base.x,base.y);ctx.rotate(ang+side*.35);
+      ctx.beginPath();ctx.ellipse(side*fw*.05,fw*.2,fw*.15,fw*.3,side*.15,0,Math.PI*2);ctx.fillStyle='#8a5a34';ctx.fill();
+      ctx.beginPath();ctx.ellipse(side*fw*.06,fw*.24,fw*.09,fw*.21,side*.15,0,Math.PI*2);ctx.fillStyle='#c48a5a';ctx.fill();ctx.restore()};
+    ear(-1);ear(1);
+    const n=g.nose;ctx.translate(n.x,n.y);ctx.rotate(ang);
+    ctx.beginPath();ctx.ellipse(0,0,fw*.1,fw*.07,0,0,Math.PI*2);const ng=ctx.createRadialGradient(-fw*.03,-fw*.03,1,0,0,fw*.1);ng.addColorStop(0,'#555');ng.addColorStop(1,'#111');ctx.fillStyle=ng;ctx.fill();
+    ctx.rotate(-ang);ctx.translate(-n.x,-n.y);
+    const open=Math.hypot(P(13).x-P(14).x,P(13).y-P(14).y)/fw;
+    if(open>.06){const m=P(14);ctx.translate(m.x,m.y);ctx.rotate(ang);ctx.beginPath();ctx.ellipse(0,fw*.07,fw*.07,fw*.11+open*fw*.3,0,0,Math.PI*2);ctx.fillStyle='#ff6f91';ctx.fill();ctx.beginPath();ctx.moveTo(0,fw*.0);ctx.lineTo(0,fw*.12);ctx.strokeStyle='#e0507a';ctx.lineWidth=fw*.012;ctx.stroke()}
+  }else if(kind==='cat'){
+    const ear=(side)=>{const base={x:g.top.x+Math.cos(ang)*fw*.3*side+up.x*fw*.05,y:g.top.y+Math.sin(ang)*fw*.3*side+up.y*fw*.05};
+      ctx.save();ctx.translate(base.x,base.y);ctx.rotate(ang+side*.25);
+      ctx.beginPath();ctx.moveTo(-fw*.14,0);ctx.lineTo(side*fw*.03,-fw*.3);ctx.lineTo(fw*.14,0);ctx.closePath();ctx.fillStyle='#3b3b45';ctx.fill();
+      ctx.beginPath();ctx.moveTo(-fw*.08,-fw*.02);ctx.lineTo(side*fw*.025,-fw*.21);ctx.lineTo(fw*.08,-fw*.02);ctx.closePath();ctx.fillStyle='#ffb3c6';ctx.fill();ctx.restore()};
+    ear(-1);ear(1);
+    const n=g.noseB;ctx.translate(g.nose.x,g.nose.y);ctx.rotate(ang);
+    ctx.beginPath();ctx.moveTo(-fw*.045,-fw*.02);ctx.lineTo(fw*.045,-fw*.02);ctx.lineTo(0,fw*.03);ctx.closePath();ctx.fillStyle='#ff7aa2';ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.92)';ctx.lineWidth=Math.max(1.5,fw*.008);ctx.lineCap='round';
+    [-1,1].forEach(s=>[-.05,0,.05].forEach(o=>{ctx.beginPath();ctx.moveTo(s*fw*.1,fw*(.04+o*.4));ctx.lineTo(s*fw*.38,fw*(.01+o*1.4));ctx.stroke()}));
+  }else if(kind==='crown'){
+    const c={x:g.top.x+up.x*fw*.18,y:g.top.y+up.y*fw*.18};ctx.translate(c.x,c.y);ctx.rotate(ang);
+    const w=fw*.78,h=fw*.36;
+    ctx.beginPath();ctx.moveTo(-w/2,h/2);ctx.lineTo(-w/2,-h*.1);ctx.lineTo(-w*.3,h*.12);ctx.lineTo(-w*.15,-h/2);ctx.lineTo(0,h*.08);ctx.lineTo(w*.15,-h/2);ctx.lineTo(w*.3,h*.12);ctx.lineTo(w/2,-h*.1);ctx.lineTo(w/2,h/2);ctx.closePath();
+    const gr=ctx.createLinearGradient(0,-h/2,0,h/2);gr.addColorStop(0,'#fff3b0');gr.addColorStop(.45,'#f6c445');gr.addColorStop(1,'#c98b10');ctx.fillStyle=gr;ctx.fill();ctx.lineWidth=fw*.012;ctx.strokeStyle='#9c6a07';ctx.stroke();
+    [['#e8344e',-w*.3],['#2fb3ff',0],['#3ddc84',w*.3]].forEach(([col,x])=>{ctx.beginPath();ctx.arc(x,h*.3,fw*.035,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();ctx.beginPath();ctx.arc(x-fw*.01,h*.29,fw*.012,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.7)';ctx.fill()});
+    const tw=.5+.5*Math.sin(t*5);ctx.globalAlpha=tw;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-w*.15,-h*.45,fw*.012,0,Math.PI*2);ctx.arc(w*.15,-h*.45,fw*.012,0,Math.PI*2);ctx.fill();
+  }else if(kind==='hearts'){
+    const c={x:g.top.x+up.x*fw*.12,y:g.top.y+up.y*fw*.12};const cols=['#ff4d6d','#ff8fab','#ff006e','#ffb3c1','#e5383b','#ff758f'];
+    for(let i=0;i<6;i++){const a=t*1.3+i*Math.PI/3;const x=c.x+Math.cos(a)*fw*.52,y=c.y+Math.sin(a)*fw*.16;const s=fw*(.095+.03*Math.sin(t*3+i));ctx.globalAlpha=Math.sin(a)>-.2?1:.55;heart(ctx,x,y,s,cols[i])}
+  }else if(kind==='blush'){
+    ctx.globalCompositeOperation='multiply';
+    [P(50),P(280)].forEach(p=>{const r=fw*.14;const gr=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,r);gr.addColorStop(0,'rgba(255,90,120,.42)');gr.addColorStop(1,'rgba(255,90,120,0)');ctx.fillStyle=gr;ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fill()});
+    const lip=[61,185,40,39,37,0,267,269,270,409,291,375,321,405,314,17,84,181,91,146];
+    ctx.beginPath();lip.forEach((i,k)=>{const p=P(i);k?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)});ctx.closePath();
+    const inner=[78,191,80,81,82,13,312,311,310,415,308,324,318,402,317,14,87,178,88,95];
+    inner.slice().reverse().forEach((i,k)=>{const p=P(i);k?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)});ctx.closePath();
+    ctx.fillStyle='rgba(215,40,90,.42)';ctx.fill('evenodd');
+    ctx.globalCompositeOperation='source-over';
+  }else if(kind==='stache'){
+    const a=P(2),b=P(13);const c={x:a.x*.45+b.x*.55,y:a.y*.45+b.y*.55};ctx.translate(c.x,c.y);ctx.rotate(ang);
+    const w=fw*.5;ctx.beginPath();ctx.moveTo(0,-w*.06);
+    ctx.bezierCurveTo(-w*.18,-w*.2,-w*.42,-w*.12,-w*.5,w*.02);ctx.bezierCurveTo(-w*.56,w*.1,-w*.62,0,-w*.6,-w*.08);ctx.bezierCurveTo(-w*.5,w*.2,-w*.2,w*.12,0,w*.04);
+    ctx.bezierCurveTo(w*.2,w*.12,w*.5,w*.2,w*.6,-w*.08);ctx.bezierCurveTo(w*.62,0,w*.56,w*.1,w*.5,w*.02);ctx.bezierCurveTo(w*.42,-w*.12,w*.18,-w*.2,0,-w*.06);
+    ctx.fillStyle='#2a1a10';ctx.fill();
+  }
+  ctx.restore();
+}
+function sparkles(ctx,W,H,t){
+  if(!ST.sp.length||ST.spW!==W){ST.spW=W;ST.sp=Array.from({length:26},()=>({x:Math.random(),y:Math.random(),s:.5+Math.random(),p:Math.random()*6.3,v:.02+Math.random()*.04}))}
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  ST.sp.forEach(s=>{s.y-=s.v*.016;if(s.y<-.05){s.y=1.05;s.x=Math.random()}const a=Math.max(0,Math.sin(t*3+s.p));if(a<.05)return;
+    const x=s.x*W,y=s.y*H,r=W*.018*s.s*a;ctx.globalAlpha=a;ctx.fillStyle='#fff6d5';
+    ctx.beginPath();ctx.moveTo(x,y-r*2);ctx.quadraticCurveTo(x,y,x+r*2,y);ctx.quadraticCurveTo(x,y,x,y+r*2);ctx.quadraticCurveTo(x,y,x-r*2,y);ctx.quadraticCurveTo(x,y,x,y-r*2);ctx.fill();
+    const gr=ctx.createRadialGradient(x,y,0,x,y,r*2.5);gr.addColorStop(0,'rgba(255,230,150,.6)');gr.addColorStop(1,'rgba(255,230,150,0)');ctx.fillStyle=gr;ctx.beginPath();ctx.arc(x,y,r*2.5,0,Math.PI*2);ctx.fill()});
+  ctx.restore();
+}
+
+/* ---------------- escolher efeito ---------------- */
+async function select(i,quiet){
+  i=Math.max(0,Math.min(FX.length-1,i|0));const prev=ST.i;ST.i=i;const fx=FX[i];
+  paintRow();if(!quiet&&i!==prev)flashName(fx.name);
+  document.getElementById('cfxHint')?.classList.remove('on');ST.noFaceT=0;
+  if(!i){deactivate();return}
+  if(fx.face){
+    activate();
+    try{await fmReady()}catch(e){if(ST.i===i){shareToast('Os efeitos de rosto não carregaram. Verifique a internet e tente de novo.');select(0,true)}return}
+    if(ST.i!==i)return;
+  }
+  activate();
+}
+ST.select=select;
+function flashName(n){const b=document.getElementById('stCam');if(!b)return;let f=document.getElementById('cfxName');if(!f){f=document.createElement('div');f.id='cfxName';f.className='cfxName';b.appendChild(f)}f.textContent=n;f.classList.remove('go');void f.offsetWidth;f.classList.add('go')}
+function showLoad(on){const b=document.getElementById('stCam');if(!b)return;let l=document.getElementById('cfxLoad');if(on&&!l){b.insertAdjacentHTML('beforeend','<div id="cfxLoad" class="cfxLoad"><i></i><span>Carregando efeito…</span></div>')}else if(!on&&l)l.remove()}
+function rowHtml(){return `<div class="cfxRow" id="cfxRow" role="listbox" aria-label="Efeitos">${FX.map((f,k)=>`<button type="button" class="cfxIt${k===ST.i?' on':''}" data-k="${k}" role="option" aria-selected="${k===ST.i}" aria-label="${f.name}"><span class="cfxBall" style="background:${f.bg}">${f.ic}</span><small>${f.name}</small></button>`).join('')}</div>`}
+function paintRow(){const r=document.getElementById('cfxRow');if(!r)return;r.querySelectorAll('.cfxIt').forEach(b=>{const on=+b.dataset.k===ST.i;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)});const on=r.querySelector('.cfxIt.on');if(on){const x=on.offsetLeft-(r.clientWidth-on.offsetWidth)/2;try{r.scrollTo({left:x,behavior:'smooth'})}catch(_){r.scrollLeft=x}}}
+function bindRow(){const r=document.getElementById('cfxRow');if(!r||r._b)return;r._b=1;
+  r.addEventListener('click',e=>{const b=e.target.closest('.cfxIt');if(!b)return;e.preventDefault();e.stopPropagation();select(+b.dataset.k)});
+  requestAnimationFrame(()=>{const on=r.querySelector('.cfxIt.on');if(on)r.scrollLeft=on.offsetLeft-(r.clientWidth-on.offsetWidth)/2});
+}
+
+/* arrastar a tela para o lado troca o efeito (como no Instagram) */
+function bindSwipe(box){
+  if(!box||box._cfxS)return;box._cfxS=1;let sx=0,sy=0,st=0,ok=false;
+  box.addEventListener('pointerdown',e=>{if(e.target.closest('.stCamBot,.stCamTop,button,a,input,.cfxRow'))return;ok=true;sx=e.clientX;sy=e.clientY;st=Date.now()},{passive:true});
+  box.addEventListener('pointerup',e=>{if(!ok)return;ok=false;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.4&&Date.now()-st<1200){if(CAM.rec)return;select(ST.i+(dx<0?1:-1))}},{passive:true});
+  box.addEventListener('pointercancel',()=>{ok=false},{passive:true});
+}
+
+/* ---------------- encaixe no código da câmera ---------------- */
+const pb0=window.stCamPaintBot;
+window.stCamPaintBot=function(){
+  const r=pb0.apply(this,arguments);
+  try{const bot=document.getElementById('stCamBot');
+    if(bot&&!CAM.shot&&!document.getElementById('cfxRow')){bot.insertAdjacentHTML('afterbegin',rowHtml());bindRow()}
+    const box=document.getElementById('stCam');bindSwipe(box);
+    if(box&&!document.getElementById('cfxHint'))box.insertAdjacentHTML('beforeend','<div id="cfxHint" class="cfxHint">Mostre o rosto para a câmera</div>');
+  }catch(e){console.warn(e)}
+  return r;
+};
+try{stCamPaintBot=window.stCamPaintBot}catch(_){}
+/* abrir/trocar câmera: devolve o id para o vídeo, abre a câmera e liga o efeito de novo */
+const start0=window.stCamStart;
+window.stCamStart=async function(){
+  const was=ST.i;deactivate();
+  const r=await start0.apply(this,arguments);
+  if(was&&ST.i===was&&CAM.stream)activate();
+  return r;
+};
+try{stCamStart=window.stCamStart}catch(_){}
+const close0=window.stCamClose;
+window.stCamClose=function(){try{const x=ST.gl&&ST.gl.gl.getExtension('WEBGL_lose_context');x&&x.loseContext()}catch(_){}ST.on=false;cancelAnimationFrame(ST.raf);ST.raf=0;ST.v=null;ST.out=null;ST.ctx=null;ST.glc=null;ST.gl=null;ST.lm=null;ST.lmS=null;return close0.apply(this,arguments)};
+try{stCamClose=window.stCamClose}catch(_){}
+/* sempre abre a câmera em "Normal" (como o Instagram) */
+const open0=window.stCamOpen;
+if(typeof open0==='function'){window.stCamOpen=function(){ST.i=0;ST.on=false;return open0.apply(this,arguments)};try{stCamOpen=window.stCamOpen}catch(_){}}
+
+/* vídeo da câmera de trás: grava o quadro com efeito (a da frente e o boomerang já leem o quadro) */
+if(typeof window.MediaRecorder==='function'&&HTMLCanvasElement.prototype.captureStream){
+  const MR=window.MediaRecorder;
+  const Wrap=function(stream,opts){
+    if(ST.on&&ST.out&&CAM.stream&&stream===CAM.stream){
+      try{const vs=ST.out.captureStream(30).getVideoTracks();stream=new MediaStream([...vs,...CAM.stream.getAudioTracks().filter(t=>t.readyState==='live')]);
+        if(opts&&opts.videoBitsPerSecond)opts=Object.assign({},opts,{videoBitsPerSecond:Math.min(opts.videoBitsPerSecond,4000000)})}catch(_){}
+    }
+    return opts===undefined?new MR(stream):new MR(stream,opts);
+  };
+  Wrap.prototype=MR.prototype;Wrap.isTypeSupported=t=>MR.isTypeSupported(t);
+  try{window.MediaRecorder=Wrap}catch(_){}
+}
+})();
+</script>
 </body></html>
