@@ -13410,4 +13410,43 @@ if(typeof r0==='function'){window.cmCollabRespond=async function(postId,status){
   try{cmCollabRespond=window.cmCollabRespond}catch(_){}}
 })();
 </script>
+<style id="bncss">
+.bnBox{margin:14px 0 6px;padding:12px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1)}
+.bnHead{display:flex;flex-direction:column;gap:2px;margin-bottom:10px}
+.bnHead small{color:#a9b4bc;font-size:12.5px;line-height:1.35}
+.bnRow{display:flex;align-items:center;gap:10px}
+.bnIcon{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.08);color:#cfdde4}
+.bnIcon.has{background:rgba(32,223,154,.16);color:#20df9a}
+.bnIcon svg{width:22px;height:22px}
+.bnTxt{flex:1;min-width:0;display:flex;flex-direction:column}
+.bnTxt small{color:#a9b4bc;font-size:12.5px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.bnTxt small b{color:#fff}
+.bnBtn{flex:none;border:0;border-radius:999px;padding:8px 13px;font-weight:700;font-size:13px;background:rgba(255,255,255,.1);color:#fff;cursor:pointer}
+.bnBtn.bnAdd{background:#20df9a;color:#03231a}
+.bnBtn.bnDel{background:rgba(255,80,80,.14);color:#ff8a8a}
+</style>
+<script id="bnjs">
+/* Banners do perfil (estilo Instagram): por enquanto só Música. Toca somente quando a pessoa aperta. */
+(function(){
+const NOTE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>';
+const IDS=['editName','editCity','editPhoto','editCover','editBio','editWhatsapp','editInterests','editLinks'];
+const BN={draft:null,back:false,saving:false};window.__bn=BN;
+function cur(){try{return PK.myExtras().music||''}catch(_){return ''}}
+function rowHtml(){const enc=cur();let t=null;if(enc){try{t=musicDecode(enc)}catch(_){}}
+ const sub=t?`<b>${esc(t.title)}</b>${t.artist?' · '+esc(t.artist):''}`:'Escolha uma música para o seu perfil';
+ return `<div class="bnIcon${t?' has':''}">${NOTE}</div><div class="bnTxt"><b>Música</b><small>${sub}</small></div>`+
+  (t?`<button type="button" class="bnBtn" onclick="bnMusic()">Trocar</button><button type="button" class="bnBtn bnDel" onclick="bnRemove()" aria-label="Remover música">Remover</button>`:`<button type="button" class="bnBtn bnAdd" onclick="bnMusic()">Adicionar</button>`)}
+function section(){return `<div class="bnBox" id="bnBox"><div class="bnHead"><b>Banners</b><small>Opcionais. Aparecem no seu perfil e só tocam quando alguém apertar.</small></div><div class="bnRow" id="bnRow">${rowHtml()}</div></div>`}
+function grab(){const d={};IDS.forEach(i=>{const e=document.getElementById(i);if(e)d[i]=e.value});const w=document.getElementById('whatsPublicSwitch');if(w)d.__w=w.classList.contains('on');return d}
+function fill(d){if(!d)return;IDS.forEach(i=>{const e=document.getElementById(i);if(e&&d[i]!==undefined)e.value=d[i]});const w=document.getElementById('whatsPublicSwitch');if(w&&d.__w!==undefined)w.classList.toggle('on',!!d.__w)}
+window.bnMusic=function(){BN.draft=grab();BN.back=true;BN.saving=false;PK.musicOpen()};
+window.bnRemove=async function(){try{await PK.musicRemove()}catch(_){}const r=document.getElementById('bnRow');if(r)r.innerHTML=rowHtml()};
+function back(){if(!BN.back)return;BN.back=false;BN.saving=false;const d=BN.draft;BN.draft=null;try{window.editProfile();fill(d)}catch(_){}}
+/* coloca a seção Banners antes do botão Salvar */
+if(typeof window.editProfile==='function'){const e0=window.editProfile;window.editProfile=function(){const r=e0.apply(this,arguments);try{const b=document.querySelector('button.primary[onclick="saveProfile()"]');if(b&&!document.getElementById('bnBox'))b.insertAdjacentHTML('beforebegin',section())}catch(e){console.warn(e)}return r}}
+/* depois de salvar a música (ou cancelar), volta para o Editar perfil */
+if(PK&&typeof PK.saveExtras==='function'){const s0=PK.saveExtras;PK.saveExtras=function(patch){const p=s0.apply(this,arguments);if(BN.back&&patch&&patch.music!==undefined){BN.saving=true;Promise.resolve(p).then(()=>setTimeout(back,350),()=>setTimeout(back,350))}return p}}
+if(typeof window.ppMuClose==='function'){const c0=window.ppMuClose;window.ppMuClose=function(){const r=c0.apply(this,arguments);if(BN.back)setTimeout(()=>{if(BN.back&&!BN.saving)back()},900);return r}}
+})();
+</script>
 </body></html>
