@@ -13466,4 +13466,133 @@ if(PK&&typeof PK.saveExtras==='function'){const s0=PK.saveExtras;PK.saveExtras=f
 if(typeof window.ppMuClose==='function'){const c0=window.ppMuClose;window.ppMuClose=function(){const r=c0.apply(this,arguments);if(BN.back)setTimeout(()=>{if(BN.back&&!BN.saving)back()},900);return r}}
 })();
 </script>
+<style id="hdcss">
+.hdWrap{position:relative}
+.hdWrap .hdAt{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#20df9a;font-weight:800;font-size:16px;pointer-events:none}
+.hdWrap .hdInput{padding-left:34px!important;text-transform:lowercase}
+.hdHint{display:block;margin:-4px 4px 10px;font-size:12.5px;line-height:1.35;color:#a9b4bc}
+.hdHint.ok{color:#20df9a}.hdHint.bad{color:#ff8a8a}
+.hdTag{margin:2px 0 0;font-size:14px;font-weight:600;color:#9fb3bf}
+.hdMini{font-style:normal;color:#20df9a;font-weight:700}
+.hdQr{position:fixed;inset:0;z-index:10060;background:#fff;overflow:hidden}
+.hdQr canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hdX,.hdPill{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);z-index:2;border:0;background:#fff;color:#111;box-shadow:0 2px 10px rgba(0,0,0,.18);cursor:pointer}
+.hdX{left:14px;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;padding:0}
+.hdX svg{width:24px;height:24px}
+.hdPill{left:50%;transform:translateX(-50%);height:38px;margin-top:4px;padding:0 18px;border-radius:999px;font-weight:800;font-size:13px;letter-spacing:.6px;border:2px solid #111}
+.hdBtns{position:absolute;left:10%;right:10%;display:flex;gap:10px;z-index:2}
+.hdBtns button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 4px 12px;border:0;border-radius:16px;background:#fff;color:#111;box-shadow:0 2px 12px rgba(0,0,0,.14);font-size:12.5px;font-weight:600;cursor:pointer}
+.hdBtns svg{width:26px;height:26px}
+.hdNoH{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 28px);transform:translateX(-50%);z-index:2;border:0;border-radius:999px;padding:11px 18px;background:rgba(0,0,0,.72);color:#fff;font-weight:700;font-size:13.5px;white-space:nowrap}
+</style>
+<script id="hdjs">
+/* @ do perfil (nome de usuário escolhido pela pessoa) + cartão "Compartilhar perfil" no estilo Instagram */
+(function(){
+const HD=window.HD={};
+const RE=/^[a-z0-9._]{3,30}$/,RESERVED=['admin','conecta','conectamantiqueira','suporte','oficial.conecta'];
+HD.clean=v=>String(v||'').trim().replace(/^@+/,'').toLowerCase().replace(/\s+/g,'');
+HD.valid=h=>RE.test(h)&&!/^\.|\.$|\.\./.test(h);
+HD.ofP=function(p){if(!p)return '';let e=(p.id&&me&&p.id===me.id)?PK.myExtras():p.extras;if(typeof e==='string'){try{e=JSON.parse(e)}catch(_){e=null}}return String((e&&e.handle)||'')};
+HD.of=function(uid){if(!uid)return '';if(me&&uid===me.id)return String(PK.myExtras().handle||'');const p=(typeof publicProfilesCache!=='undefined'&&publicProfilesCache.find(x=>x&&x.id===uid))||null;return HD.ofP(p)};
+HD.taken=async function(h){
+  try{if((publicProfilesCache||[]).some(p=>p&&p.id!==me?.id&&HD.ofP(p).toLowerCase()===h))return true}catch(_){}
+  try{const r=await sb.from('profiles').select('id,extras').filter('extras->>handle','eq',h).neq('id',me.id).limit(5);if(r&&!r.error&&Array.isArray(r.data)&&r.data.some(x=>x&&x.id!==me.id&&HD.ofP(x).toLowerCase()===h))return true}catch(_){}
+  return false};
+HD.problem=async function(h){
+  if(!h)return null;
+  if(!HD.valid(h))return h.length<3?'O @ precisa ter pelo menos 3 letras.':'Use só letras, números, ponto e _ (sem espaço).';
+  if(RESERVED.includes(h))return 'Esse @ não está disponível.';
+  if(await HD.taken(h))return 'Esse @ já está em uso. Escolha outro.';
+  return null};
+HD.persist=async function(h){
+  const ex=Object.assign(PK.myExtras(),{handle:h});
+  try{const r=await sb.from('profiles').update({extras:ex}).eq('id',me.id);if(r&&r.error&&(r.error.code==='23505'||/duplicate|unique/i.test(r.error.message||'')))throw new Error('taken')}catch(e){if(e&&e.message==='taken')throw e}
+  await PK.saveExtras({handle:h});
+  try{const c=(publicProfilesCache||[]).find(p=>p&&p.id===me.id);if(c)c.extras=Object.assign({},typeof c.extras==='object'&&c.extras||{},{handle:h})}catch(_){}};
+
+/* ---------- campo @ em Editar perfil ---------- */
+let T=0;
+HD.check=function(inp){clearTimeout(T);const hint=document.getElementById('hdHint');if(!hint)return;const h=HD.clean(inp.value);
+  if(inp.value!==h&&/[A-Z@\s]/.test(inp.value)){inp.value=h}
+  hint.className='hdHint';if(!h){hint.textContent='Seu @ é único. Letras, números, ponto e _ (3 a 30). Ajuda as pessoas a te achar na busca.';return}
+  if(h===HD.of(me.id)){hint.textContent='Esse é o seu @ atual.';hint.classList.add('ok');return}
+  hint.textContent='Verificando…';
+  T=setTimeout(async()=>{const m=await HD.problem(h);if(!document.getElementById('hdHint'))return;hint.className='hdHint '+(m?'bad':'ok');hint.textContent=m||'✓ @'+h+' está livre'},450)};
+if(typeof window.editProfile==='function'){const e0=window.editProfile;window.editProfile=function(){const r=e0.apply(this,arguments);try{const n=document.getElementById('editName');if(n&&!document.getElementById('editHandle')){n.insertAdjacentHTML('afterend',`<div class="hdWrap"><span class="hdAt">@</span><input id="editHandle" class="field hdInput" maxlength="30" autocapitalize="none" autocomplete="off" autocorrect="off" spellcheck="false" inputmode="text" placeholder="seu_arroba" value="${esc(HD.of(me.id))}" oninput="HD.check(this)"></div><small class="hdHint" id="hdHint">Seu @ é único. Letras, números, ponto e _ (3 a 30). Ajuda as pessoas a te achar na busca.</small>`)}}catch(e){console.warn(e)}return r}}
+if(typeof window.saveProfile==='function'){const s0=window.saveProfile;window.saveProfile=async function(){
+  const el=document.getElementById('editHandle');
+  if(el){const h=HD.clean(el.value);if(h!==HD.of(me.id)){const m=await HD.problem(h);if(m){shareToast(m);try{el.focus()}catch(_){}return}try{await HD.persist(h)}catch(e){shareToast(e&&e.message==='taken'?'Esse @ já está em uso. Escolha outro.':'Não foi possível salvar o @ agora.');return}}}
+  return s0.apply(this,arguments)}}
+
+/* ---------- @ aparece no perfil ---------- */
+if(typeof window.pfHeadHtml==='function'){const p0=window.pfHeadHtml;window.pfHeadHtml=function(o){let h=p0.apply(this,arguments);try{const hd=o&&o.id?HD.of(o.id):'';if(hd&&!/class="hdTag"/.test(h))h=h.replace('<div class="pfCity">',`<div class="hdTag">@${esc(hd)}</div><div class="pfCity">`)}catch(_){}return h}}
+
+/* ---------- busca acha pelo @ ---------- */
+if(typeof window.peopleMatch==='function'){const m0=window.peopleMatch;window.peopleMatch=function(p,q){
+  const raw=String(q||'').trim();if(!raw)return true;const h=HD.ofP(p).toLowerCase();const qq=HD.clean(raw);
+  if(raw[0]==='@'){return !!(h&&qq&&h.includes(qq))||(qq?m0.call(this,p,qq):false)}
+  return m0.apply(this,arguments)||!!(h&&qq.length>=2&&h.includes(qq))}}
+if(typeof window.cmPeopleFind==='function'){const f0=window.cmPeopleFind;window.cmPeopleFind=function(q){const a=f0.apply(this,arguments);try{const qq=HD.clean(q);if(!qq)return a;const have=new Set(a.map(p=>p.id));const extra=getPublicPeople().filter(p=>!have.has(p.id)&&HD.ofP(p).toLowerCase().includes(qq));return a.concat(extra).slice(0,20)}catch(_){return a}}}
+if(typeof window.renderPeopleList==='function'){const r0=window.renderPeopleList;window.renderPeopleList=function(list){let h=r0.apply(this,arguments);try{(list||[]).forEach(p=>{const hd=HD.ofP(p);if(!hd)return;const k=h.indexOf(`publicProfile('${p.id}')`);if(k<0)return;const s=h.indexOf('<span>',k);if(s<0)return;h=h.slice(0,s+6)+`<em class="hdMini">@${esc(hd)}</em> · `+h.slice(s+6)})}catch(_){}return h}}
+
+/* ---------- cartão de compartilhar (estilo Instagram) ---------- */
+const PRE=[
+ {k:'EMOJI',bg:'#ffffff',em:['🙂','😄','😉'],qr:'#7a4d00'},
+ {k:'EMOJI',bg:'#f3faf6',em:['⛰️','🌲','☕','🌿','🧀','🌄'],qr:'#0b5a3d'},
+ {k:'EMOJI',bg:'#fff4f6',em:['❤️','😍','🥰','💕'],qr:'#8f1c3a'},
+ {k:'COR',grad:['#20df9a','#19a6d6'],qr:'#07524a'},
+ {k:'COR',grad:['#ff9a5a','#ff4f8b'],qr:'#8a1f33'},
+ {k:'FOTO',photo:true,qr:'#0b2a36'}];
+const IMG={};
+function loadImg(src){if(!src)return Promise.resolve(null);if(IMG[src]!==undefined)return Promise.resolve(IMG[src]);return new Promise(r=>{const i=new Image();i.crossOrigin='anonymous';i.onload=()=>{IMG[src]=i;r(i)};i.onerror=()=>{IMG[src]=null;r(null)};i.src=src})}
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+function geom(W,H){const cw=W*.8;return{cw,ch:cw*.98,x:(W-cw)/2,y:H*.235}}
+function cover(c,img,W,H){const s=Math.max(W/img.width,H/img.height);c.drawImage(img,(W-img.width*s)/2,(H-img.height*s)/2,img.width*s,img.height*s)}
+function drawBg(c,W,H,P,img){
+  if(P.grad){const g=c.createLinearGradient(0,0,W,H);g.addColorStop(0,P.grad[0]);g.addColorStop(1,P.grad[1]);c.fillStyle=g;c.fillRect(0,0,W,H);return}
+  if(P.photo){c.fillStyle='#0b2a36';c.fillRect(0,0,W,H);if(img){const t=document.createElement('canvas');t.width=24;t.height=Math.max(24,Math.round(24*H/W));const x=t.getContext('2d');x.imageSmoothingQuality='high';cover(x,img,t.width,t.height);c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';c.drawImage(t,0,0,W,H);c.fillStyle='rgba(0,0,0,.28)';c.fillRect(0,0,W,H)}return}
+  c.fillStyle=P.bg;c.fillRect(0,0,W,H);
+  const step=W*.3,sz=W*.14;c.textAlign='center';c.textBaseline='middle';c.font=`${sz}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+  let n=0;for(let row=-1;row*step*.86<H+step;row++){const off=(row%2?step/2:0);for(let col=-1;col*step+off<W+step;col++){const e=P.em[(n*7+row*3+col*5+99)%P.em.length];n++;const px=col*step+off+step/2,py=row*step*.86+step/2;c.save();c.translate(px,py);c.rotate(((n*37)%31-15)*Math.PI/180);c.fillText(e,0,0);c.restore()}}}
+function drawQR(c,url,x,y,size,col){
+  const q=window.CMQRLib(url,'H'),n=q.n,m=size/n;const fin=(r,k)=>(r<7&&k<7)||(r<7&&k>=n-7)||(r>=n-7&&k<7);
+  c.fillStyle=col;for(let r=0;r<n;r++)for(let k=0;k<n;k++){if(!q.dark(r,k)||fin(r,k))continue;c.beginPath();c.arc(x+k*m+m/2,y+r*m+m/2,m*.46,0,Math.PI*2);c.fill()}
+  [[0,0],[0,n-7],[n-7,0]].forEach(([r,k])=>{const fx=x+k*m,fy=y+r*m;c.fillStyle=col;rr(c,fx,fy,7*m,7*m,m);c.fill();c.fillStyle='#fff';rr(c,fx+m,fy+m,5*m,5*m,m*.7);c.fill();c.fillStyle=col;rr(c,fx+2*m,fy+2*m,3*m,3*m,m*.55);c.fill()})}
+async function draw(cv,W,H,P,o){
+  cv.width=W;cv.height=H;const c=cv.getContext('2d');
+  const ph=P.photo?await loadImg(o.photo||o.cover):null;
+  drawBg(c,W,H,P,ph);
+  const g=geom(W,H);c.save();c.shadowColor='rgba(0,0,0,.22)';c.shadowBlur=W*.05;c.shadowOffsetY=W*.012;c.fillStyle='#fff';rr(c,g.x,g.y,g.cw,g.ch,g.cw*.07);c.fill();c.restore();
+  const qs=g.cw*.64,qx=(W-qs)/2,qy=g.y+g.cw*.1;
+  drawQR(c,o.url,qx,qy,qs,P.qr);
+  const L=qs*.2,lx=qx+qs/2-L/2,ly=qy+qs/2-L/2;c.fillStyle='#fff';rr(c,lx-L*.14,ly-L*.14,L*1.28,L*1.28,L*.34);c.fill();
+  const ic=await loadImg('icon-192.png');if(ic){c.save();rr(c,lx,ly,L,L,L*.24);c.clip();c.drawImage(ic,lx,ly,L,L);c.restore()}else{c.fillStyle=P.qr;rr(c,lx,ly,L,L,L*.24);c.fill()}
+  const txt=(o.handle?'@'+o.handle:o.name||'').toUpperCase();let fs=g.cw*.095;c.textAlign='center';c.textBaseline='alphabetic';c.fillStyle=P.qr;
+  const fam=`"Bebas Neue","Arial Narrow","Roboto Condensed",Impact,system-ui,sans-serif`;c.font=`700 ${fs}px ${fam}`;while(c.measureText(txt).width>g.cw*.86&&fs>12){fs-=2;c.font=`700 ${fs}px ${fam}`}
+  c.fillText(txt,W/2,g.y+g.ch-g.cw*.085)}
+const ICO={share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M5 12v8h14v-8"/></svg>',link:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/></svg>',down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M5 20h14"/></svg>',x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg>'};
+HD.qrScreen=async function(){
+  if(!me?.id)return;document.getElementById('hdQr')?.remove();
+  const p=profileData(),handle=HD.of(me.id);
+  const o={name:p.name,handle,photo:p.photo,cover:p.cover,url:profileShareUrl({id:me.id,name:p.name})};
+  let idx=0;try{idx=(+localStorage.getItem('cm_hd_pre')||0)%PRE.length}catch(_){}
+  document.body.insertAdjacentHTML('beforeend',`<div id="hdQr" class="hdQr"><canvas id="hdQrC"></canvas><button type="button" class="hdX" aria-label="Fechar">${ICO.x}</button><button type="button" class="hdPill" id="hdPill">${PRE[idx].k}</button><div class="hdBtns" id="hdBtns"><button type="button" data-a="share">${ICO.share}<span>Compartilhar perfil</span></button><button type="button" data-a="copy">${ICO.link}<span>Copiar link</span></button><button type="button" data-a="down">${ICO.down}<span>Baixar</span></button></div>${handle?'':'<button type="button" class="hdNoH" id="hdNoH">Crie seu @ em Editar perfil</button>'}</div>`);
+  const root=document.getElementById('hdQr'),cv=document.getElementById('hdQrC'),btns=document.getElementById('hdBtns');
+  const lay=()=>{const W=1080,H=Math.round(1080*root.clientHeight/Math.max(1,root.clientWidth));const g=geom(W,H);const s=root.clientWidth/W;btns.style.top=Math.round((g.y+g.ch)*s+16)+'px';return [W,H]};
+  const paint=async()=>{const [W,H]=lay();await draw(cv,W,H,PRE[idx],o)};
+  root.querySelector('.hdX').onclick=()=>root.remove();
+  document.getElementById('hdPill').onclick=async e=>{idx=(idx+1)%PRE.length;try{localStorage.setItem('cm_hd_pre',String(idx))}catch(_){}e.currentTarget.textContent=PRE[idx].k;await paint()};
+  const nh=document.getElementById('hdNoH');if(nh)nh.onclick=()=>{root.remove();try{editProfile()}catch(_){}};
+  const fileBlob=async()=>{const c=document.createElement('canvas');await draw(c,1080,1920,PRE[idx],o);return new Promise(r=>{try{c.toBlob(b=>r(b),'image/png')}catch(_){r(null)}})};
+  const fname='conecta-'+(handle||'perfil')+'.png';
+  btns.onclick=async e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset.a;
+    if(a==='copy'){copyText(o.url,'Link copiado');return}
+    const bl=await fileBlob();const f=bl&&new File([bl],fname,{type:'image/png'});
+    if(a==='share'){try{if(f&&navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],text:o.url});return}if(navigator.share){await navigator.share({title:'Conecta',text:'Me siga no Conecta:',url:o.url});return}}catch(er){if(er&&er.name==='AbortError')return}copyText(o.url,'Link copiado');return}
+    if(a==='down'&&bl){const u=URL.createObjectURL(bl);const l=document.createElement('a');l.href=u;l.download=fname;document.body.appendChild(l);l.click();setTimeout(()=>{URL.revokeObjectURL(u);l.remove()},600);shareToast('Imagem salva')}};
+  try{await paint()}catch(e){console.warn(e)}};
+if(typeof window.profileShare==='function'){const ps=window.profileShare;window.profileShare=function(id){if(!id||id==='me'||id===me?.id)return HD.qrScreen();return ps.apply(this,arguments)}}
+if(PK&&typeof PK.qrOpen==='function'){const q0=PK.qrOpen;PK.qrOpen=function(kind){if(kind==='biz')return q0.apply(this,arguments);return HD.qrScreen()}}
+})();
+</script>
 </body></html>
