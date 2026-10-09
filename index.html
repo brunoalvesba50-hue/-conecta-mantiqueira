@@ -12918,5 +12918,165 @@ const stop0=window.reelStop;
 window.reelStop=function(){const r=stop0.apply(this,arguments);if(!document.getElementById('reelsFeed'))VP.on=false;return r};
 try{reelStop=window.reelStop}catch(_){}
 })();
+
+/* ===================== VÍDEOS: correções do vídeo gravado no iPhone =====================
+   1) Telas pretas: eram os vídeos do Dailymotion (no iPhone não começam sozinhos e ficam pretos).
+      Saem da aba Vídeos.
+   2) Vídeo travado carregando: pula mais rápido (antes esperava 11 s).
+   3) Tocar no vídeo sem som liga o som (antes pausava o vídeo). */
+(function(){
+if(typeof RL==='undefined')return;
+/* 1) sem Dailymotion */
+try{window.dmSearch=async function(){return []};dmSearch=window.dmSearch}catch(_){}
+function purge(){try{if(typeof EXTRA_POOL!=='undefined'&&Array.isArray(EXTRA_POOL)){const n=EXTRA_POOL.length;EXTRA_POOL=EXTRA_POOL.filter(x=>x&&x.kind!=='dm');if(EXTRA_POOL.length!==n)rlSet('cm_video_extra',EXTRA_POOL)}}catch(_){}}
+purge();
+const s0=window.setupVideoFeed;window.setupVideoFeed=function(){purge();return s0.apply(this,arguments)};try{setupVideoFeed=window.setupVideoFeed}catch(_){}
+const o0=window.rlOrdered;if(typeof o0==='function'){window.rlOrdered=function(){return o0.apply(this,arguments).filter(x=>!x||x.kind!=='dm'||RL.saved)};try{rlOrdered=window.rlOrdered}catch(_){}}
+/* 2) YouTube que não começa: tenta de novo em 3 s e pula em 7,5 s */
+const p0=window.reelPlay;
+if(typeof p0==='function'){window.reelPlay=function(x){const r=p0.apply(this,arguments);
+  if(x&&!x.social){clearTimeout(RL.wd);clearTimeout(RL.wd3);
+    RL.wd3=setTimeout(()=>{if(RL.state!==1&&RL.items[RL.cur]===x){if(RL.ready){reelCmd('loadVideoById',[x.youtubeId,0]);reelCmd('playVideo')}else reelCreateFrame(x,RL.muted)}},3000);
+    RL.wd=setTimeout(()=>{if(RL.state!==1&&RL.items[RL.cur]===x)reelFail(false)},7500)}
+  return r};try{reelPlay=window.reelPlay}catch(_){}}
+/* 3) toque com o vídeo mudo = liga o som */
+const t0=window.reelTapUp;
+if(typeof t0==='function'){window.reelTapUp=function(e,i){const x=RL.items[RL.cur];
+  if(RL.muted&&RL.want&&x&&(!x.social||x.kind==='px'||x.kind==='cm')&&Math.abs(e.clientX-(RL.px||0))<=10&&Math.abs(e.clientY-(RL.py||0))<=10){
+    const now=Date.now();if(now-RL.lastTap<300)return t0.apply(this,arguments);RL.lastTap=now;reelUnmute();if(RL.state!==1)reelCmd('playVideo');return}
+  return t0.apply(this,arguments)};try{reelTapUp=window.reelTapUp}catch(_){}}
+})();
+</script>
+<style id="rvcss">
+.rvBtn{align-self:center;display:inline-flex;align-items:center;gap:8px;margin:6px 0 14px;padding:11px 20px;border-radius:999px;border:1px solid rgba(32,223,154,.55);background:rgba(32,223,154,.14);color:#fff;font-weight:800;font-size:14.5px;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);cursor:pointer}
+.rvBtn svg{width:20px;height:20px;color:#20df9a}
+.rvBtn:active{transform:scale(.97)}
+.rvSheet{position:absolute;inset:0;z-index:5;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;animation:stFade .18s ease}
+.rvBox{width:100%;max-height:78%;display:flex;flex-direction:column;background:rgba(8,27,37,.96);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.1);border-bottom:0;border-radius:24px 24px 0 0;padding:8px 16px calc(env(safe-area-inset-bottom,0px) + 14px);margin:0;box-sizing:border-box;animation:pkUp .22s ease-out}
+.rvGrab{width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,.25);margin:4px auto 10px}
+.rvHead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.rvHead>div{flex:1;display:flex;flex-direction:column}
+.rvHead b{font-size:18px;font-weight:850}
+.rvHead small{color:#b9cad3;font-size:12.5px}
+.rvX{width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.08);color:#fff;display:grid;place-items:center}
+.rvX svg{width:18px;height:18px}
+.rvQ{width:100%;box-sizing:border-box;padding:11px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;font-size:15px;margin-bottom:8px;outline:none}
+.rvQ:focus{border-color:rgba(32,223,154,.6)}
+.rvList{flex:1;min-height:120px;overflow-y:auto;-webkit-overflow-scrolling:touch;margin:0 -6px;padding:0 6px}
+.rvRow{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.rvAv{position:relative;flex:none;width:46px;height:46px}
+.rvAv img{width:100%;height:100%;border-radius:50%;object-fit:cover;background:#173040}
+.rvAv i{position:absolute;right:0;bottom:1px;width:12px;height:12px;border-radius:50%;background:#20df9a;border:2px solid #081b25}
+.rvTx{flex:1;min-width:0;display:flex;flex-direction:column}
+.rvTx b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rvTx small{color:#9fb3be;font-size:12.5px}
+.rvGo{flex:none;display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border-radius:999px;border:0;background:#20df9a;color:#03231a;font-weight:800;font-size:13.5px;cursor:pointer}
+.rvGo svg{width:14px;height:14px}
+.rvGo.ok{background:rgba(255,255,255,.1);color:#cfe;font-weight:700}
+.rvGo:disabled{cursor:default}
+.rvEmpty{padding:26px 8px;text-align:center;color:#9fb3be;font-size:14px}
+.rvOther{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;font-weight:700;font-size:14px}
+.rvOther svg{width:18px;height:18px}
+.bubble.rvMsg{padding:0!important;background:none!important;border:0!important;box-shadow:none!important}
+.rvCard{display:flex;align-items:center;gap:10px;min-width:230px;max-width:280px;padding:12px;border-radius:18px;background:linear-gradient(120deg,rgba(32,223,154,.2),rgba(25,198,214,.1));border:1px solid rgba(32,223,154,.45);color:#fff}
+.rvCardIco{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#20df9a;color:#03231a;animation:pkPulse 1.8s ease-in-out infinite}
+.rvCardIco svg{width:20px;height:20px}
+.rvCardTx{flex:1;min-width:0;display:flex;flex-direction:column;text-align:left}
+.rvCardTx b{font-size:14.5px}
+.rvCardTx small{color:#c5d6de;font-size:12px}
+.rvCardGo{flex:none;padding:8px 14px;border-radius:999px;border:0;background:#20df9a;color:#03231a;font-weight:800;font-size:13px}
+</style>
+<script id="rvjs">
+/* ===================== SALA AO VIVO: convidar amigos do bate-papo =====================
+   - Botão "Convidar amigos" dentro da sala.
+   - Lista as pessoas das suas conversas (e quem você segue), com busca.
+   - O convite vai como mensagem no bate-papo (vira um cartão "Entrar na sala")
+     e também aparece na central de notificações.
+   - "Outros apps" continua compartilhando o link por WhatsApp etc. */
+(function(){
+if(typeof PK==='undefined'||!PK._rm)return;const RM=PK._rm;
+const IV={sent:new Set(),q:''};
+const ICO={
+  add:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21c1.2-3.8 4-5.8 7-5.8s5.8 2 7 5.8"/><path d="M19 8v6M16 11h6"/></svg>',
+  mic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+  share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v14"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>'
+};
+const url=city=>(typeof CONECTA_APP_URL!=='undefined'?CONECTA_APP_URL:location.origin+location.pathname)+'?sala='+encodeURIComponent(city);
+const inviteText=city=>`🎙️ Vem pra Sala ao vivo de ${city}! Toque para entrar: ${url(city)}`;
+function inRoom(){const s=new Set();try{Object.values(RM.ch?RM.ch.presenceState()||{}:{}).forEach(a=>{const x=(a||[])[0];if(x&&x.uid)s.add(x.uid)})}catch(_){}return s}
+
+/* ---------- botão dentro da sala ---------- */
+function addButton(){
+  const r=document.getElementById('pkRoom');if(!r||r.querySelector('.rvBtn'))return;
+  const bar=r.querySelector('.pkRoomBar');if(!bar)return;
+  bar.insertAdjacentHTML('beforebegin',`<button type="button" class="rvBtn" onclick="PK.roomInviteFriends()">${ICO.add}<span>Convidar amigos</span></button>`);
+  const sh=r.querySelector('.pkRoomShare');if(sh){sh.setAttribute('onclick','PK.roomInviteFriends()');sh.setAttribute('aria-label','Convidar amigos');sh.innerHTML=ICO.add}
+}
+new MutationObserver(()=>{if(document.getElementById('pkRoom')&&!document.querySelector('#pkRoom .rvBtn'))addButton()}).observe(document.body,{childList:true});
+
+/* ---------- lista de amigos ---------- */
+function people(){
+  const here=inRoom(),out=[],seen=new Set([me?.id]);
+  const push=(id,last)=>{if(!id||seen.has(id)||here.has(id))return;seen.add(id);const p=(typeof chatPerson==='function'?chatPerson(id):personById(id))||{id,name:'Pessoa',photo:''};out.push({p,last:last||0,on:typeof isOnline==='function'&&isOnline(id)})};
+  try{[...CHAT.rows.values()].sort((a,b)=>Date.parse(b.last.created_at)-Date.parse(a.last.created_at)).forEach(c=>push(c.peer,Date.parse(c.last.created_at)))}catch(_){}
+  try{[...(followCache||[])].forEach(id=>push(id,0))}catch(_){}
+  /* online primeiro, depois quem conversou por último */
+  return out.sort((a,b)=>(b.on-a.on)||(b.last-a.last));
+}
+function rowHtml(x){
+  const p=x.p,sent=IV.sent.has(p.id),city=(typeof personCity==='function'&&personCity(p))||p.city||'';
+  return `<div class="rvRow" data-id="${esc(p.id)}"><span class="rvAv"><img src="${esc(p.photo||avatar(p.name||'?'))}" alt="" loading="lazy">${x.on?'<i></i>':''}</span><span class="rvTx"><b>${esc(p.name||'Pessoa')}</b><small>${x.on?'Online agora':esc(city||'Bate-papo')}</small></span><button type="button" class="rvGo${sent?' ok':''}" ${sent?'disabled':''} onclick="PK.roomInviteSend('${esc(p.id)}',this)">${sent?ICO.ok+'Enviado':'Convidar'}</button></div>`;
+}
+function paintList(){
+  const box=document.getElementById('rvList');if(!box)return;
+  const q=(typeof normText==='function'?normText(IV.q):IV.q.toLowerCase()).trim();
+  let list=people();
+  if(q){list=list.filter(x=>(typeof normText==='function'?normText(x.p.name||''):String(x.p.name||'').toLowerCase()).includes(q));
+    if(list.length<8){const have=new Set(list.map(x=>x.p.id));const here=inRoom();(typeof getPublicPeople==='function'?getPublicPeople():[]).filter(p=>p.id!==me?.id&&!have.has(p.id)&&!here.has(p.id)&&(typeof normText==='function'?normText(p.name||''):String(p.name||'').toLowerCase()).includes(q)).slice(0,20).forEach(p=>list.push({p,last:0,on:typeof isOnline==='function'&&isOnline(p.id)}))}}
+  box.innerHTML=list.length?list.map(rowHtml).join(''):`<div class="rvEmpty">${q?'Ninguém encontrado com esse nome.':(CHAT&&CHAT.loaded?'Você ainda não tem conversas. Use a busca ou "Outros apps".':'Carregando seus amigos…')}</div>`;
+}
+PK.roomInviteFriends=async function(){
+  const r=document.getElementById('pkRoom');if(!r||!RM.on)return;
+  r.querySelector('.rvSheet')?.remove();IV.q='';
+  r.insertAdjacentHTML('beforeend',`<div class="rvSheet" onclick="if(event.target===this)PK.roomInviteClose()"><div class="rvBox" role="dialog" aria-label="Convidar amigos"><div class="rvGrab"></div><div class="rvHead"><div><b>Convidar amigos</b><small>Para a Sala ao vivo de ${esc(RM.city)}</small></div><button type="button" class="rvX" onclick="PK.roomInviteClose()" aria-label="Fechar">${ICO.x}</button></div><input id="rvQ" class="rvQ" type="search" placeholder="Buscar amigo" autocomplete="off" oninput="PK.roomInviteSearch(this.value)"><div id="rvList" class="rvList"></div><button type="button" class="rvOther" onclick="PK.roomInvite()">${ICO.share}<span>Outros apps (WhatsApp, link…)</span></button></div></div>`);
+  paintList();
+  if(typeof CHAT!=='undefined'&&!CHAT.loaded&&typeof chatLoad==='function'){try{await chatLoad()}catch(_){}paintList()}
+};
+PK.roomInviteClose=function(){document.querySelector('#pkRoom .rvSheet')?.remove()};
+PK.roomInviteSearch=function(v){IV.q=v||'';clearTimeout(IV.t);IV.t=setTimeout(paintList,120)};
+PK.roomInviteSend=async function(uid,btn){
+  if(!me?.id||!uid||!RM.on)return;if(btn){btn.disabled=true;btn.textContent='Enviando…'}
+  const city=RM.city;
+  try{const {error}=await sb.from('messages').insert({sender_id:me.id,receiver_id:uid,body:inviteText(city)});if(error)throw error;
+    IV.sent.add(uid);if(btn){btn.classList.add('ok');btn.innerHTML=ICO.ok+'Enviado'}
+    try{typeof cmNotify==='function'&&cmNotify(uid,'room_invite',{extra:city})}catch(_){}
+    try{navigator.vibrate&&navigator.vibrate(8)}catch(_){}
+  }catch(_){if(btn){btn.disabled=false;btn.textContent='Tentar de novo'}shareToast('Não foi possível enviar o convite agora.')}
+};
+/* ao trocar de sala, pode convidar de novo */
+const j0=PK.roomJoin;PK.roomJoin=async function(){IV.sent.clear();return j0.apply(this,arguments)};
+
+/* ---------- no bate-papo, o convite vira um cartão "Entrar na sala" ---------- */
+const RE=/[?&]sala=([^\s&#]+)/;
+function cityOf(body){const m=String(body||'').match(RE);if(!m)return '';try{return decodeURIComponent(m[1])}catch(_){return m[1]}}
+const b0=window.msgBodyHtml;
+if(typeof b0==='function'){window.msgBodyHtml=function(m){
+  const t=String(m&&m.body||'');
+  if(t.startsWith('🎙️')&&RE.test(t)){const c=cityOf(t);const mine=m.sender_id===me?.id;
+    return {cls:'rvMsg',html:`<div class="rvCard"><span class="rvCardIco">${ICO.mic}</span><span class="rvCardTx"><b>Sala ao vivo</b><small>${esc(c)} · ${mine?'você convidou':'convite para conversar'}</small></span>${mine?'':`<button type="button" class="rvCardGo" onclick="event.stopPropagation();PK.roomJoin('${esc(c).replace(/'/g,"\\'")}')">Entrar</button>`}</div>`}}
+  return b0.apply(this,arguments)};
+  try{msgBodyHtml=window.msgBodyHtml}catch(_){}}
+
+/* ---------- central de notificações ---------- */
+try{if(typeof NOTIF_TXT!=='undefined')NOTIF_TXT.room_invite='chamou você para a Sala ao vivo de'}catch(_){}
+const g0=window.cmNotifGo;
+if(typeof g0==='function'){window.cmNotifGo=async function(id){const n=(CM_NOTIF.list||[]).find(x=>x.id===id);if(n&&n.kind==='room_invite'&&n.extra){try{closeModal()}catch(_){}if(!n.read_at){n.read_at=new Date().toISOString();CM_NOTIF.unread=Math.max(0,(CM_NOTIF.unread|0)-1);try{cmNotifDots()}catch(_){}try{const r=sb.from('cm_notifications').update({read_at:n.read_at}).eq('id',id).eq('user_id',me.id);r&&r.then&&r.then(()=>{},()=>{})}catch(_){}}PK.roomJoin(n.extra);return}return g0.apply(this,arguments)};
+  try{cmNotifGo=window.cmNotifGo}catch(_){}}
+
+/* ---------- notificação no celular (app fechado): tocar abre direto a sala ---------- */
+try{navigator.serviceWorker&&navigator.serviceWorker.addEventListener('message',e=>{const d=e.data||{};if(d.type==='open-room'&&d.city){const go=()=>{if(me?.id&&typeof PK.roomJoin==='function')PK.roomJoin(d.city);else setTimeout(go,400)};go()}})}catch(_){}
+})();
 </script>
 </body></html>

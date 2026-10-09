@@ -1,6 +1,6 @@
 /* Conecta Mantiqueira — trabalha em segundo plano no celular:
    notificações, app instalado, abrir rápido e funcionar sem internet (como o Instagram). */
-const VER = 'v18';
+const VER = 'v19';
 const CACHE = 'conecta-' + VER;          /* páginas e arquivos do site */
 const LIB = 'conecta-lib-' + VER;        /* biblioteca do Supabase (necessária para abrir) */
 const API = 'conecta-api';               /* últimos dados vistos (feed, perfis, conversas) */
@@ -133,6 +133,17 @@ self.addEventListener('push', e => {
 self.addEventListener('notificationclick', e => {
   e.notification.close();
   const data = e.notification.data || {};
+  /* convite para a Sala ao vivo: abre direto na sala */
+  const sala = (String(e.notification.body || '') + ' ' + String(data.url || '')).match(/[?&]sala=([^\s&#]+)/);
+  const sala2 = !sala && String(e.notification.body || '').match(/Sala ao vivo de ([^!\n]{2,40})!/);
+  if (sala || sala2) {
+    let city = sala ? sala[1] : sala2[1].trim(); try { if (sala) city = decodeURIComponent(city); } catch (_) {}
+    e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      for (const c of list) { if ('focus' in c) { c.postMessage({ type: 'open-room', city }); return c.focus(); } }
+      return self.clients.openWindow('./?sala=' + encodeURIComponent(city));
+    }));
+    return;
+  }
   e.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
       for (const c of list) {
