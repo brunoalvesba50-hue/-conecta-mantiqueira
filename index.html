@@ -12803,7 +12803,7 @@ function makeThumbs(force){
   const snap=snapshot();if(!snap)return;
   try{if(!ST.tgl){ST.tglc=document.createElement('canvas');ST.tglc.width=ST.tglc.height=112;ST.tgl=glInit(ST.tglc)}}catch(_){ST.tgl=null}
   FX.forEach(fx=>{
-    if(fx.face)return;
+    if(fx.face){try{const c=document.createElement('canvas');c.width=c.height=112;const x=c.getContext('2d');x.drawImage(snap,0,0);x.fillStyle='rgba(0,0,0,.38)';x.fillRect(0,0,112,112);ST.thumbs[fx.id]=c.toDataURL('image/jpeg',.72)}catch(_){}return}
     try{let src=snap;if(ST.tgl&&needsGL(fx)){glDraw(ST.tgl,snap,112,112,fx,1.3);src=ST.tglc}
       const c=document.createElement('canvas');c.width=c.height=112;const x=c.getContext('2d');x.drawImage(src,0,0);if(fx.over)overlay(x,fx.over,112,112,1.2+Math.random());
       ST.thumbs[fx.id]=c.toDataURL('image/jpeg',.72)}catch(_){}
@@ -12830,7 +12830,8 @@ async function select(i,quiet){
 }
 ST.select=select;ST.selectId=id=>select(idx(id));
 function flashName(n){const b=document.getElementById('stCam');if(!b)return;let f=document.getElementById('cfxName');if(!f){f=document.createElement('div');f.id='cfxName';f.className='cfxName';b.appendChild(f)}f.textContent=n;f.classList.remove('go');void f.offsetWidth;f.classList.add('go')}
-function showLoad(on){const b=document.getElementById('stCam');if(!b)return;let l=document.getElementById('cfxLoad');if(on&&!l)b.insertAdjacentHTML('beforeend','<div id="cfxLoad" class="cfxLoad"><i></i><span>Carregando efeito…</span></div>');else if(!on&&l)l.remove()}
+function showLoad(on){clearTimeout(ST.loadT);if(on){ST.loadT=setTimeout(()=>showLoadNow(true),700);return}showLoadNow(false)}
+function showLoadNow(on){const b=document.getElementById('stCam');if(!b)return;let l=document.getElementById('cfxLoad');if(on&&!l)b.insertAdjacentHTML('beforeend','<div id="cfxLoad" class="cfxLoad"><i></i><span>Carregando efeito…</span></div>');else if(!on&&l)l.remove()}
 
 /* ---------------- tela: menu lateral, carrossel no botão, nome, explorar ---------------- */
 const RI={aa:'<b class="c2Aa">Aa</b>',boom:S('<path d="M7 12c0-2.8 2-4.5 4.5-4.5S15 9 17 12s3.3 4.5 4 4.5"/><path d="M17 12c0 2.8-2 4.5-4.5 4.5S9 15 7 12 3.7 7.5 3 7.5"/>',2.2),
@@ -13593,6 +13594,61 @@ HD.qrScreen=async function(){
   try{await paint()}catch(e){console.warn(e)}};
 if(typeof window.profileShare==='function'){const ps=window.profileShare;window.profileShare=function(id){if(!id||id==='me'||id===me?.id)return HD.qrScreen();return ps.apply(this,arguments)}}
 if(PK&&typeof PK.qrOpen==='function'){const q0=PK.qrOpen;PK.qrOpen=function(kind){if(kind==='biz')return q0.apply(this,arguments);return HD.qrScreen()}}
+})();
+</script>
+<style id="cigcss">
+/* ===== câmera do story no formato do Instagram: prévia em cartão 9:16, barra preta embaixo ===== */
+.stCamBack{position:fixed;inset:0;z-index:159;background:#000}
+#stCam.ig{top:env(safe-area-inset-top,0px);left:0;right:0;bottom:auto;margin:0 auto;
+  width:min(100%,calc((100vh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 84px)*.5625));
+  height:auto;aspect-ratio:9/16;border-radius:20px;background:#000;overflow:visible}
+@supports(height:100dvh){#stCam.ig{width:min(100%,calc((100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 84px)*.5625))}}
+#stCam.ig>video,#stCam.ig>canvas,#stCam.ig .stCamShot,#stCam.ig .stCamFreeze,#stCam.ig .stCamFlashFx,#stCam.ig .c2Lay{border-radius:20px}
+#stCam.ig .stCamTop{padding:12px 12px 0}
+#stCam.ig .stCamTime{top:64px}
+#stCam.ig .c2Rail{top:96px}
+#stCam.ig .c2Undo{top:64px}
+#stCam.ig .stCamBot{padding:0 0 14px;background:none;border-radius:0 0 20px 20px}
+#stCam.ig .stCamBot::before{content:"";position:absolute;left:0;right:0;bottom:0;height:150px;border-radius:0 0 20px 20px;background:linear-gradient(transparent,rgba(0,0,0,.28));pointer-events:none;z-index:-1}
+#stCam.ig .stCamHint:empty{display:none}
+#stCam.ig .c2Bar{position:absolute;left:12px;right:12px;top:100%;margin-top:14px}
+#stCam.ig .c2Sq{border:0;background:rgba(255,255,255,.12);border-radius:12px}
+#stCam.ig .c2Sq:last-child{border-radius:50%}
+#stCam.ig .c2Name{background:rgba(255,255,255,.12);padding:0 6px}
+#stCam.ig .c2Ball{border:0;box-shadow:0 1px 6px rgba(0,0,0,.35)}
+#stCam.ig .c2Ci.on .c2Ball{transform:scale(1.18)}
+#stCam.ig .cfxName{font-size:19px}
+#stCam.ig .c2Sheet{border-radius:20px;overflow:hidden}
+/* ===== edição do story: foto no mesmo cartão, ferramentas na lateral direita ===== */
+.sc.scIg .scStageWrap{padding:env(safe-area-inset-top,0px) 0 calc(8px + env(safe-area-inset-bottom,0px));gap:12px}
+.sc.scIg .scStage{border-radius:20px;box-shadow:none}
+.sc.scIg .stEdTop{background:none;align-items:flex-start;padding:12px}
+.sc.scIg .stEdTools{position:absolute;right:10px;top:12px;flex-direction:column;gap:10px}
+.sc.scIg .stEdTop .stIco{background:rgba(0,0,0,.32)}
+.sc.scIg .scBottom{width:100%;padding:0 10px;box-sizing:border-box}
+.sc.scIg .scStage{flex:none;max-height:none;height:auto;aspect-ratio:9/16;width:min(100%,calc((100vh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 84px)*.5625))}
+@supports(height:100dvh){.sc.scIg .scStage{width:min(100%,calc((100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 84px)*.5625))}}
+</style>
+<script id="cigjs">
+/* câmera do story no formato do Instagram (prévia 9:16 = foto final = edição) */
+(function(){
+if(typeof window.stCamOpen!=='function')return;
+const DEF=['Toque para foto · segure para vídeo'];
+function clean(){const h=document.getElementById('stCamHint');if(h&&DEF.includes(h.textContent.trim()))h.textContent=''}
+const o0=window.stCamOpen;
+window.stCamOpen=function(){
+  const r=o0.apply(this,arguments);
+  try{const box=document.getElementById('stCam');if(box){box.classList.add('ig');if(!document.getElementById('stCamBack'))box.insertAdjacentHTML('beforebegin','<div class="stCamBack" id="stCamBack"></div>')}clean()}catch(_){}
+  return r};
+try{stCamOpen=window.stCamOpen}catch(_){}
+const p0=window.stCamPaintBot;
+if(typeof p0==='function'){window.stCamPaintBot=function(){const r=p0.apply(this,arguments);try{clean()}catch(_){}return r};try{stCamPaintBot=window.stCamPaintBot}catch(_){}}
+const c0=window.stCamClose;
+if(typeof c0==='function'){window.stCamClose=function(){try{document.getElementById('stCamBack')?.remove()}catch(_){}return c0.apply(this,arguments)};try{stCamClose=window.stCamClose}catch(_){}}
+const e0=window.scRenderEdit;
+if(typeof e0==='function'){window.scRenderEdit=function(){const r=e0.apply(this,arguments);try{document.getElementById('sc')?.classList.add('scIg')}catch(_){}return r};try{scRenderEdit=window.scRenderEdit}catch(_){}}
+/* garante que a tela preta some se a câmera for removida por outro caminho */
+setInterval(()=>{const b=document.getElementById('stCamBack');if(b&&!document.getElementById('stCam'))b.remove()},800);
 })();
 </script>
 </body></html>
