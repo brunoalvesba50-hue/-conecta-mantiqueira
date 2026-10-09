@@ -12374,9 +12374,11 @@ window.reelSocialPlay=function(x){
   }
   /* pausa um vídeo do Facebook que estava tocando em outro cartão */
   document.querySelectorAll('.reel.social .fb-video').forEach(el=>{try{el._fbp&&el._fbp.pause()}catch(_){}el.remove()});
-  const r=play0.apply(this,arguments);
   const box=document.querySelector(`.reel[data-i="${RL.cur}"] .reelSocialBox`);
-  if(box&&!box.classList.contains('ready'))RL.swd=setTimeout(()=>socialFail(x,false),x.kind==='ig'?10000:12000);
+  const fresh=box&&!box.querySelector('iframe');if(fresh)box.classList.remove('ready');
+  const r=play0.apply(this,arguments);
+  /* Instagram só conta como "abriu" quando o próprio Instagram avisa (MEASURE) */
+  if(box&&fresh)RL.swd=setTimeout(()=>socialFail(x,false),x.kind==='ig'?10000:12000);
   return r;
 };
 try{reelSocialPlay=window.reelSocialPlay}catch(_){}
@@ -12776,6 +12778,145 @@ if(typeof window.MediaRecorder==='function'&&HTMLCanvasElement.prototype.capture
   Wrap.prototype=MR.prototype;Wrap.isTypeSupported=t=>MR.isTypeSupported(t);
   try{window.MediaRecorder=Wrap}catch(_){}
 }
+})();
+</script>
+<style id="vpcss">
+.reelsWrap.vpWrap{overflow:hidden}
+#reelsFeed.vpOn{overflow:visible!important;scroll-snap-type:none!important;will-change:transform;touch-action:none;-webkit-overflow-scrolling:auto;contain:layout style}
+#reelsFeed.vpOn .reel{scroll-snap-align:none}
+.reelsRoot .reelGest.vpGest{display:block!important;touch-action:none}
+.vpHint{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 70px);transform:translateX(-50%);z-index:8;padding:8px 14px;border-radius:999px;background:rgba(8,27,37,.82);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#fff;font-size:12.5px;font-weight:700;white-space:nowrap;pointer-events:none;animation:vpHint 2.6s ease forwards}
+@keyframes vpHint{0%{opacity:0}10%{opacity:1}80%{opacity:1}100%{opacity:0}}
+</style>
+<script id="vpjs">
+/* ===================== VÍDEOS: rolagem fluida (igual Reels/TikTok) =====================
+   - O dedo arrasta o vídeo junto (sem rolagem "presa"), solta e ele encaixa no próximo.
+   - Troca o vídeo na hora em que você solta (não espera a tela parar).
+   - Funciona também em cima dos vídeos do Instagram/Facebook (antes travava neles).
+   - O primeiro gesto (arrastar ou tocar) já libera o som, quando você quer som.
+   Só muda o jeito de passar os vídeos; player, botões e lista continuam os mesmos. */
+(function(){
+if(typeof RL==='undefined'||typeof window.setupVideoFeed!=='function')return;
+const VP={on:false,i:0,H:0,drag:false,y0:0,x0:0,t0:0,dy:0,dx:0,base:0,id:null,anim:0,pass:false};
+window.VP=VP;
+const feed=()=>document.getElementById('reelsFeed');
+const wrapEl=()=>document.querySelector('#reelsRoot .reelsWrap');
+function H(){const w=wrapEl();return VP.H=(w&&w.clientHeight)||window.innerHeight}
+function setY(y,ms){const f=feed();if(!f)return;f.style.transition=ms?`transform ${ms}ms cubic-bezier(.2,.85,.25,1)`:'none';f.style.transform=`translate3d(0,${Math.round(y)}px,0)`}
+function curY(){const f=feed();if(!f)return 0;const m=getComputedStyle(f).transform;if(!m||m==='none')return 0;const p=m.match(/matrix(3d)?\(([^)]+)\)/);if(!p)return 0;const a=p[2].split(',').map(Number);return p[1]?a[13]:a[5]}
+function moving(on){const r=document.getElementById('reelsRoot');if(!r)return;clearTimeout(VP.mt);if(on)r.classList.add('moving');else VP.mt=setTimeout(()=>r.classList.remove('moving'),60)}
+/* vai para o vídeo i */
+function go(i,ms){
+  const f=feed();if(!f||!VP.on)return;
+  const n=RL.items.length;if(!n)return;
+  if(i>=n){if(typeof reelMore==='function')reelMore().then(()=>{if(RL.items.length>n)go(n,ms);else go(n-1,ms)});i=n-1}
+  i=Math.max(0,Math.min(n-1,i));
+  const h=H();const dur=ms==null?300:ms;
+  VP.i=i;setY(-i*h,dur);
+  clearTimeout(VP.anim);
+  if(RL.cur!==i){moving(true);reelSetCurrent(i)}
+  VP.anim=setTimeout(()=>{moving(false);passMode(false)},dur+20);
+}
+VP.go=go;
+
+/* ---------- liga o modo novo na aba Vídeos ---------- */
+function enable(){
+  const f=feed(),w=wrapEl();if(!f||!w)return;
+  VP.on=true;f.classList.add('vpOn');w.classList.add('vpWrap');
+  try{RL.io&&RL.io.disconnect()}catch(_){}
+  VP.i=Math.max(0,RL.cur);H();setY(-VP.i*VP.H,0);
+  /* troca a camada de gestos antiga pela nova */
+  const old=document.getElementById('reelGest');const g=old?old.cloneNode(false):document.createElement('div');
+  g.id='reelGest';g.className='reelGest vpGest';if(old)old.replaceWith(g);else w.appendChild(g);
+  bind(g);
+}
+function bind(g){
+  g.addEventListener('pointerdown',e=>{
+    if(e.button>0)return;if(VP.pass){g.style.clipPath='';g.style.webkitClipPath='';VP.wasPass=true}else VP.wasPass=false;VP.drag=true;VP.id=e.pointerId;VP.y0=e.clientY;VP.x0=e.clientX;VP.t0=performance.now();VP.dy=0;VP.dx=0;VP.moved=false;
+    VP.base=curY();setY(VP.base,0);clearTimeout(VP.anim);
+    try{g.setPointerCapture(e.pointerId)}catch(_){}
+    if(typeof reelTapDown==='function')reelTapDown(e);
+  });
+  g.addEventListener('pointermove',e=>{
+    if(!VP.drag||e.pointerId!==VP.id)return;VP.dy=e.clientY-VP.y0;VP.dx=e.clientX-VP.x0;
+    if(!VP.moved&&Math.abs(VP.dy)>8&&Math.abs(VP.dy)>Math.abs(VP.dx)){VP.moved=true;moving(true)}
+    if(!VP.moved)return;
+    let dy=VP.dy;const n=RL.items.length;
+    if((VP.i===0&&dy>0)||(VP.i>=n-1&&dy<0))dy*=.35;
+    setY(VP.base+dy,0);
+  });
+  const end=e=>{
+    if(!VP.drag||e.pointerId!==VP.id)return;VP.drag=false;
+    const dt=Math.max(1,performance.now()-VP.t0),v=VP.dy/dt,h=VP.H||H();
+    if(!VP.moved){
+      setY(-VP.i*h,0);moving(false);
+      if(VP.wasPass){passMode(true);return}
+      if(e.type==='pointerup'&&Math.abs(VP.dx)<12&&Math.abs(VP.dy)<12)tap(e);
+      return;
+    }
+    unlockSound();
+    if(VP.wasPass){VP.pass=true;passMode(false)}
+    let t=VP.i;
+    if(VP.dy<-h*.16||v<-.4)t=VP.i+1;else if(VP.dy>h*.16||v>.4)t=VP.i-1;
+    const left=Math.abs((-t*h)-(VP.base+VP.dy));
+    go(t,Math.max(160,Math.min(320,left/1.6)));
+  };
+  g.addEventListener('pointerup',end);g.addEventListener('pointercancel',end);
+  g.addEventListener('wheel',e=>{e.preventDefault();if(Date.now()-(VP.wt||0)<450||Math.abs(e.deltaY)<15)return;VP.wt=Date.now();go(VP.i+(e.deltaY>0?1:-1))},{passive:false});
+}
+/* toque: no Instagram abre "modo toque" (para apertar o play do próprio Instagram); nos outros, pausa/continua */
+function tap(e){
+  const x=RL.items[RL.cur];
+  if(x&&x.kind==='ig'){passMode(true);return}
+  if(x&&x.kind==='fb'){const el=document.querySelector(`.reel[data-i="${RL.cur}"] .fb-video`);const p=el&&el._fbp;if(p){try{if(VP.fbPaused){p.play();VP.fbPaused=false;reelFlash&&reelFlash('▶')}else{p.pause();VP.fbPaused=true;reelFlash&&reelFlash('⏸')}}catch(_){}}return}
+  if(x&&x.kind==='dm'){passMode(true);return}
+  if(typeof reelTapUp==='function')reelTapUp(e,RL.cur);
+}
+/* "modo toque": abre um buraco na camada de gestos em cima do vídeo do Instagram,
+   para o toque chegar no player dele. As bordas continuam passando para o próximo. */
+function passMode(on){
+  const g=document.getElementById('reelGest');if(!g)return;
+  if(!on){if(VP.pass){VP.pass=false;g.style.clipPath='';g.style.webkitClipPath='';document.getElementById('vpHint')?.remove()}return}
+  const box=document.querySelector(`.reel[data-i="${RL.cur}"] .reelSocialBox`);if(!box)return;
+  const gr=g.getBoundingClientRect(),b=box.getBoundingClientRect();
+  const x1=b.left-gr.left,y1=b.top-gr.top,x2=b.right-gr.left,y2=b.bottom-gr.top;
+  const cp=`polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,${x1}px ${y1}px,${x2}px ${y1}px,${x2}px ${y2}px,${x1}px ${y2}px,${x1}px ${y1}px)`;
+  g.style.clipPath=cp;g.style.webkitClipPath=cp;VP.pass=true;
+  const r=document.getElementById('reelsRoot');if(r&&!document.getElementById('vpHint')){r.insertAdjacentHTML('beforeend','<div id="vpHint" class="vpHint">Toque no play do vídeo · arraste pelas bordas para passar</div>');setTimeout(()=>document.getElementById('vpHint')?.remove(),2600)}
+}
+/* som: o primeiro gesto vale como "permissão" do navegador */
+function unlockSound(){
+  try{if(RL.want&&RL.muted&&RL.pill&&typeof reelUnmute==='function'){const x=RL.items[RL.cur];if(!x||x.kind==='youtube'||!x.social||x.kind==='px'||x.kind==='cm'||x.kind==='fb'||x.kind==='dm')reelUnmute()}}catch(_){}
+}
+
+/* ---------- encaixe no código que já existia ---------- */
+const setup0=window.setupVideoFeed;
+window.setupVideoFeed=function(){const r=setup0.apply(this,arguments);try{enable()}catch(e){console.warn(e)}return r};
+try{setupVideoFeed=window.setupVideoFeed}catch(_){}
+/* o observador antigo decidia o vídeo pela rolagem; agora quem decide é o arraste */
+const obs0=window.reelObserve;
+window.reelObserve=function(){if(VP.on&&feed()?.classList.contains('vpOn')){try{RL.io&&RL.io.disconnect()}catch(_){}return}return obs0.apply(this,arguments)};
+try{reelObserve=window.reelObserve}catch(_){}
+const render0=window.renderVideoFeed;
+window.renderVideoFeed=function(append){const r=render0.apply(this,arguments);if(VP.on&&!append){VP.i=Math.max(0,RL.cur);setY(-VP.i*H(),0);passMode(false)}return r};
+try{renderVideoFeed=window.renderVideoFeed}catch(_){}
+window.reelNext=function(){if(!VP.on||!feed())return;const n=RL.items.length;if(RL.cur+1<n){go(RL.cur+1);return}
+  reelMore().then(()=>{if(RL.items.length>RL.cur+1)go(RL.cur+1);else if(RL.items[RL.cur]&&!RL.items[RL.cur].social){reelCmd('seekTo',[0,true]);reelCmd('playVideo')}})};
+try{reelNext=window.reelNext}catch(_){}
+window.reelGo=function(i){if(VP.on)go(i);};
+try{reelGo=window.reelGo}catch(_){}
+/* qualquer "rolar até o vídeo" antigo vira ir até o vídeo */
+const siv=Element.prototype.scrollIntoView;
+Element.prototype.scrollIntoView=function(){if(VP.on&&this.classList&&this.classList.contains('reel')&&this.parentElement&&this.parentElement.id==='reelsFeed'&&this.parentElement.classList.contains('vpOn')){go(+this.dataset.i);return}return siv.apply(this,arguments)};
+/* troca de vídeo por outro motivo (erro, fim) mantém a posição certa */
+const set0=window.reelSetCurrent;
+window.reelSetCurrent=function(i){const r=set0.apply(this,arguments);if(VP.on&&feed()?.classList.contains('vpOn')&&VP.i!==i&&!VP.drag){VP.i=i;setY(-i*H(),260)}return r};
+try{reelSetCurrent=window.reelSetCurrent}catch(_){}
+window.addEventListener('resize',()=>{if(VP.on&&feed())setY(-VP.i*H(),0)});
+/* saiu da aba: desliga */
+const stop0=window.reelStop;
+window.reelStop=function(){const r=stop0.apply(this,arguments);if(!document.getElementById('reelsFeed'))VP.on=false;return r};
+try{reelStop=window.reelStop}catch(_){}
 })();
 </script>
 </body></html>
