@@ -4532,6 +4532,7 @@ function scRenderPick(){
   document.getElementById('scBody').innerHTML=`<div class="stPick"><div class="stPickHero"><h2>Novo story</h2>Compartilhe um momento com a região. Fica no ar por 24 horas.<br><small style="opacity:.75">Visível para: <b>${ST_AUD_TXT[pr.view]||'Todos'}</b></small></div><div class="stPickGrid"><button class="stBig" onclick="stCamOpen()"><span class="stBigIco">${STI.cam}</span><span><b>Câmera</b><small>Foto ou vídeo na hora</small></span></button><button class="stBig" onclick="document.getElementById('scGal').click()"><span class="stBigIco">${STI.gal}</span><span><b>Galeria</b><small>Fotos e vídeos · vários de uma vez</small></span></button><button class="stBig" onclick="scStartText()"><span class="stBigIco" style="font-family:Georgia,serif">Aa</span><span><b>Texto</b><small>Só texto com fundo colorido</small></span></button><button class="stBig" onclick="document.getElementById('scFile').click()"><span class="stBigIco">${STI.file}</span><span><b>Arquivo</b><small>JPG, PNG, HEIC, MP4, MOV</small></span></button></div><div class="stPickLinks"><button class="stChip" onclick="storyArchive()">${STI.arch} Arquivo de stories</button><button class="stChip" onclick="closeFriendsEditor()">${STI.star} Amigos próximos</button></div></div><input id="scCam" class="hidden" type="file" accept="image/*,video/*" capture="environment" onchange="scPicked(this)"><input id="scGal" class="hidden" type="file" accept="image/*,video/*" multiple onchange="scPicked(this)"><input id="scFile" class="hidden" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/gif,video/mp4,video/quicktime,video/webm,.heic,.heif,.mov,.mp4" multiple onchange="scPicked(this)">`;
 }
 function scPicked(inp){
+  if(inp.files&&inp.files.length&&document.getElementById('stCam'))stCamClose();
   const files=[...(inp.files||[])].filter(f=>/^(image|video)\//.test(f.type)||/\.(heic|heif|mov|mp4|webm|jpe?g|png|webp|gif)$/i.test(f.name));
   inp.value='';
   if(!files.length){if(inp.files&&inp.files.length)alert('Formato não suportado. Use foto (JPG, PNG, HEIC) ou vídeo (MP4, MOV).');return}
@@ -4565,7 +4566,7 @@ function stCamOpen(){
 function stCamPaintBot(){
   const b=document.getElementById('stCamBot');if(!b)return;
   if(CAM.shot){b.innerHTML=`<div class="stUseRow"><button class="secondary" onclick="stCamRetake()">Refazer</button><button class="primary" onclick="stCamUse()">Usar ${CAM.shot.type.startsWith('video')?'vídeo':'foto'} ›</button></div>`;return}
-  b.innerHTML=`<div class="stCamModes"><button class="${CAM.mode==='photo'?'on':''}" onclick="stCamMode('photo')">Foto</button><button class="${CAM.mode==='video'?'on':''}" onclick="stCamMode('video')">Vídeo</button></div><div class="stCamRow"><button class="stIco" aria-label="Galeria" onclick="stCamClose();document.getElementById('scGal').click()">${STI.gal}</button><button class="stShutter ${CAM.mode==='video'?'video':''}" id="stShutter" aria-label="${CAM.mode==='video'?'Gravar':'Tirar foto'}" onclick="stCamShutter()"><i></i><svg viewBox="0 0 82 82"><circle cx="41" cy="41" r="39"/></svg></button><button class="stIco" aria-label="Trocar câmera" onclick="stCamFlip()">${STI.flip}</button></div>`;
+  b.innerHTML=`<div class="stCamModes"><button class="${CAM.mode==='photo'?'on':''}" onclick="stCamMode('photo')">Foto</button><button class="${CAM.mode==='video'?'on':''}" onclick="stCamMode('video')">Vídeo</button></div><div class="stCamRow"><button class="stIco" aria-label="Galeria" onclick="stCamGal()">${STI.gal}</button><button class="stShutter ${CAM.mode==='video'?'video':''}" id="stShutter" aria-label="${CAM.mode==='video'?'Gravar':'Tirar foto'}" onclick="stCamShutter()"><i></i><svg viewBox="0 0 82 82"><circle cx="41" cy="41" r="39"/></svg></button><button class="stIco" aria-label="Trocar câmera" onclick="stCamFlip()">${STI.flip}</button></div>`;
 }
 async function stCamStart(){
   stCamStopTracks();
@@ -4584,6 +4585,14 @@ async function stCamStart(){
   }
 }
 function stCamStopTracks(){if(CAM.stream){CAM.stream.getTracks().forEach(t=>{try{t.stop()}catch(_){}});CAM.stream=null}}
+function stCamGal(){
+  /* Galeria direto da câmera: abre o seletor sem fechar a câmera; a câmera só fecha se a pessoa escolher algo */
+  const inp=document.getElementById('scGal');
+  if(!inp){stCamClose();return}
+  try{inp.value=''}catch(_){}
+  inp.click();
+}
+window.addEventListener('focus',()=>{try{const t=CAM.stream&&CAM.stream.getVideoTracks()[0];if(document.getElementById('stCam')&&(!t||t.readyState==='ended'))stCamStart()}catch(_){}});
 function stCamClose(){
   try{if(CAM.rec&&CAM.rec.state!=='inactive'){CAM.rec.onstop=null;CAM.rec.stop()}}catch(_){}
   clearInterval(CAM.timer);stCamStopTracks();
@@ -12480,6 +12489,8 @@ SV2.remove=async function(i){
 .c2Ci.on .c2Ball{transform:scale(1.2);border-color:transparent}
 .c2BallExp{background:rgba(255,255,255,.2);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .c2Bar{display:flex;align-items:center;gap:10px;margin-top:12px}
+#stCam,#stCam *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+#stCam input,#stCam textarea,#stCam [contenteditable]{-webkit-user-select:text;user-select:text}
 .c2Sq{flex:none;width:40px;height:40px;border-radius:12px;border:2px solid rgba(255,255,255,.85);background:rgba(0,0,0,.3);color:#fff;display:grid;place-items:center;padding:0;cursor:pointer}
 .c2Sq svg{width:22px;height:22px}
 .c2Sq:last-child{border-radius:50%;border-width:1px;border-color:rgba(255,255,255,.2)}
@@ -12845,7 +12856,7 @@ function railHtml(){
 }
 function carHtml(){const ids=carouselIds();return `<div class="c2Car" id="c2Car">${ids.map(id=>{const fx=FX[idx(id)];return `<button type="button" class="c2Ci${fx.id===cur().id?' on':''}" data-id="${fx.id}" aria-label="${fx.name}">${ball(fx)}</button>`}).join('')}<button type="button" class="c2Ci c2Exp" data-exp="1" aria-label="Explorar efeitos"><span class="c2Ball c2BallExp">${RI.search}</span></button></div>`}
 function pillHtml(){const fx=cur(),sv=ls('cm_cfx_saved',[]).includes(fx.id);
-  return `<div class="c2Bar"><button type="button" class="c2Sq" onclick="stCamClose();document.getElementById('scGal').click()" aria-label="Galeria">${RI.gal}</button><div class="c2Name${ST.i?' on':''}">${ST.i?`<button type="button" class="c2Bm${sv?' on':''}" onclick="CFX.ui.save()" aria-label="Salvar efeito">${sv?RI.saveOn:RI.save}</button><span onclick="CFX.ui.sheet(true)">${esc(fx.name)}</span><button type="button" class="c2Xb" onclick="CFX.select(0)" aria-label="Tirar efeito">${RI.x}</button>`:`<span class="c2Hint2" onclick="CFX.ui.sheet(true)">${RI.search} Explorar efeitos</span>`}</div><button type="button" class="c2Sq" onclick="stCamFlip()" aria-label="Trocar câmera">${RI.flip}</button></div>`}
+  return `<div class="c2Bar"><button type="button" class="c2Sq" onclick="stCamGal()" aria-label="Galeria">${RI.gal}</button><div class="c2Name${ST.i?' on':''}">${ST.i?`<button type="button" class="c2Bm${sv?' on':''}" onclick="CFX.ui.save()" aria-label="Salvar efeito">${sv?RI.saveOn:RI.save}</button><span onclick="CFX.ui.sheet(true)">${esc(fx.name)}</span><button type="button" class="c2Xb" onclick="CFX.select(0)" aria-label="Tirar efeito">${RI.x}</button>`:`<span class="c2Hint2" onclick="CFX.ui.sheet(true)">${RI.search} Explorar efeitos</span>`}</div><button type="button" class="c2Sq" onclick="stCamFlip()" aria-label="Trocar câmera">${RI.flip}</button></div>`}
 function build(){
   const box=document.getElementById('stCam'),bot=document.getElementById('stCamBot');if(!box||!bot||CAM.shot)return;
   box.classList.add('c2');document.getElementById('cfxRow')?.remove();
