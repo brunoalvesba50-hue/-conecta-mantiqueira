@@ -5300,6 +5300,7 @@ function cfgMain(){
     {i:'act',t:'Sua atividade',on:"cfgPush(cfgActivity)",k:'atividade publicações seguidores'},
     {i:'bell',t:'Notificações',s:'Ver avisos de menções, curtidas e respostas',on:"cfgGo('cmNotifOpen()')",k:'avisos'},
     {i:'bell',t:'Notificações no celular',s:notif?'Ativadas':'Desativadas',sw:notif,on:"cfgPushToggle(this)",k:'push alerta'},
+    {i:'lock',t:'Permissões do app',s:'Notificações, câmera e microfone',on:"cfgGo('cmPermsOpen(true)')",k:'permissoes camera microfone audio segundo plano'},
     {i:'moon',t:'Tema escuro',sw:dark,on:"cfgTheme(this)",k:'tema claro escuro'}
    ])+
    cfgSec('Seu perfil',[
@@ -13803,6 +13804,100 @@ function ensurePush(){
   }catch(_){}
 }
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(ensurePush,1500)});
+})();
+</script>
+<style id="cmPermStyle">
+.pmBox{padding:4px 2px calc(8px + env(safe-area-inset-bottom));text-align:center}
+.pmBox h2{margin:6px 0 4px;font-size:22px}
+.pmBox>p{color:#c9d6de;font-size:15px;line-height:1.45;margin:0 0 14px}
+.pmList{display:flex;flex-direction:column;gap:10px;text-align:left;margin-bottom:14px}
+.pmRow{display:flex;align-items:center;gap:12px;padding:12px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08)}
+.pmIco{flex:none;width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:21px;background:rgba(32,223,154,.14)}
+.pmTx{flex:1;min-width:0}.pmTx b{display:block;font-size:15px}.pmTx small{display:block;color:#9fb3bf;font-size:12.5px;line-height:1.35;margin-top:2px}
+.pmSt{flex:none;font-size:13px;font-weight:700;padding:8px 12px;border-radius:999px;border:0;background:#20df9a;color:#04121c;min-width:78px}
+.pmSt.ok{background:transparent;color:#20df9a;padding:8px 4px}
+.pmSt.no{background:rgba(255,77,94,.16);color:#ff8b96}
+.pmNote{font-size:12px;color:#8ea3af;margin:10px 4px 0;line-height:1.4}
+</style>
+<script>
+/* ===================== Primeira abertura do app instalado: pede tudo de uma vez ===================== */
+(function(){
+const DONE='cm_perms_done';
+const isApp=()=>{try{return typeof cmStandalone==='function'&&cmStandalone()}catch(_){return false}};
+const ios=()=>{try{return cmIsIOS()}catch(_){return false}};
+async function permState(name){
+  if(name==='notif'){if(!('Notification' in window))return 'na';const p=Notification.permission;return p==='granted'?'ok':p==='denied'?'no':'ask'}
+  try{const r=await navigator.permissions.query({name});if(r.state==='granted')return 'ok';if(r.state==='denied')return 'no'}catch(_){}
+  return localStorage.getItem('cm_perm_'+name)==='ok'?'ok':'ask';
+}
+function btn(st,act){
+  if(st==='ok')return '<span class="pmSt ok">✓ Ativado</span>';
+  if(st==='na')return '<span class="pmSt ok" style="color:#8ea3af">—</span>';
+  if(st==='no')return `<button type="button" class="pmSt no" onclick="cmPermHelp('${act}')">Bloqueado</button>`;
+  return `<button type="button" class="pmSt" onclick="cmPermAsk('${act}',this)">Permitir</button>`;
+}
+async function paint(){
+  const box=document.getElementById('pmList');if(!box)return;
+  const [n,c,m]=await Promise.all([permState('notif'),permState('camera'),permState('microphone')]);
+  box.innerHTML=
+   `<div class="pmRow"><span class="pmIco">🔔</span><span class="pmTx"><b>Notificações</b><small>Mensagens, curtidas e alertas da serra chegam mesmo com o app fechado — é assim que o Conecta funciona em segundo plano.</small></span>${btn(n,'notif')}</div>`+
+   `<div class="pmRow"><span class="pmIco">📷</span><span class="pmTx"><b>Câmera</b><small>Para stories, fotos, vídeos e instantes.</small></span>${btn(c,'camera')}</div>`+
+   `<div class="pmRow"><span class="pmIco">🎤</span><span class="pmTx"><b>Microfone</b><small>Para mensagens de voz, vídeos com som e a sala ao vivo.</small></span>${btn(m,'microphone')}</div>`;
+  const all=document.getElementById('pmAll');if(all){const pend=[n,c,m].filter(x=>x==='ask').length;all.style.display=pend?'':'none';const ok=document.getElementById('pmOk');if(ok)ok.textContent=pend?'Agora não':'Pronto'}
+}
+async function askMedia(video,audio){
+  try{
+    const s=await navigator.mediaDevices.getUserMedia({video:video?{facingMode:'user'}:false,audio:!!audio});
+    s.getTracks().forEach(t=>t.stop());
+    if(video)localStorage.setItem('cm_perm_camera','ok');if(audio)localStorage.setItem('cm_perm_microphone','ok');
+    return true;
+  }catch(e){return false}
+}
+async function askNotif(){
+  try{if(typeof cmPushEnable==='function'&&Notification.permission!=='granted'){return await cmPushSubscribe(true)==='ok'}if(Notification.permission==='granted'){cmPushSubscribe(false).catch(()=>{});return true}}catch(_){}
+  return false;
+}
+window.cmPermAsk=async function(what,b){
+  if(b){b.disabled=true;b.textContent='…'}
+  if(what==='notif')await askNotif();
+  else if(what==='camera')await askMedia(true,false);
+  else if(what==='microphone')await askMedia(false,true);
+  paint();
+};
+window.cmPermAll=async function(b){
+  if(b){b.disabled=true;b.textContent='Liberando…'}
+  /* a notificação precisa ser a primeira (o iPhone só pergunta logo depois do toque) */
+  if(('Notification' in window)&&Notification.permission==='default')await askNotif();
+  const [c,m]=await Promise.all([permState('camera'),permState('microphone')]);
+  if(c==='ask'||m==='ask')await askMedia(c==='ask',m==='ask');
+  if(b){b.disabled=false;b.textContent='Permitir tudo'}
+  await paint();
+  const left=(await Promise.all([permState('notif'),permState('camera'),permState('microphone')])).filter(x=>x==='ask'||x==='no').length;
+  if(!left){try{closeModal()}catch(_){}shareToast('Tudo pronto! O Conecta está liberado ✓')}
+};
+window.cmPermHelp=function(what){
+  const nome={notif:'Notificações',camera:'Câmera',microphone:'Microfone'}[what]||'';
+  const txt=ios()
+    ?(what==='notif'?'Abra <b>Ajustes do iPhone → Notificações → Conecta</b> e ative “Permitir Notificações”.':`Abra <b>Ajustes do iPhone → Apps → Safari → ${nome}</b> e escolha <b>Permitir</b>. Depois feche e abra o Conecta de novo.`)
+    :`Abra os <b>Ajustes do celular → Apps → Chrome → Permissões → ${nome}</b> e permita. Ou no Chrome: <b>⋮ → Configurações → Configurações do site → ${nome}</b>.`;
+  alert(txt.replace(/<[^>]+>/g,''));
+};
+window.cmPermsOpen=function(force){
+  try{localStorage.setItem(DONE,'1')}catch(_){}
+  openModal(`<div class="pmBox"><div class="nuHero">📲</div><h2>Deixe o Conecta pronto</h2><p>Libere uma vez e use tudo sem interrupções, igual ao Instagram.</p><div id="pmList" class="pmList"></div><button id="pmAll" class="primary" style="width:100%" onclick="cmPermAll(this)">Permitir tudo</button><button id="pmOk" class="ghost" style="width:100%;margin-top:6px" onclick="closeModal()">Agora não</button>${ios()?'<div class="pmNote">No iPhone, a Apple pode confirmar a câmera de novo na hora de usar. É normal: basta tocar em Permitir.</div>':''}</div>`);
+  document.querySelector('#modal .modalBox')?.classList.add('stSheet');
+  paint();
+};
+/* primeira vez que abre o app instalado (já logado): mostra a tela de permissões no lugar do aviso simples */
+function shouldShow(){
+  try{return isApp()&&me?.id&&localStorage.getItem(DONE)!=='1'&&window.cmCurrentPage==='home'&&!document.getElementById('modal')&&!document.getElementById('cityGate')&&(typeof cmHasCity!=='function'||cmHasCity())}catch(_){return false}
+}
+if(typeof window.cmPushNudge==='function'){
+  const n0=window.cmPushNudge;
+  window.cmPushNudge=function(force){if(isApp()&&localStorage.getItem(DONE)!=='1'){if(shouldShow())cmPermsOpen();return}return n0.apply(this,arguments)};
+  try{cmPushNudge=window.cmPushNudge}catch(_){}
+}
+let tries=0;const t=setInterval(()=>{tries++;if(localStorage.getItem(DONE)==='1'||tries>40||!isApp()){clearInterval(t);return}if(shouldShow()){clearInterval(t);cmPermsOpen()}},1500);
 })();
 </script>
 </body></html>
