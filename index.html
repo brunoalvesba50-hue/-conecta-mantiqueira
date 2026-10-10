@@ -1351,7 +1351,7 @@ cal:'<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2.5
 mount:'<svg viewBox="0 0 120 80" aria-hidden="true"><path d="M8 66 L44 18 L62 42 L76 26 L112 66" fill="none" stroke="#fff" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/><path d="M26 66 C44 54 60 60 80 50" fill="none" stroke="#20df9a" stroke-width="4" stroke-linecap="round"/><path d="M60 58v18M51 67h18" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M22 20l2 5 5 2-5 2-2 5-2-5-5-2 5-2zM98 14l1.5 3.5 3.5 1.5-3.5 1.5L98 24l-1.5-3.5L93 19l3.5-1.5zM86 4l1 2.5 2.5 1-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1z" fill="#cfeee4"/></svg>'
 };
 let FEEDF={q:'',type:'all',sort:'recent',mine:false};
-function exploreTopBtns(){const p=profileData();return cmRound(CMI.search,'Buscar','document.getElementById(\'exploreQ\')?.focus()')+cmRound(CMI.bell+'<i class="cmDot hidden" data-notif-dot></i>','Notificações','cmNotifOpen()')+`<button class="cmRound av" type="button" aria-label="Meu perfil" onclick="go('profile')"><img src="${esc(p.photo)}" alt="" onerror="this.src='${esc(avatar(p.name))}'"></button>`}
+function exploreTopBtns(){const p=profileData();return cmRound(CMI.search,'Buscar','document.getElementById(\'exploreQ\')?.focus()')+cmRound(CMI.bell+'<i class="cmDot hidden" data-notif-dot></i>','Notificações','cmNotifOpen()')}
 function explore(){setTimeout(cmNotifCount,300);return screen(`${cmTop(exploreTopBtns())}<h1 class="cmTitle">Expl<em>orar</em></h1><div class="cmChips cmTabs"><button type="button" class="on">Feed</button><button type="button" onclick="go('videos')">${CMI2.film}Vídeos</button><button type="button" onclick="go('news')">${CMI2.news}Notícias</button><button type="button" onclick="go('groups')">${CMI2.group}Grupos</button></div><div class="cmRegion"><span class="cmRegionPin">${CMI.pin}</span><div><b>Feed da região</b><span>Conteúdos reais de pessoas da Mantiqueira e cidades vizinhas</span></div><button type="button" class="cmBtnLine" onclick="newPost()">＋ Publicar</button></div><div class="cmSearch"><span class="cmSearchIco">${CMI.search}</span><input id="exploreQ" type="search" placeholder="Buscar publicações, pessoas ou lugares…" value="${esc(FEEDF.q)}" oninput="FEEDF.q=this.value;POSTS.shown=20;renderFeed()" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search"><button type="button" class="cmFilterBtn${FEEDF.sort!=='recent'||FEEDF.mine?' on':''}" onclick="exploreFilters()" aria-label="Filtros">${CMI.sliders}</button></div><div class="cmChips" id="exploreChips">${exploreChipsHtml()}</div><div id="explorePeople"></div><div id="feed" data-explore="1"></div>`,'explore')}
 function exploreChipsHtml(){return [['all',CMI2.grid,'Todos'],['image',CMI2.photo,'Fotos'],['video',CMI2.play,'Vídeos'],['news',CMI2.news,'Notícias'],['event',CMI2.cal,'Eventos']].map(([k,ic,l])=>`<button type="button" class="${FEEDF.type===k?'on':''}" onclick="exploreType('${k}')">${ic}${l}</button>`).join('')}
 function exploreType(k){if(k==='news'){go('news');return}FEEDF.type=k;POSTS.shown=20;const c=document.getElementById('exploreChips');if(c)c.innerHTML=exploreChipsHtml();renderFeed()}
@@ -8169,7 +8169,7 @@ const ICO={
   pause:'<svg class="muxPa" viewBox="0 0 24 24" fill="#fff"><rect x="6.5" y="5" width="4" height="14" rx="1"/><rect x="13.5" y="5" width="4" height="14" rx="1"/></svg>',
   save:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3.5h12a1 1 0 0 1 1 1V21l-7-4.5L5 21V4.5a1 1 0 0 1 1-1z"/></svg>'
 };
-const TABS=[['@foryou','Para você'],['@top','Em alta'],['@saved','Salvos']];
+const TABS=[['@foryou','Para você'],['@top','Em alta'],['@free','Sem royalties'],['@saved','Salvos']];
 const ST={sc:{tab:'@foryou',seq:0,q:'',page:0,done:false,busy:false,keys:null},pp:{tab:'@foryou',seq:0,q:'',page:0,done:false,busy:false,keys:null}};
 const kOf=t=>normText((t.title||'')+'|'+(t.artist||'')).replace(/\s*\(.*?\)\s*/g,'').trim();
 const src=t=>t&&t.dz?'dz:'+t.dz:(t&&t.url)||'';
@@ -8281,7 +8281,7 @@ const skeleton=n=>Array.from({length:n||7},()=>'<div class="muxSk"><i></i><span>
 const fmt=d=>{d=Math.max(0,Math.round(d||0));return Math.floor(d/60)+':'+String(d%60).padStart(2,'0')};
 function rows(list,k,off){
   off=off||0;const prev=k==='sc'?'muPreview':'ppMuPrev',use=k==='sc'?'muChoose':'ppMuChoose';
-  return list.map((t,j)=>{const i=off+j;return `<div class="muxRow" onclick="${use}(${i})"><button type="button" class="muxCov" data-${k}="${k==='sc'?esc(t.id):'r'+i}" aria-label="Ouvir prévia" onclick="event.stopPropagation();${prev}(${i})">${t.cover?`<img src="${esc(t.cover)}" alt="" loading="lazy">`:'<em>♪</em>'}<span class="muxPl">${ICO.pause}</span></button><div class="muxInfo"><b><span>${esc(t.title)}</span>${t.ex?'<i class="igmE">E</i>':''}</b><span>${esc(t.artist||'Artista')}${t.full?' · '+fmt(t.full):''}</span></div><button type="button" class="muxSv${savedHas(t)?' on':''}" aria-label="Salvar música" onclick="event.stopPropagation();muxSave('${k}',${i},this)">${ICO.save}</button></div>`}).join('');
+  return list.map((t,j)=>{const i=off+j;return `<div class="muxRow" onclick="${prev}(${i})"><button type="button" class="muxCov" data-${k}="${k==='sc'?esc(t.id):'r'+i}" aria-label="Ouvir prévia" onclick="event.stopPropagation();${prev}(${i})">${t.cover?`<img src="${esc(t.cover)}" alt="" loading="lazy">`:'<em>♪</em>'}<span class="muxPl">${ICO.pause}</span></button><div class="muxInfo"><b><span>${esc(t.title)}</span>${t.ex?'<i class="igmE">E</i>':''}</b><span>${t.free?'<i class="muxFree">Completa</i>':''}${esc(t.artist||'Artista')}${t.full?' · '+fmt(t.full):''}</span></div><button type="button" class="muxSv${savedHas(t)?' on':''}" aria-label="Salvar música" onclick="event.stopPropagation();muxSave('${k}',${i},this)">${ICO.save}</button><button type="button" class="muxUse" aria-label="Usar esta música" onclick="event.stopPropagation();${use}(${i})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>`}).join('');
 }
 const listId=k=>k==='sc'?'muList':'ppMuList';
 const getArr=k=>k==='sc'?MP.results:PPM.res;
@@ -8346,11 +8346,12 @@ window.ppMuClose=function(){hush();closeModal()};
 window.ppMuLoad=function(q){return load('pp',q)};
 
 /* ---------- escolher o trecho (estilo Instagram) ---------- */
-const DURS=[5,10,15,30];
+const DURS=[5,10,15,30,60,90,180];
 const TR={k:'',t:null,start:0,seg:15,dur:30,raf:0,playing:false,drag:null,
   stopRaf(){cancelAnimationFrame(this.raf);this.raf=0;this.playing=false;const b=document.getElementById('trPlay');if(b)b.classList.remove('on')}};
 function bars(id){let h=0;const s=String(id||'x');for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;const out=[];for(let i=0;i<64;i++){h=(h*1103515245+12345)>>>0;const base=0.35+0.65*Math.abs(Math.sin(i/3.1+(h%7)));out.push(Math.round(18+((h>>8)%60)*0.5*base+base*30))}return out}
-const durBtns=()=>DURS.map(d=>`<button type="button" class="muxChip${TR.seg===d?' on':''}" data-d="${d}" ${d>TR.dur+0.5?'disabled':''} onclick="muxTrDur(${d})">${d}s</button>`).join('');
+const durLab=d=>d<60?d+'s':d===90?'1:30':(d/60)+' min';
+const durBtns=()=>DURS.filter(d=>d<=30||d<=TR.dur+0.5).map(d=>`<button type="button" class="muxChip${TR.seg===d?' on':''}" data-d="${d}" ${d>TR.dur+0.5?'disabled':''} onclick="muxTrDur(${d})">${durLab(d)}</button>`).join('');
 function trHTML(){
   const t=TR.t;const b=bars(t.id);
   const back=TR.k==='sc'?'scMusicPanel()':'ppMuOpen()',close=TR.k==='sc'?'scMusicClose()':'ppMuClose()';
@@ -10243,7 +10244,7 @@ const XI={
 window.CMX=XI;
 const tpl=h=>{const t=document.createElement('template');t.innerHTML=h;return t};
 const meAv=()=>{try{const p=profileData();return `<button class="cmRound av" type="button" aria-label="Meu perfil" onclick="go('profile')"><img src="${esc(p.photo||avatar(p.name))}" alt="" onerror="this.src='${esc(avatar(p.name))}'"></button>`}catch(_){return ''}};
-window.cmTopBtns3=function(searchOn,noAv){return cmRound(XI.search,'Buscar',searchOn)+cmRound(XI.bell+'<i class="cmDot hidden" data-notif-dot></i>','Notificações','cmNotifOpen()')+(noAv?'':meAv())};
+window.cmTopBtns3=function(searchOn,noAv,noSearch){return (noSearch?'':cmRound(XI.search,'Buscar',searchOn))+cmRound(XI.bell+'<i class="cmDot hidden" data-notif-dot></i>','Notificações','cmNotifOpen()')+(noAv?'':meAv())};
 
 /* ---------------------------------- INÍCIO ---------------------------------- */
 function cityPeople(city){try{const k=cityKey(city);return getPublicPeople().filter(p=>p&&p.photo&&cityKey(p.city||'')===k).slice(0,4)}catch(_){return []}}
@@ -10252,7 +10253,7 @@ function dressHome(h){
   root.classList.add('hm3');
   /* topo: logo + lupa, sino e foto */
   const top=r.querySelector('.premiumTop');
-  if(top)top.outerHTML=`<div class="hmTop"><button class="hmBrand" type="button" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Conecta">${XI.mount}<b>Conecta</b><small>PESSOAS <i>•</i> LUGARES <i>•</i> HISTÓRIAS</small></button><div class="hmBtns">${cmTopBtns3("cmHomeSearch()",true)}</div></div>`;
+  if(top)top.outerHTML=`<div class="hmTop"><button class="hmBrand" type="button" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Conecta">${XI.mount}<b>Conecta</b><small>PESSOAS <i>•</i> LUGARES <i>•</i> HISTÓRIAS</small></button><div class="hmBtns">${cmTopBtns3("cmHomeSearch()",true,true)}</div></div>`;
   /* sem saudação */
   r.querySelectorAll('.premiumGreeting,.premiumSub').forEach(e=>e.remove());
   const hs=r.querySelector('.heroSpace');if(hs)hs.classList.add('hmSpace');
@@ -14018,6 +14019,137 @@ const t=setInterval(()=>{if(me?.id&&window.cmCurrentPage&&window.cmCurrentPage!=
 /* app em segundo plano: a notificação chega pelo celular; ao voltar em até 45s, ainda toca */
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&CL.pending&&Date.now()-CL.pending.at<45000){const n=CL.pending.n;CL.pending=null;cmIncomingCall({id:n.id,city:n.extra,from:n.actor_id})}else if(!document.hidden)CL.pending=null});
 try{navigator.serviceWorker&&navigator.serviceWorker.addEventListener('message',e=>{const d=e.data||{};if(d.type==='push'&&d.data&&d.data.kind==='room_invite'&&d.data.city){const n={id:d.data.nid,kind:'room_invite',extra:d.data.city,actor_id:d.data.actor,created_at:new Date().toISOString()};handle(n)}})}catch(_){}
+})();
+</script>
+<style id="cmMuNewsStyle">
+/* música: tocar ouve; seta no canto usa (igual Instagram) */
+.igm .muxRow{position:relative}
+.igm .muxCov{flex:0 0 52px;width:52px;height:52px;border-radius:8px}
+.igm .muxInfo b{font-size:15.5px}
+.igm .muxInfo>span{font-size:13.5px;color:#9aa8b1}
+.muxUse{display:none;flex:none;width:38px;height:38px;border-radius:50%;border:0;padding:0;background:#20df9a;color:#03231a;place-items:center;margin-left:2px;animation:muxPop .22s ease}
+.muxUse svg{width:20px;height:20px}
+.muxRow:has(.muxCov.on){background:rgba(255,255,255,.06)}
+.muxRow:has(.muxCov.on) .muxUse{display:grid}
+@keyframes muxPop{from{transform:scale(.5);opacity:0}to{transform:none;opacity:1}}
+.muxFree{font-style:normal;font-size:10.5px;font-weight:800;color:#03231a;background:#20df9a;border-radius:4px;padding:1px 5px;margin-right:6px;vertical-align:1px}
+.trDurs{flex-wrap:wrap}
+.trDurs .muxChip{flex:1 0 calc(25% - 8px)}
+</style>
+<script>
+/* ===================== Músicas completas (2 a 3 min) + Central de notícias mais rápida ===================== */
+(function(){
+/* ---------- 1) "Sem royalties": músicas completas e livres do Audius ---------- */
+const AUD='https://api.audius.co/v1';let AUD_HOST='';
+async function audJson(path){
+  const sep=path.includes('?')?'&':'?';
+  const tryOne=async b=>{const r=await fetch(b+path+sep+'app_name=Conecta',{cache:'no-store'});if(!r.ok)throw new Error('audius '+r.status);const j=await r.json();return Array.isArray(j.data)?j.data:[]};
+  try{return await tryOne(AUD_HOST||AUD)}catch(e){
+    try{const r=await fetch('https://api.audius.co');const j=await r.json();const l=(j&&j.data)||[];if(l.length){AUD_HOST=l[Math.floor(Math.random()*l.length)]+'/v1';return await tryOne(AUD_HOST)}}catch(_){}
+    throw e;
+  }
+}
+function audMap(arr){
+  return (arr||[]).filter(x=>x&&x.id&&x.is_streamable!==false&&!x.is_delete&&x.duration>=40&&x.duration<=480).map(x=>{const art=x.artwork||{};return{id:'a'+x.id,title:x.title||'Música',artist:(x.user&&x.user.name)||'',url:AUD+'/tracks/'+encodeURIComponent(x.id)+'/stream?app_name=Conecta',cover:art['480x480']||art['150x150']||art['1000x1000']||'',dur:Math.round(x.duration),full:Math.round(x.duration),free:1}});
+}
+/* preferência por músicas de 2 a 3 minutos */
+const near=t=>Math.abs((t.full||0)-150);
+const AC={};
+async function audTrending(page){
+  const k='t'+page;if(AC[k])return AC[k];
+  const genres=['','Electronic','Hip-Hop/Rap','Pop','Latin','Acoustic','Lo-Fi'];
+  const g=genres[page%genres.length];
+  let r=audMap(await audJson('/tracks/trending?limit=50'+(g?'&genre='+encodeURIComponent(g):'')+(page>=genres.length?'&time=allTime':'')));
+  r=r.sort((a,b)=>near(a)-near(b));
+  AC[k]=r;return r;
+}
+async function audSearch(q,page){
+  const k='s'+q+'#'+page;if(AC[k])return AC[k];
+  const r=audMap(await audJson('/tracks/search?query='+encodeURIComponent(q)+'&limit=25&offset='+(page*25)));
+  AC[k]=r;return r;
+}
+if(typeof window.musicSearch==='function'){
+  const ms0=window.musicSearch;
+  window.musicSearch=async function(q,page){
+    q=String(q||'').trim();page=page||0;
+    if(q==='@free'){try{return await audTrending(page)}catch(_){return []}}
+    const base=await ms0.apply(this,arguments);
+    if(q&&q[0]!=='@'){try{const a=await Promise.race([audSearch(q,page),new Promise(r=>setTimeout(()=>r([]),5000))]);const seen=new Set(base.map(t=>(t.title+'|'+t.artist).toLowerCase()));return base.concat(a.filter(t=>!seen.has((t.title+'|'+t.artist).toLowerCase())).slice(0,10))}catch(_){}}
+    return base;
+  };
+  try{musicSearch=window.musicSearch}catch(_){}
+}
+
+/* ---------- 2) Central de notícias: abre na hora, mais notícias e Aparecida ---------- */
+if(typeof window.refreshNews!=='function')return;
+const APARECIDA=['"Aparecida" SP','"Aparecida do Norte"','"Santuário Nacional" Aparecida','"Nossa Senhora Aparecida" Santuário','"Basílica" Aparecida romeiros'];
+const MORE=['"Cachoeira Paulista" OR "Canção Nova"','"Guaratinguetá"','"Lorena SP" OR "Lorena" Vale do Paraíba','"Cruzeiro SP" OR "Queluz SP"','"Pindamonhangaba"','"Itajubá"','"Pouso Alegre"','"Campos do Jordão" evento OR turismo','"Potim" OR "Roseira"'];
+const isAp=q=>/aparecida/i.test(q||'');
+function allQueries(){
+  const base=[...APARECIDA,...(typeof NEWS_LOCAL!=='undefined'?NEWS_LOCAL:[]),...MORE,...(typeof NEWS_WIDE!=='undefined'?NEWS_WIDE:[])];
+  return [...new Set(base)].map(q=>q+' when:4d');
+}
+function chunk(a,n){const o=[];for(let i=0;i<a.length;i+=n)o.push(a.slice(i,i+n));return o}
+function mapItem(x){
+  const title0=stripHtml(x.title||'');const q=String(x._query||'');
+  const source=typeof x.author==='string'&&x.author?x.author:(title0.includes(' - ')?title0.split(' - ').pop():'Fonte regional');
+  const title=title0.replace(/\s+-\s+[^-]+$/,'');
+  const cityHit=(typeof newsCity==='function'&&newsCity(title0))||'';
+  const o={source,title,summary:stripHtml(x.description||x.content||'').slice(0,220),url:x.link||x.guid||'',date:(typeof newsDateText==='function'&&newsDateText(x.pubDate))||'Atualizada recentemente',pubDate:x.pubDate||'',city:cityHit||(isAp(q)?'Aparecida':((typeof newsQueryLabel==='function'&&newsQueryLabel(q))||'')),image:(typeof extractNewsImage==='function'&&extractNewsImage(x))||''};
+  if(!isAp(q))o.q=q;
+  return o;
+}
+const keyT=t=>(typeof normText==='function'?normText(t):String(t).toLowerCase()).replace(/[^a-z0-9 ]/g,'').slice(0,70);
+let busy=false;
+window.refreshNews=async function(force){
+  const box=document.getElementById('newsList'),status=document.getElementById('newsStatus');if(!box||busy)return;
+  busy=true;document.getElementById('nwRoot')?.classList.add('busy');
+  if(status)status.textContent='Buscando notícias da região e de Aparecida…';
+  try{
+    const qs=allQueries();
+    const parts=await Promise.all(chunk(qs,12).map(c=>cmContent('noticias',c).catch(()=>null)));
+    let raw=[];parts.forEach(p=>{if(Array.isArray(p))raw.push(...p)});
+    if(!raw.length){
+      const b=await Promise.allSettled([...APARECIDA.slice(0,2),...newsQueries].map(fetchNewsQuery));b.forEach(r=>{if(r.status==='fulfilled')raw.push(...r.value)});
+    }
+    const seenU=new Set(),seenT=new Set();
+    let items=raw.map(mapItem).filter(x=>x.title&&x.url).filter(x=>{const kt=keyT(x.title);if(seenU.has(x.url)||seenT.has(kt))return false;seenU.add(x.url);seenT.add(kt);return true});
+    items.sort((a,b)=>newsDateValue(b)-newsDateValue(a));
+    /* mais recente primeiro, sem deixar uma cidade só tomar conta do topo */
+    const top=[],rest=[],perCity=new Map();
+    items.forEach(x=>{const c=x.city||'Região';const n=perCity.get(c)||0;if(top.length<40&&n<6){top.push(x);perCity.set(c,n+1)}else rest.push(x)});
+    items=top.concat(rest).slice(0,160);
+    if(items.length){
+      const old=new Map((news||[]).map(n=>[n.url,n.image]));items.forEach(x=>{if(!x.image&&old.get(x.url))x.image=old.get(x.url)});
+      news.splice(0,news.length,...items);renderNews(news);
+      const ap=items.filter(x=>x.city==='Aparecida').length;
+      if(status)status.textContent=`Atualizado agora • ${items.length} notícias${ap?' • '+ap+' de Aparecida':''}`;
+      try{localStorage.setItem('cm_news_cache',JSON.stringify(items.map(x=>({...x,summary:String(x.summary||'').slice(0,200)}))));localStorage.setItem('cm_news_cache_at',String(Date.now()))}catch(_){}
+      /* fotos das primeiras matérias por trás, sem travar a tela */
+      setTimeout(async()=>{
+        const need=news.filter(x=>!x.image).slice(0,10);if(!need.length)return;
+        const got=await Promise.all(need.map(x=>Promise.race([enrichNewsImage(x).catch(()=>''),new Promise(r=>setTimeout(()=>r(''),5000))])));
+        let ch=0;need.forEach((x,i)=>{if(got[i]){x.image=got[i];ch++}});
+        if(ch&&document.getElementById('newsList')&&window.scrollY<150)renderNews(news);
+        if(ch){try{localStorage.setItem('cm_news_cache',JSON.stringify(news))}catch(_){}}
+      },300);
+    }else{renderNews(news);if(status)status.textContent='Não há novidades no momento'}
+  }catch(e){renderNews(news);if(status)status.textContent='Não foi possível atualizar agora. Tente novamente.'}
+  finally{busy=false;document.getElementById('nwRoot')?.classList.remove('busy')}
+};
+try{refreshNews=window.refreshNews}catch(_){}
+/* abre com as últimas notícias guardadas (na hora) e atualiza por trás */
+if(typeof window.setupNewsRefresh==='function'){
+  const s0=window.setupNewsRefresh;
+  window.setupNewsRefresh=function(){
+    try{const c=JSON.parse(localStorage.getItem('cm_news_cache')||'[]');if(Array.isArray(c)&&c.length>=news.length*0.5)news.splice(0,news.length,...c)}catch(_){}
+    const at=Number(localStorage.getItem('cm_news_cache_at')||0);
+    const r=s0.apply(this,arguments);
+    const st=document.getElementById('newsStatus');if(st&&at)st.textContent='Atualizando… (última atualização há '+Math.max(1,Math.round((Date.now()-at)/60000))+' min)';
+    return r;
+  };
+  try{setupNewsRefresh=window.setupNewsRefresh}catch(_){}
+}
 })();
 </script>
 </body></html>
