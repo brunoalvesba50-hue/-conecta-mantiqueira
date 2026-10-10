@@ -14169,4 +14169,57 @@ if(typeof window.setupNewsRefresh==='function'){
 }
 })();
 </script>
+<style id="cmCleanHeads">
+/* ===== Bate-papo e Explorar: sem logo e sem título grande; ficam só os botões ===== */
+#app[data-page="chat"] .cmTop .cmLogo,#app[data-page="explore"] .cmTop .cmLogo{display:none!important}
+#app[data-page="chat"] h1.cmTitle,#app[data-page="explore"] h1.cmTitle{display:none!important}
+#app[data-page="chat"] .cmTop,#app[data-page="explore"] .cmTop{justify-content:flex-end;margin:0 0 14px;min-height:46px}
+/* ===== Comércios: sem a marca "Conecta" repetida ===== */
+.bz3 .bzBrand .bzMark,.bz3 .bzBrand>div:not([class]){display:none!important}
+.bz3 .bzBrand{justify-content:flex-end;margin-bottom:8px!important}
+.bz3 .bzBrand{display:flex!important;justify-content:flex-end!important;gap:10px!important}
+.bz3 .bzBrand .bzBell{margin-left:auto!important;position:static!important;transform:none!important}
+.bz3 .bzBrand .bzTopBtn:not(.bzBell){margin-left:0!important}
+.bz3 .bzTitle3{margin-top:clamp(18px,6vw,34px)!important}
+.bz3 .bzTitle3 span{display:none!important}
+.bz3 .bzHero{min-height:0!important}
+/* ===== Perfil: capa vai até o topo (atrás da barra do iPhone), sem faixa nem divisória ===== */
+.pf.pf3{margin-top:calc(-1 * max(28px, calc(env(safe-area-inset-top,0px) + 14px)))!important}
+.pf3 .pfCover{height:calc(clamp(220px,62vw,290px) + env(safe-area-inset-top,0px))!important}
+.pf3 .pfCover::after{-webkit-mask:none!important;mask:none!important;height:46%!important;bottom:-1px!important;background:linear-gradient(180deg,rgba(6,19,29,0) 0%,rgba(6,19,29,.55) 55%,#06131d 100%)!important}
+.pf3 .pfCover::before{background:linear-gradient(180deg,rgba(6,19,29,.38) 0%,rgba(6,19,29,0) 26%,rgba(6,19,29,0) 60%)!important}
+.pfTopBtns{position:absolute;z-index:3;top:calc(env(safe-area-inset-top,0px) + 14px);right:16px;display:flex;gap:10px;align-items:center}
+.pfTopBtns .pfCoverBtn{position:static!important;width:46px!important;height:46px!important}
+/* arco verde da foto mais fino */
+.pf3 .pfAvatarWrap{padding:2px!important}
+.pf3 .pfAvatarWrap .pfAvatar,.pf3 .pfAvatar{border-width:3px!important;box-shadow:0 0 12px rgba(32,223,154,.18)!important}
+</style>
+<script>
+/* ===================== Cabeçalhos limpos + topo do perfil integrado à capa ===================== */
+(function(){
+/* marca a tela atual para o CSS saber qual cabeçalho esconder */
+if(typeof window.go==='function'){const g0=window.go;window.go=function(page){try{const a=document.getElementById('app');if(a)a.dataset.page=page}catch(_){}return g0.apply(this,arguments)};try{go=window.go}catch(_){}}
+/* perfil: sininho sobre a capa, igual ao da tela inicial */
+function bell(){try{return cmRound(((window.CMX&&CMX.bell)||CMI.bell)+'<i class="cmDot hidden" data-notif-dot></i>','Notificações','cmNotifOpen()')}catch(_){return ''}}
+if(typeof window.profile==='function'){
+  const p0=window.profile;
+  window.profile=function(){
+    const h=p0.apply(this,arguments);
+    try{
+      const t=document.createElement('template');t.innerHTML=h;
+      const cov=t.content.querySelector('.pf3 .pfCover, .pfCover');
+      if(cov&&!cov.querySelector('.pfTopBtns')){
+        const box=document.createElement('div');box.className='pfTopBtns';
+        cov.querySelectorAll('.pfCoverBtn.r,.pfCoverBtn.r2').forEach(b=>box.appendChild(b));
+        box.insertAdjacentHTML('beforeend',bell());
+        cov.appendChild(box);
+      }
+      setTimeout(()=>{try{cmNotifDots()}catch(_){}},0);
+      return t.innerHTML;
+    }catch(_){return h}
+  };
+  try{profile=window.profile}catch(_){}
+}
+})();
+</script>
 </body></html>
