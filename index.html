@@ -2761,7 +2761,7 @@ search:'<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20.5 2
 dots:'<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/></svg>',
 sliders:'<svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>',
 pin:'<svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg>',
-bell:'<svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg>',
+bell:'<svg viewBox="0 0 24 24"><path d="M6 8.5a6 6 0 0 1 12 0c0 6.2 2.6 8.3 2.6 8.3H3.4S6 14.7 6 8.5z"/><path d="M10.2 20.6a2 2 0 0 0 3.6 0"/></svg>',
 plus:'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
 smile:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M8 14.5a5 5 0 0 0 8 0M9 9.5h.01M15 9.5h.01"/></svg>',
 send:'<svg viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-2.5-6.5z"/></svg>',
@@ -10229,7 +10229,7 @@ body:not(.lightTheme)::after{background:linear-gradient(180deg,rgba(6,19,29,.05)
 const SV=(p,sw)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw||1.9}" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
 const XI={
   search:SV('<circle cx="11" cy="11" r="7"/><path d="M20.5 20.5L16 16"/>',2.2),
-  bell:SV('<path d="M18 16V11a6 6 0 0 0-12 0v5l-2 2h16z"/><path d="M10 21a2 2 0 0 0 4 0"/>',2),
+  bell:SV('<path d="M6 8.5a6 6 0 0 1 12 0c0 6.2 2.6 8.3 2.6 8.3H3.4S6 14.7 6 8.5z"/><path d="M10.2 20.6a2 2 0 0 0 3.6 0"/>',1.9),
   sliders:SV('<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>'),
   people:SV('<circle cx="9" cy="8" r="3.2"/><path d="M3 19c.8-3.3 3.2-5 6-5s5.2 1.7 6 5"/><circle cx="17" cy="9" r="2.6"/><path d="M15.5 14.2c2.6-.3 4.8 1.2 5.5 4.3"/>'),
   groups:SV('<circle cx="12" cy="7" r="2.8"/><circle cx="5.5" cy="10" r="2.3"/><circle cx="18.5" cy="10" r="2.3"/><path d="M7.5 19c.6-3 2.3-4.6 4.5-4.6s3.9 1.6 4.5 4.6"/><path d="M2 18c.4-2 1.6-3.2 3.3-3.4M22 18c-.4-2-1.6-3.2-3.3-3.4"/>'),
@@ -12146,6 +12146,22 @@ window.__pk=PK;
 .ntBtn.blue{background:#4a5df9}
 .ntPage .ntUnread{margin:0 -8px 0 -6px}
 .lightTheme #modal.ntPage{background:#fff}.lightTheme .ntPage .ntTop h2,.lightTheme .ntPage .ntSec,.lightTheme .ntPage .ntBody,.lightTheme .ntPage .ntBack{color:#111}
+
+/* ---------- sininho premium ---------- */
+.cmRound.ntBell{overflow:visible}
+.cmRound.ntBell svg{width:23px;height:23px;stroke-width:1.9;transform-origin:50% 12%}
+.cmRound.ntBell.has{border-color:rgba(32,223,154,.55)!important;box-shadow:0 0 0 3px rgba(32,223,154,.12),0 6px 18px rgba(0,0,0,.3)!important}
+.cmRound.ntBell.has svg{animation:bellRing 3.2s ease-in-out 1s infinite}
+@keyframes bellRing{0%,82%,100%{transform:rotate(0)}85%{transform:rotate(14deg)}88%{transform:rotate(-12deg)}91%{transform:rotate(8deg)}94%{transform:rotate(-5deg)}97%{transform:rotate(2deg)}}
+.cmRound .cmDot.ntN{top:-3px!important;right:-3px!important;height:20px!important;min-width:20px!important;padding:0 5px!important;border-radius:10px!important;font:800 11px/20px Inter,system-ui,-apple-system,sans-serif!important;color:#fff!important;background:linear-gradient(180deg,#ff5a6e,#ff2d48)!important;box-shadow:0 0 0 2.5px #0b1d28,0 4px 10px rgba(255,45,72,.45)!important;border:0!important}
+.cmRound .cmDot:not(.ntN){top:7px;right:8px}
+/* ---------- lista de notificações: sem espaços enormes ---------- */
+.ntPage .ntList{display:block!important;gap:0!important}
+.ntPage .ntRow{min-height:0}
+.ntPage .ntAvs2 img{width:38px;height:38px}
+.ntPage .ntAvs2 img:nth-of-type(1){top:0;right:0;left:auto;bottom:auto}
+.ntPage .ntAvs2 img:nth-of-type(2){bottom:0;left:0;top:auto;right:auto;z-index:1}
+.ntPage .ntBadge{z-index:2}
 .lightTheme .ntBtn{background:#efefef;color:#111}.lightTheme .ntBtn.blue{background:#4a5df9;color:#fff}.lightTheme .ntBadge,.lightTheme .ntPage .ntAvs2 img{border-color:#fff}
 
 </style>
@@ -12172,6 +12188,7 @@ function thumbOf(pid){const x=pid&&postFind(String(pid));if(!x)return '';const m
 /* ---------- contador (número no sininho) ---------- */
 window.cmNotifDots=function(){
   const n=Math.max(0,CM_NOTIF.unread|0),t=n>9?'9+':String(n);
+  document.querySelectorAll('[data-notif-dot]').forEach(d=>{const b=d.closest('.cmRound');if(b){b.classList.add('ntBell');b.classList.toggle('has',!!n)}});
   document.querySelectorAll('[data-notif-dot]').forEach(d=>{d.classList.toggle('hidden',!n);d.classList.toggle('ntN',!!n);d.textContent=n?t:'';d.setAttribute('aria-label',n?n+' não lidas':'')});
   document.querySelectorAll('.bellDot').forEach(d=>d.style.display=n?'block':'');
   const h=document.getElementById('ntHeadCount');if(h){h.textContent=n?(n===1?'1 nova':n+' novas'):'';}
