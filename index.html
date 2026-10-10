@@ -14222,4 +14222,116 @@ if(typeof window.profile==='function'){
 }
 })();
 </script>
+<style id="cmCoverAdj">
+/* Comércios: igual às outras abas (sem bloco de foto com linha em cima e embaixo) */
+.bz3 .bzHero{background:none!important;padding:0 16px 10px!important;min-height:0!important;box-shadow:none!important;border:0!important}
+.bz3.bzPage{margin-top:0!important}
+/* ajustar a capa (igual ao Facebook) */
+.cvAdjBtn{margin-top:6px;width:100%;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;border-radius:12px;padding:9px 10px;font-weight:700;font-size:14px}
+#cvAdj{position:fixed;inset:0;z-index:9000;background:rgba(3,10,16,.92);display:flex;flex-direction:column;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 12px) 0 calc(env(safe-area-inset-bottom,0px) + 16px);animation:cvIn .2s ease}
+@keyframes cvIn{from{opacity:0}to{opacity:1}}
+#cvAdj .cvHead{text-align:center;color:#fff;padding:0 16px 14px}
+#cvAdj .cvHead b{display:block;font-size:19px}
+#cvAdj .cvHead small{color:#a9bac4;font-size:14px}
+#cvAdj .cvBox{position:relative;width:100%;height:calc(clamp(220px,62vw,290px) + 30px);background:#0b2230 center/cover no-repeat;touch-action:none;cursor:grab;overflow:hidden}
+#cvAdj .cvBox:active{cursor:grabbing}
+#cvAdj .cvGrid{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.18) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.18) 1px,transparent 1px);background-size:33.33% 33.33%;opacity:0;transition:opacity .2s}
+#cvAdj .cvBox.drag .cvGrid{opacity:1}
+#cvAdj .cvHint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.55);color:#fff;font-weight:700;font-size:14px;padding:9px 14px;border-radius:999px;pointer-events:none;display:flex;gap:8px;align-items:center;transition:opacity .25s}
+#cvAdj .cvBox.moved .cvHint{opacity:0}
+#cvAdj .cvAv{position:absolute;left:18px;bottom:-34px;width:84px;height:84px;border-radius:50%;border:3px solid #06131d;background:#0b2230 center/cover;box-shadow:0 0 0 2px #20df9a;pointer-events:none}
+#cvAdj .cvBtns{display:flex;gap:10px;padding:56px 16px 0}
+#cvAdj .cvBtns button{flex:1;padding:14px;border-radius:14px;border:0;font-weight:800;font-size:16px}
+#cvAdj .cvNo{background:rgba(255,255,255,.1);color:#fff}
+#cvAdj .cvOk{background:#20df9a;color:#03231a}
+</style>
+<script>
+/* ===================== Capa do perfil: arrastar para centralizar (igual ao Facebook) ===================== */
+(function(){
+const RE=/#cp=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)$/;
+const posOf=u=>{const m=RE.exec(String(u||''));return m?[+m[1],+m[2]]:null};
+const strip=u=>String(u||'').replace(RE,'');
+window.cmCoverPos=posOf;
+/* mostra a capa na posição escolhida (no próprio perfil e no perfil dos outros) */
+if(typeof window.pfHeadHtml==='function'){
+  const h0=window.pfHeadHtml;
+  window.pfHeadHtml=function(o){
+    const h=h0.apply(this,arguments);
+    try{const p=posOf(o&&o.cover);if(p)return h.replace('class="pfCover" style="','class="pfCover" style="background-position:'+p[0]+'% '+p[1]+'%;')}catch(_){}
+    return h;
+  };
+  try{pfHeadHtml=window.pfHeadHtml}catch(_){}
+}
+let POS=null;      /* posição escolhida nesta edição */
+function paintPreview(){const img=document.getElementById('editCoverPreview');if(img&&POS){img.style.objectFit='cover';img.style.objectPosition=POS[0]+'% '+POS[1]+'%'}}
+if(typeof window.editProfile==='function'){
+  const e0=window.editProfile;
+  window.editProfile=function(){
+    const r=e0.apply(this,arguments);
+    try{
+      POS=posOf(profileData().cover);
+      const f=document.getElementById('editCover');if(f&&RE.test(f.value))f.value=strip(f.value);
+      const inp=document.getElementById('editCoverFile');
+      if(inp&&!document.getElementById('cvAdjBtn'))inp.insertAdjacentHTML('afterend','<button type="button" id="cvAdjBtn" class="cvAdjBtn" onclick="cmCoverAdjust()">↕ Ajustar posição da capa</button>');
+      paintPreview();
+    }catch(_){}
+    return r;
+  };
+  try{editProfile=window.editProfile}catch(_){}
+}
+/* escolheu foto nova: começa centralizada e já abre o ajuste */
+if(typeof window.previewProfileCover==='function'){
+  const c0=window.previewProfileCover;
+  window.previewProfileCover=async function(){const r=await c0.apply(this,arguments);POS=[50,50];paintPreview();setTimeout(()=>{try{cmCoverAdjust()}catch(_){}},150);return r};
+  try{previewProfileCover=window.previewProfileCover}catch(_){}
+}
+window.cmCoverAdjust=function(){
+  const img=document.getElementById('editCoverPreview');const src=img&&img.src;if(!src)return;
+  const ph=(()=>{try{return document.getElementById('editPhotoPreview')?.src||''}catch(_){return ''}})();
+  let pos=(POS||[50,40]).slice();
+  document.getElementById('cvAdj')?.remove();
+  document.body.insertAdjacentHTML('beforeend',`<div id="cvAdj" role="dialog" aria-label="Ajustar capa"><div class="cvHead"><b>Ajustar capa</b><small>Arraste a foto para centralizar do jeito que você quer</small></div><div class="cvBox" id="cvBox"><div class="cvGrid"></div><div class="cvHint">✋ Arraste para ajustar</div><div class="cvAv" style="background-image:url('${String(ph).replace(/'/g,'%27')}')"></div></div><div class="cvBtns"><button type="button" class="cvNo" onclick="document.getElementById('cvAdj').remove()">Cancelar</button><button type="button" class="cvOk" id="cvOk">Salvar posição</button></div></div>`);
+  const box=document.getElementById('cvBox');box.style.backgroundImage=`url('${String(src).replace(/'/g,'%27')}')`;
+  const apply=()=>{box.style.backgroundPosition=pos[0].toFixed(1)+'% '+pos[1].toFixed(1)+'%'};apply();
+  let nat=null;const im=new Image();im.onload=()=>{nat=[im.naturalWidth,im.naturalHeight]};im.src=src;
+  let st=null;
+  box.addEventListener('pointerdown',e=>{e.preventDefault();try{box.setPointerCapture(e.pointerId)}catch(_){}st={x:e.clientX,y:e.clientY,p:pos.slice()};box.classList.add('drag','moved')});
+  box.addEventListener('pointermove',e=>{
+    if(!st)return;const bw=box.clientWidth,bh=box.clientHeight;
+    let ox=0,oy=0;if(nat){const s=Math.max(bw/nat[0],bh/nat[1]);ox=nat[0]*s-bw;oy=nat[1]*s-bh}
+    const dx=e.clientX-st.x,dy=e.clientY-st.y;
+    pos[0]=ox>1?Math.max(0,Math.min(100,st.p[0]-dx/ox*100)):50;
+    pos[1]=oy>1?Math.max(0,Math.min(100,st.p[1]-dy/oy*100)):50;
+    apply();
+  });
+  const end=()=>{st=null;box.classList.remove('drag')};
+  box.addEventListener('pointerup',end);box.addEventListener('pointercancel',end);
+  document.getElementById('cvOk').onclick=()=>{POS=[Math.round(pos[0]*10)/10,Math.round(pos[1]*10)/10];paintPreview();document.getElementById('cvAdj')?.remove();try{shareToast('Posição da capa ajustada ✓ — toque em Salvar')}catch(_){}};
+};
+/* ao salvar o perfil, guarda a posição junto com a capa */
+if(typeof window.saveProfile==='function'){
+  const s0=window.saveProfile;
+  window.saveProfile=async function(){
+    const want=POS?POS.slice():null;
+    const r=await s0.apply(this,arguments);
+    try{
+      if(want&&me&&me.user_metadata){
+        const base=strip(me.user_metadata.cover||'');
+        if(base){
+          const cover=base+'#cp='+want[0]+','+want[1];
+          if(cover!==me.user_metadata.cover){
+            const {data,error}=await sb.auth.updateUser({data:{cover}});
+            if(!error&&data&&data.user)me=data.user;
+            try{await upsertMyProfile({id:me.id,cover})}catch(_){}
+            if(window.cmCurrentPage==='profile')go('profile');
+          }
+        }
+      }
+    }catch(_){}
+    POS=null;return r;
+  };
+  try{saveProfile=window.saveProfile}catch(_){}
+}
+})();
+</script>
 </body></html>
