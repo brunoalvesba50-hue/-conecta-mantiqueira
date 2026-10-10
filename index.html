@@ -2958,7 +2958,7 @@ function stories(){
   const cls=g=>g.allSeen?'seen':(g.close?'close':'');
   const ownHtml=`<div class="storyCircle" onclick="${own?`openStories('${esc(own.uid)}')`:'newStory()'}"><div class="storyRingWrap"><div class="storyRing ${own?cls(own):'none'}"><img src="${esc(own?own.photo:p.photo)}" alt=""></div><button class="storyPlus" aria-label="Novo story" onclick="event.stopPropagation();newStory()">+</button></div><div>Seu story</div></div>`;
   const othersHtml=others.map(g=>`<div class="storyCircle" onclick="openStories('${esc(g.uid)}')"><div class="storyRingWrap"><div class="storyRing ${cls(g)}"><img src="${esc(g.photo)}" alt=""></div></div><div>${esc((g.name||'Usuário').split(' ')[0])}</div></div>`).join('');
-  return `<div class="sectionHead"><h2>Stories</h2><button class="link" onclick="storySettings()">⚙ Configurações</button></div><div class="stories">${ownHtml}${bizStoriesHtml()}${othersHtml}</div>`;
+  return `<div class="sectionHead"><h2>Stories</h2></div><div class="stories">${ownHtml}${bizStoriesHtml()}${othersHtml}</div>`;
 }
 function refreshStoryTray(){const el=document.getElementById('homeStories');if(el)el.innerHTML=stories()}
 function openMyStoryOrNew(){const g=storyGroups().find(x=>x.mine);if(g)openStories(g.uid);else newStory()}
@@ -4509,7 +4509,7 @@ function stories(){
   const cls=g=>g.allSeen?'seen':(g.close?'close':'');
   const ownHtml=`<div class="storyCircle${own&&own.allSeen?' isSeen':''}" onclick="${own?`openStories('${esc(own.uid)}')`:'newStory()'}"><div class="storyRingWrap"><div class="storyRing ${own?cls(own):'none'}"><img src="${esc(own?own.photo:p.photo)}" alt="" loading="lazy" onerror="this.src=avatar('${esc(stFirst(p.name))}')"></div><button class="storyPlus" aria-label="Novo story" onclick="event.stopPropagation();newStory()">+</button></div><div>Seu story</div></div>`;
   const othersHtml=others.map(g=>`<div class="storyCircle${g.allSeen?' isSeen':''}" onclick="openStories('${esc(g.uid)}')"><div class="storyRingWrap"><div class="storyRing ${cls(g)}"><img src="${esc(g.photo)}" alt="" loading="lazy"></div>${g.close&&!g.allSeen?'<span class="stCloseTag">★</span>':''}</div><div>${esc(stFirst(g.name))}</div></div>`).join('');
-  return `<div class="sectionHead"><h2>Stories</h2><button class="link" onclick="storySettings()">⚙ Configurações</button></div><div class="stories">${ownHtml}${typeof bizStoriesHtml==='function'?bizStoriesHtml():''}${othersHtml}</div>`;
+  return `<div class="sectionHead"><h2>Stories</h2></div><div class="stories">${ownHtml}${typeof bizStoriesHtml==='function'?bizStoriesHtml():''}${othersHtml}</div>`;
 }
 function pfStoryCls(uid){try{const g=storyGroups().find(x=>x.uid===uid);return g?('hasStory'+(g.allSeen?' seenStory':'')):''}catch(_){return ''}}
 function pfAvatarTap(uid){const g=storyGroups().find(x=>x.uid===uid);if(g)openStories(uid)}
@@ -10243,7 +10243,7 @@ const XI={
 window.CMX=XI;
 const tpl=h=>{const t=document.createElement('template');t.innerHTML=h;return t};
 const meAv=()=>{try{const p=profileData();return `<button class="cmRound av" type="button" aria-label="Meu perfil" onclick="go('profile')"><img src="${esc(p.photo||avatar(p.name))}" alt="" onerror="this.src='${esc(avatar(p.name))}'"></button>`}catch(_){return ''}};
-window.cmTopBtns3=function(searchOn){return cmRound(XI.search,'Buscar',searchOn)+cmRound(XI.bell+'<i class="cmDot hidden" data-notif-dot></i>','Notificações','cmNotifOpen()')+meAv()};
+window.cmTopBtns3=function(searchOn,noAv){return cmRound(XI.search,'Buscar',searchOn)+cmRound(XI.bell+'<i class="cmDot hidden" data-notif-dot></i>','Notificações','cmNotifOpen()')+(noAv?'':meAv())};
 
 /* ---------------------------------- INÍCIO ---------------------------------- */
 function cityPeople(city){try{const k=cityKey(city);return getPublicPeople().filter(p=>p&&p.photo&&cityKey(p.city||'')===k).slice(0,4)}catch(_){return []}}
@@ -10252,7 +10252,7 @@ function dressHome(h){
   root.classList.add('hm3');
   /* topo: logo + lupa, sino e foto */
   const top=r.querySelector('.premiumTop');
-  if(top)top.outerHTML=`<div class="hmTop"><button class="hmBrand" type="button" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Conecta">${XI.mount}<b>Conecta</b><small>PESSOAS <i>•</i> LUGARES <i>•</i> HISTÓRIAS</small></button><div class="hmBtns">${cmTopBtns3("cmHomeSearch()")}</div></div>`;
+  if(top)top.outerHTML=`<div class="hmTop"><button class="hmBrand" type="button" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Conecta">${XI.mount}<b>Conecta</b><small>PESSOAS <i>•</i> LUGARES <i>•</i> HISTÓRIAS</small></button><div class="hmBtns">${cmTopBtns3("cmHomeSearch()",true)}</div></div>`;
   /* sem saudação */
   r.querySelectorAll('.premiumGreeting,.premiumSub').forEach(e=>e.remove());
   const hs=r.querySelector('.heroSpace');if(hs)hs.classList.add('hmSpace');
@@ -12117,6 +12117,36 @@ window.__pk=PK;
 .ntUnread i{width:9px;height:9px;border-radius:50%;background:#3b9eff;box-shadow:0 0 0 3px rgba(59,158,255,.18)}
 .ntUnread.hidden{display:none}
 .lightTheme .ntAllBtn:disabled{color:rgba(0,0,0,.3)}
+/* ---------- notificações em tela cheia (igual ao Instagram) ---------- */
+#modal.ntPage{position:fixed;inset:0;z-index:400;background:#0c1014;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);animation:ntIn .26s cubic-bezier(.2,.8,.2,1)}
+@keyframes ntIn{from{transform:translateX(28%);opacity:.4}to{transform:none;opacity:1}}
+.ntPage .ntTop{display:flex;align-items:center;gap:14px;padding:10px 16px 6px}
+.ntPage .ntBack{flex:none;width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#fff;display:grid;place-items:center;padding:0}
+.ntPage .ntBack svg{width:24px;height:24px}
+.ntPage .ntTop h2{flex:1;margin:0;font-size:23px;font-weight:800;display:flex;align-items:baseline;gap:8px;color:#fff}
+.ntPage .ntAllBtn{align-self:center;margin:0;padding:6px 0}
+.ntPage .ntTop h2 small{font-size:13px;font-weight:800;color:var(--green,#20df9a)}
+.ntPage .ntList{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;margin:0;padding:0 16px calc(24px + env(safe-area-inset-bottom))}
+.ntPage .ntSec{font-size:17px;font-weight:800;margin:18px 0 8px;color:#fff}
+.ntPage .ntRow{gap:14px;padding:9px 0;border-radius:0;align-items:center}
+.ntPage .ntRow.new{background:none}
+.ntPage .ntAvWrap{position:relative;flex:0 0 56px;width:56px;height:56px}
+.ntPage .ntAv{width:56px;height:56px;flex:none}
+.ntPage .ntAvs2{flex:0 0 56px;width:56px;height:56px}
+.ntPage .ntAvs2 img{width:40px;height:40px;border:2px solid #0c1014}
+.ntBadge{position:absolute;right:-3px;bottom:-3px;width:22px;height:22px;border-radius:50%;background:#ff3040;border:2.5px solid #0c1014;display:grid;place-items:center}
+.ntBadge svg{width:12px;height:12px;fill:#fff}
+.ntPage .ntBody{font-size:15px;line-height:1.38;color:#f2f4f5}
+.ntPage .ntBody b{font-weight:700}
+.ntPage .ntBody small{color:#8e9aa3;font-size:14.5px}
+.ntSend{display:block;margin-top:8px;border:0;background:none;padding:0;color:#a8b3ba;font-weight:700;font-size:13.5px}
+.ntPage .ntThumb{flex:0 0 46px;width:46px;height:60px;border-radius:8px}
+.ntBtn{flex:none;border:0;border-radius:10px;background:#262d34;color:#fff;font-weight:700;font-size:14.5px;padding:10px 16px;white-space:nowrap}
+.ntBtn.blue{background:#4a5df9}
+.ntPage .ntUnread{margin:0 -8px 0 -6px}
+.lightTheme #modal.ntPage{background:#fff}.lightTheme .ntPage .ntTop h2,.lightTheme .ntPage .ntSec,.lightTheme .ntPage .ntBody,.lightTheme .ntPage .ntBack{color:#111}
+.lightTheme .ntBtn{background:#efefef;color:#111}.lightTheme .ntBtn.blue{background:#4a5df9;color:#fff}.lightTheme .ntBadge,.lightTheme .ntPage .ntAvs2 img{border-color:#fff}
+
 </style>
 <script id="ntjs">
 /* ===================== CENTRAL DE NOTIFICAÇÕES v2 =====================
@@ -12134,6 +12164,8 @@ const missing=e=>/does not exist|schema cache|relation|Could not find/i.test(Str
 const person=uid=>uid===me?.id?{id:me.id,...profileData()}:(personById(uid)||{id:uid,name:'Alguém',photo:''});
 const ph=p=>esc(p.photo||avatar(p.name||'?'));
 function sectionOf(ts){const d=Date.now()-ts;if(d<864e5&&new Date(ts).toDateString()===new Date().toDateString())return 'Hoje';if(d<7*864e5)return 'Esta semana';if(d<30*864e5)return 'Este mês';return 'Anteriores'}
+function ntAgo(ts){const m=Math.max(1,Math.round((Date.now()-ts)/60000));if(m<60)return m+' min';const h=Math.round(m/60);if(h<24)return h+' h';const d=Math.round(h/24);if(d<7)return d+' d';return Math.round(d/7)+' sem'}
+window.cmNotifChat=function(uid){const p=personById(uid);closeModal();if(p){currentPublicUser=p;go('conversation')}else postOpenProfile(uid)};
 function thumbOf(pid){const x=pid&&postFind(String(pid));if(!x)return '';const m=postMedia(x)[0];const u=m?(m.t==='video'?(m.th||x.thumb||''):m.u):'';return u?`<img class="ntThumb" src="${esc(u)}" alt="" loading="lazy">`:`<span class="ntThumb ntTxt">${esc(String(x.text||'').slice(0,40))}</span>`}
 
 /* ---------- contador (número no sininho) ---------- */
@@ -12181,25 +12213,33 @@ window.cmNotifLoad=async function(){
   let collabs=new Map();const inv=CM_NOTIF.list.filter(n=>n.kind==='collab_invite').map(n=>n.post_id);
   if(inv.length){try{const c=await sb.from('cm_post_collabs').select('post_id,status').eq('user_id',me.id).in('post_id',inv);(c.data||[]).forEach(x=>collabs.set(String(x.post_id),x.status))}catch(_){}}
   const groups=[];const byKey=new Map();
-  CM_NOTIF.list.forEach(n=>{const ts=Date.parse(n.created_at)||Date.now();const sec=sectionOf(ts);
+  CM_NOTIF.list.forEach(n=>{const ts=Date.parse(n.created_at)||Date.now();const sec=n.read_at?sectionOf(ts):'Novas';
     if(n.kind==='post_like'||n.kind==='story_like'){const k=sec+'|'+n.kind+'|'+(n.post_id||n.story_id);const g=byKey.get(k);if(g){if(!g.actors.includes(n.actor_id))g.actors.push(n.actor_id);g.ids.push(n.id);return}const ng={n,sec,ts,actors:[n.actor_id],ids:[n.id]};byKey.set(k,ng);groups.push(ng);return}
     groups.push({n,sec,ts,actors:[n.actor_id],ids:[n.id]})});
   NT.groups=groups;
   if(!groups.length){el.innerHTML=`<div class="cmEmpty small"><div class="cmEmptyIco">🔔</div><b>Nenhuma notificação</b><span>Quando alguém seguir você, curtir, comentar, marcar ou responder seu story, aparece aqui.</span></div>`;return}
   let last='',html='';
+  const HEART='<svg viewBox="0 0 24 24"><path d="M12 21.2l-1.4-1.3C5.4 15.2 2 12.1 2 8.3 2 5.2 4.4 2.8 7.5 2.8c1.7 0 3.4.8 4.5 2.1 1.1-1.3 2.8-2.1 4.5-2.1 3.1 0 5.5 2.4 5.5 5.5 0 3.8-3.4 6.9-8.6 11.6z"/></svg>';
+  const storyThumb=sid=>{try{const st=(storiesCache||[]).find(x=>String(x.id)===String(sid));if(!st)return '';const u=st.type==='video'?(st.thumb||''):st.image;return u&&!/\.(mp4|mov|webm)(\?|$)/i.test(u)?`<img class="ntThumb ntStory" src="${esc(u)}" alt="" loading="lazy">`:`<span class="ntThumb ntStory ntTxt">Story</span>`}catch(_){return ''}};
   groups.forEach((g,gi)=>{const n=g.n;if(g.sec!==last){html+=`<div class="ntSec">${g.sec}</div>`;last=g.sec}
     const a=person(g.actors[0]);const others=g.actors.length-1;
-    const names=others===0?`<b>${esc(a.name)}</b>`:others===1?`<b>${esc(a.name)}</b> e <b>${esc(person(g.actors[1]).name)}</b>`:`<b>${esc(a.name)}</b>, <b>${esc(person(g.actors[1]).name)}</b> e mais ${others-1}`;
+    const nm=p=>`<b onclick="event.stopPropagation();closeModal();postOpenProfile('${esc(p.id)}')">${esc(p.name)}</b>`;
+    const names=others===0?nm(a):others===1?`${nm(a)} e ${nm(person(g.actors[1]))}`:`${nm(a)}, ${nm(person(g.actors[1]))} ${others-1===1?'e 1 outra pessoa':'e outras '+(others-1)+' pessoas'}`;
     let txt=NOTIF_TXT[n.kind]||'interagiu com você.';if(others&&n.kind==='post_like')txt='curtiram sua publicação.';if(others&&n.kind==='story_like')txt='curtiram seu story.';
+    txt=txt.replace(/\s*[❤️➤❓⚠\u{1F4AC}\u{1F4CA}\u{1F399}]+\s*$/u,'');if(!/[.:!?]$/.test(txt)&&!(n.kind==='room_invite'&&n.extra))txt+='.';
     const ex=n.extra&&typeof PK!=='undefined'&&PK.cTokenLabel?PK.cTokenLabel(n.extra):n.extra;
     const extra=ex?` <span class="ntExtra">${esc(ex)}</span>`:'';
-    const avs=others?`<span class="ntAvs"><img src="${ph(person(g.actors[1]))}" alt=""><img src="${ph(a)}" alt=""></span>`:`<img class="ntAv" src="${ph(a)}" alt="" onclick="event.stopPropagation();cmNotifMarkGroup(${gi});postOpenProfile('${esc(a.id)}')">`;
+    const like=/like$/.test(n.kind);
+    const badge=like?`<span class="ntBadge">${HEART}</span>`:'';
+    const avs=others?`<span class="ntAvs ntAvs2"><img src="${ph(person(g.actors[1]))}" alt=""><img src="${ph(a)}" alt="">${badge}</span>`:`<span class="ntAvWrap" onclick="event.stopPropagation();cmNotifMarkGroup(${gi});closeModal();postOpenProfile('${esc(a.id)}')"><img class="ntAv" src="${ph(a)}" alt="">${badge}</span>`;
     let right='';const st=collabs.get(String(n.post_id));
     if(n.kind==='collab_invite')right=st==='pending'?`<div class="notifAct"><button class="cmBtn sm" onclick="event.stopPropagation();cmNotifMarkGroup(${gi});cmCollabRespond('${esc(n.post_id)}','accepted')">Aceitar</button><button class="secondary" onclick="event.stopPropagation();cmNotifMarkGroup(${gi});cmCollabRespond('${esc(n.post_id)}','declined')">Recusar</button></div>`:`<div class="notifAct small">${st==='accepted'?'✓ Aceito':st==='declined'?'Recusado':''}</div>`;
-    else if(n.kind==='follow'){const f=followCache.has(n.actor_id);right=`<button class="ntFollow${f?' on':''}" onclick="event.stopPropagation();cmNotifMarkGroup(${gi});toggleFollow('${esc(n.actor_id)}').then(()=>cmNotifLoad())">${f?'Seguindo':'Seguir de volta'}</button>`}
+    else if(n.kind==='follow'||n.kind==='follow_accepted'){const f=followCache.has(n.actor_id);right=f?`<button class="ntBtn" onclick="event.stopPropagation();cmNotifMarkGroup(${gi});cmNotifChat('${esc(n.actor_id)}')">Mensagem</button>`:`<button class="ntBtn blue" onclick="event.stopPropagation();cmNotifMarkGroup(${gi});toggleFollow('${esc(n.actor_id)}').then(()=>cmNotifLoad())">Seguir de volta</button>`}
     else if(n.post_id)right=thumbOf(n.post_id);
+    else if(n.story_id)right=storyThumb(n.story_id);
+    const sendMsg=(!others&&(n.kind==='story_like'||n.kind==='story_reply'||n.kind==='story_mention'))?`<button type="button" class="ntSend" onclick="event.stopPropagation();cmNotifMarkGroup(${gi});cmNotifChat('${esc(a.id)}')">Enviar mensagem</button>`:'';
     const un=g.ids.some(id=>{const z=CM_NOTIF.list.find(x=>x.id===id);return z&&!z.read_at});
-    html+=`<div class="ntRow${un?' new':''}" data-g="${gi}" onclick="cmNotifGo(${n.id})">${avs}<div class="ntBody">${names} ${esc(txt)}${extra} <small>${esc(timeAgo(g.ts))}</small></div>${right}<button type="button" class="ntUnread${un?'':' hidden'}" onclick="cmNotifMarkGroup(${gi},event)" aria-label="Marcar como lida" title="Marcar como lida"><i></i></button></div>`});
+    html+=`<div class="ntRow${un?' new':''}" data-g="${gi}" onclick="cmNotifGo(${n.id})">${avs}<div class="ntBody"><div>${names} ${esc(txt)}${extra} <small>${esc(ntAgo(g.ts))}</small></div>${sendMsg}</div>${right}<button type="button" class="ntUnread${un?'':' hidden'}" onclick="cmNotifMarkGroup(${gi},event)" aria-label="Marcar como lida" title="Marcar como lida"><i></i></button></div>`});
   el.innerHTML=html;
   }catch(e){el.innerHTML=`<div class="cmEmpty small"><b>Não foi possível carregar agora</b><span>Verifique a internet.</span><button class="secondary" style="margin-top:10px" onclick="cmNotifLoad()">Tentar de novo</button></div>`}
   finally{NT.busy=false;if(NT.again){NT.again=false;setTimeout(()=>window.cmNotifLoad(),50)}}
@@ -12220,8 +12260,9 @@ window.cmNotifGo=async function(id){
 try{cmNotifGo=window.cmNotifGo}catch(_){}
 
 window.cmNotifOpen=function(){
-  openModal(`<div class="modalHead ntHead"><h2>Notificações <small id="ntHeadCount"></small></h2><button class="close" onclick="closeModal()" aria-label="Fechar">×</button></div><button type="button" id="ntAllBtn" class="ntAllBtn" onclick="cmNotifMarkAll()" disabled>Marcar todas como lidas</button><div id="notifList" class="notifList ntList"><div class="chatSkel"></div><div class="chatSkel"></div><div class="chatSkel"></div></div><button class="secondary notifSettings" onclick="closeModal();settingsScreen()">⚙ Configurações</button>`);
-  document.getElementById('modal')?.classList.add('sheet','ntSheet');cmNotifDots();cmNotifLoad();
+  closeModal();
+  document.body.insertAdjacentHTML('beforeend',`<div id="modal" class="ntPage" role="dialog" aria-label="Notificações"><div class="ntTop"><button type="button" class="ntBack" onclick="closeModal()" aria-label="Voltar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><h2>Notificações <small id="ntHeadCount"></small></h2><button type="button" id="ntAllBtn" class="ntAllBtn" onclick="cmNotifMarkAll()" disabled>Ler todas</button></div><div id="notifList" class="notifList ntList"><div class="chatSkel"></div><div class="chatSkel"></div><div class="chatSkel"></div><div class="chatSkel"></div></div></div>`);
+  cmNotifDots();cmNotifLoad();
 };
 try{cmNotifOpen=window.cmNotifOpen}catch(_){}
 
@@ -13898,6 +13939,85 @@ if(typeof window.cmPushNudge==='function'){
   try{cmPushNudge=window.cmPushNudge}catch(_){}
 }
 let tries=0;const t=setInterval(()=>{tries++;if(localStorage.getItem(DONE)==='1'||tries>40||!isApp()){clearInterval(t);return}if(shouldShow()){clearInterval(t);cmPermsOpen()}},1500);
+})();
+</script>
+<style id="cmCallStyle">
+#cmCall{position:fixed;inset:0;z-index:9995;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:calc(70px + env(safe-area-inset-top)) 24px calc(56px + env(safe-area-inset-bottom));color:#fff;background:#04121c;overflow:hidden;animation:ccIn .3s ease both}
+#cmCall .ccBg{position:absolute;inset:-40px;background-size:cover;background-position:center;filter:blur(38px) brightness(.45) saturate(1.2);transform:scale(1.1);z-index:-1}
+#cmCall .ccTop{text-align:center;display:block!important;width:100%;flex:none}
+#cmCall .ccTop>*{display:block}#cmCall .ccTop,#cmCall .ccSub,#cmCall h2{border:0!important;box-shadow:none!important;padding-bottom:0}#cmCall .ccKind{display:flex!important}
+#cmCall .ccBtns{display:flex!important;flex-direction:row!important;justify-content:center}
+#cmCall .ccKind{font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:#9fe9cf;font-weight:700;display:flex;align-items:center;gap:6px;justify-content:center}
+#cmCall .ccKind svg{width:16px;height:16px}
+#cmCall .ccAv{position:relative;width:132px;height:132px;margin:26px auto 18px}
+#cmCall .ccAv img{width:100%;height:100%;border-radius:50%;object-fit:cover;position:relative;z-index:1;border:3px solid rgba(255,255,255,.18)}
+#cmCall .ccAv::before,#cmCall .ccAv::after{content:'';position:absolute;inset:0;border-radius:50%;background:rgba(32,223,154,.35);animation:ccPulse 2s ease-out infinite}
+#cmCall .ccAv::after{animation-delay:1s}
+#cmCall h2{margin:0;font-size:30px;font-weight:800}
+#cmCall .ccSub{margin-top:8px;color:#d3dee4;font-size:16px}
+#cmCall .ccBtns{display:flex;gap:70px}
+#cmCall .ccB{display:flex;flex-direction:column;align-items:center;gap:10px;font-size:14px;color:#e6eef2;background:none;border:0;padding:0}
+#cmCall .ccB i{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+#cmCall .ccB svg{width:32px;height:32px;fill:#fff}
+#cmCall .ccNo i{background:#ff3b30}
+#cmCall .ccNo svg{transform:rotate(135deg)}
+#cmCall .ccYes i{background:#30d158;animation:ccShake 1.2s ease-in-out infinite}
+#cmCall.out{opacity:0;transition:opacity .25s}
+@keyframes ccIn{from{opacity:0;transform:scale(1.04)}to{opacity:1;transform:none}}
+@keyframes ccPulse{from{transform:scale(1);opacity:.8}to{transform:scale(1.75);opacity:0}}
+@keyframes ccShake{0%,60%,100%{transform:rotate(0)}10%,30%,50%{transform:rotate(-12deg)}20%,40%{transform:rotate(12deg)}}
+</style>
+<script>
+/* ===================== Convite para a Sala ao vivo toca igual chamada ===================== */
+(function(){
+const PHONE='<svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg>';
+const MIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
+const CL={timer:0,ring:0,id:null,seen:new Set()};
+function ringOnce(){
+  try{const a=typeof cmAC==='function'?cmAC():null;if(!a)return;if(a.state==='suspended')a.resume().catch(()=>{});
+    const t0=a.currentTime+.02;
+    /* toque de celular: dois "trrim" curtos */
+    [0,.42].forEach(off=>{const o1=a.createOscillator(),o2=a.createOscillator(),g=a.createGain();o1.frequency.value=880;o2.frequency.value=1320;o1.type=o2.type='sine';
+      g.gain.setValueAtTime(0,t0+off);g.gain.linearRampToValueAtTime(.22,t0+off+.02);g.gain.setValueAtTime(.22,t0+off+.32);g.gain.linearRampToValueAtTime(0,t0+off+.38);
+      o1.connect(g);o2.connect(g);g.connect(a.destination);o1.start(t0+off);o2.start(t0+off);o1.stop(t0+off+.4);o2.stop(t0+off+.4)});
+  }catch(_){}
+  try{navigator.vibrate&&navigator.vibrate([500,250,500])}catch(_){}
+}
+function stop(){clearInterval(CL.ring);clearTimeout(CL.timer);try{navigator.vibrate&&navigator.vibrate(0)}catch(_){}const el=document.getElementById('cmCall');if(el){el.classList.add('out');setTimeout(()=>el.remove(),260)}}
+function markRead(id){try{if(id)sb.from('cm_notifications').update({read_at:new Date().toISOString()}).eq('id',id).eq('user_id',me.id).then(()=>{try{cmNotifCount()}catch(_){}},()=>{})}catch(_){}}
+window.cmIncomingCall=function(o){
+  if(!o||!o.city||document.getElementById('cmCall'))return;
+  if(typeof RM!=='undefined'&&RM&&RM.on&&RM.city===o.city)return;            /* já está nessa sala */
+  if(document.getElementById('pkRoom'))return;
+  const p=(o.from&&(personById(o.from)))||{name:o.name||'Alguém',photo:''};
+  const name=String(p.name||'Alguém').split(/\s+/).slice(0,2).join(' ');
+  const ph=esc(p.photo||avatar(p.name||'?'));
+  CL.id=o.id||null;
+  document.body.insertAdjacentHTML('beforeend',`<div id="cmCall" role="dialog" aria-label="Chamada da Sala ao vivo"><div class="ccBg" style="background-image:url('${ph}')"></div><div class="ccTop"><div class="ccKind">${MIC} Sala ao vivo · ${esc(o.city)}</div><div class="ccAv"><img src="${ph}" alt=""></div><h2>${esc(name)}</h2><div class="ccSub">está te chamando…</div></div><div class="ccBtns"><button type="button" class="ccB ccNo" onclick="cmCallDecline()"><i>${PHONE}</i>Recusar</button><button type="button" class="ccB ccYes" onclick="cmCallAnswer()"><i>${PHONE}</i>Atender</button></div></div>`);
+  CL.city=o.city;ringOnce();CL.ring=setInterval(ringOnce,2600);
+  CL.timer=setTimeout(()=>{stop();shareToast(`📞 Chamada perdida de ${name} · Sala ao vivo de ${o.city}`)},35000);
+};
+window.cmCallAnswer=function(){const c=CL.city;markRead(CL.id);stop();try{closeModal()}catch(_){}if(c&&typeof PK!=='undefined'&&PK.roomJoin)PK.roomJoin(c)};
+window.cmCallDecline=function(){markRead(CL.id);stop()};
+
+/* chegou convite: pelo banco em tempo real (app aberto) */
+function fresh(ts){return Date.now()-(Date.parse(ts)||Date.now())<60000}
+function handle(n){
+  if(!n||n.kind!=='room_invite'||!n.extra||CL.seen.has(n.id))return;CL.seen.add(n.id);
+  if(!fresh(n.created_at))return;
+  const go=()=>cmIncomingCall({id:n.id,city:n.extra,from:n.actor_id});
+  if(document.hidden){CL.pending={n,at:Date.now()};return}
+  go();
+}
+let ch=null;
+function listen(){
+  if(ch||!me?.id||!sb?.channel)return;
+  try{ch=sb.channel('cm-call-'+me.id).on('postgres_changes',{event:'INSERT',schema:'public',table:'cm_notifications',filter:`user_id=eq.${me.id}`},pl=>handle(pl.new)).subscribe()}catch(_){}
+}
+const t=setInterval(()=>{if(me?.id&&window.cmCurrentPage&&window.cmCurrentPage!=='auth'){clearInterval(t);listen()}},1200);
+/* app em segundo plano: a notificação chega pelo celular; ao voltar em até 45s, ainda toca */
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&CL.pending&&Date.now()-CL.pending.at<45000){const n=CL.pending.n;CL.pending=null;cmIncomingCall({id:n.id,city:n.extra,from:n.actor_id})}else if(!document.hidden)CL.pending=null});
+try{navigator.serviceWorker&&navigator.serviceWorker.addEventListener('message',e=>{const d=e.data||{};if(d.type==='push'&&d.data&&d.data.kind==='room_invite'&&d.data.city){const n={id:d.data.nid,kind:'room_invite',extra:d.data.city,actor_id:d.data.actor,created_at:new Date().toISOString()};handle(n)}})}catch(_){}
 })();
 </script>
 </body></html>

@@ -1,6 +1,6 @@
 /* Conecta Mantiqueira — trabalha em segundo plano no celular:
    notificações, app instalado, abrir rápido e funcionar sem internet (como o Instagram). */
-const VER = 'v22';
+const VER = 'v23';
 const CACHE = 'conecta-' + VER;          /* páginas e arquivos do site */
 const LIB = 'conecta-lib-' + VER;        /* biblioteca do Supabase (necessária para abrir) */
 const API = 'conecta-api';               /* últimos dados vistos (feed, perfis, conversas) */
@@ -141,7 +141,9 @@ self.addEventListener('push', e => {
       badge: 'icon-192.png',
       tag: d.tag || 'conecta',
       renotify: true,
-      vibrate: [80, 40, 80],
+      vibrate: d.vibrate || [80, 40, 80],
+      requireInteraction: !!d.requireInteraction,
+      actions: Array.isArray(d.actions) ? d.actions.slice(0, 2) : undefined,
       data: { url: d.url || './', from: d.from || '' }
     });
   })());
@@ -150,6 +152,7 @@ self.addEventListener('push', e => {
 /* Tocou na notificação: abre o app (ou traz ele para frente). */
 self.addEventListener('notificationclick', e => {
   e.notification.close();
+  if (e.action === 'decline') return;               /* recusou a chamada da sala */
   const data = e.notification.data || {};
   /* convite para a Sala ao vivo: abre direto na sala */
   const sala = (String(e.notification.body || '') + ' ' + String(data.url || '')).match(/[?&]sala=([^\s&#]+)/);
