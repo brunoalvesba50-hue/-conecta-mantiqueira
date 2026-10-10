@@ -1,6 +1,6 @@
 /* Conecta Mantiqueira — trabalha em segundo plano no celular:
    notificações, app instalado, abrir rápido e funcionar sem internet (como o Instagram). */
-const VER = 'v21';
+const VER = 'v22';
 const CACHE = 'conecta-' + VER;          /* páginas e arquivos do site */
 const LIB = 'conecta-lib-' + VER;        /* biblioteca do Supabase (necessária para abrir) */
 const API = 'conecta-api';               /* últimos dados vistos (feed, perfis, conversas) */
@@ -72,10 +72,28 @@ self.addEventListener('fetch', e => {
 
   /* página do site: sempre confere se há versão nova; sem internet abre a guardada */
   if (req.mode === 'navigate' && url.origin === self.location.origin) {
+    /* abre NA HORA com a versão guardada (igual app instalado) e busca a nova por trás;
+       se mudou, avisa a página, que atualiza sozinha sem atrapalhar */
     e.respondWith((async () => {
-      /* abre na hora: se a internet demorar mais de 2,5s, usa a versão guardada (e atualiza por trás) */
-      try { return await networkFirst(req, CACHE, 2500, { cache: 'no-cache' }); }
-      catch (_) { return (await caches.match('./')) || Response.error(); }
+      const c = await caches.open(CACHE);
+      const hit = await c.match('./', { ignoreSearch: true, ignoreVary: true });
+      const net = (async () => {
+        try {
+          const res = await fetch('./', { cache: 'no-cache' });
+          if (!res || !res.ok) return null;
+          const fresh = await res.clone().text();
+          const old = hit ? await hit.clone().text().catch(() => '') : '';
+          await c.put('./', res.clone());
+          if (hit && old !== fresh) {
+            await new Promise(r => setTimeout(r, 2500));
+            const list = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+            list.forEach(cl => cl.postMessage({ type: 'sw-updated' }));
+          }
+          return res;
+        } catch (_) { return null; }
+      })();
+      if (hit) { e.waitUntil(net); return hit; }
+      return (await net) || (await networkFirst(req, CACHE, 0, { cache: 'no-cache' }).catch(() => null)) || Response.error();
     })());
     return;
   }
@@ -108,7 +126,7 @@ self.addEventListener('fetch', e => {
 self.addEventListener('push', e => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; } catch (_) { d = { body: e.data && e.data.text() }; }
-  const title = d.title || 'Conecta Mantiqueira';
+  const title = d.title || 'Conecta';
   const apple = /iPhone|iPad|iPod|Macintosh/.test(self.navigator.userAgent || '');
   e.waitUntil((async () => {
     const list = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
@@ -116,9 +134,9 @@ self.addEventListener('push', e => {
     list.forEach(c => c.postMessage({ type: 'push', data: d }));
     // Com o app aberto na tela, o próprio site já toca o som. No iPhone a Apple exige mostrar sempre.
     if (onScreen && !apple) return;
-    try { if (self.navigator.setAppBadge) await self.navigator.setAppBadge(); } catch (_) {}
+    try { if (self.navigator.setAppBadge) await (d.count > 0 ? self.navigator.setAppBadge(d.count) : self.navigator.setAppBadge()); } catch (_) {}
     await self.registration.showNotification(title, {
-      body: d.body || 'Você tem uma novidade no Conecta Mantiqueira.',
+      body: d.body || 'Você tem uma novidade no Conecta.',
       icon: 'icon-192.png',
       badge: 'icon-192.png',
       tag: d.tag || 'conecta',
@@ -149,6 +167,7 @@ self.addEventListener('notificationclick', e => {
       for (const c of list) {
         if ('focus' in c) {
           if (data.from) c.postMessage({ type: 'open-chat', from: data.from });
+          else if (data.url) c.postMessage({ type: 'open-url', url: data.url });
           return c.focus();
         }
       }
