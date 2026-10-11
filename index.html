@@ -14407,4 +14407,50 @@ if(typeof window.editProfile==='function'){
 }
 })();
 </script>
+<style id="cmLinks3">
+#modal #editLinks{display:none!important}
+.lk3{margin:6px 0 4px}
+.lk3H{display:flex;align-items:baseline;justify-content:space-between;margin:4px 2px 8px}
+.lk3H b{font-size:16px;color:#fff}.lk3H small{color:#8fa6b3;font-size:12.5px}
+.lk3Card{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.035);border-radius:18px;padding:10px 10px 4px;margin-bottom:10px}
+.lk3Card .lk3N{display:flex;align-items:center;gap:8px;margin:0 2px 8px;color:#20df9a;font-weight:800;font-size:13px}
+.lk3Card .lk3N i{width:22px;height:22px;border-radius:50%;background:rgba(32,223,154,.16);display:grid;place-items:center;font-style:normal;font-size:12px}
+.lk3Card .field{margin:0 0 8px!important;height:48px}
+.lk3Card .lk3Clr{margin-left:auto;border:0;background:none;color:#ff8b96;font-weight:700;font-size:12.5px;padding:2px 4px}
+</style>
+<script>
+/* ===================== Editar perfil: 3 links, cada um com nome e endereço ===================== */
+(function(){
+const MAX=3;
+function parse(v){return String(v||'').split(/\n+/).map(s=>s.trim()).filter(Boolean).map(s=>{const i=s.indexOf('|');return i>0&&/^\s*(https?:|www\.|wa\.me|tel:)/i.test(s.slice(i+1))?{n:s.slice(0,i).trim(),u:s.slice(i+1).trim()}:{n:'',u:s}})}
+function fixUrl(u){u=String(u||'').trim();if(!u)return '';if(/^(https?:|tel:|mailto:)/i.test(u))return u;if(/^@[\w.]+$/.test(u))return 'https://instagram.com/'+u.slice(1);return 'https://'+u.replace(/^\/+/,'')}
+let extra=[];
+function sync(){
+  const ta=document.getElementById('editLinks');if(!ta)return;
+  const out=[];
+  for(let i=0;i<MAX;i++){const n=(document.getElementById('lk3n'+i)?.value||'').replace(/\|/g,' ').trim();const u=fixUrl(document.getElementById('lk3u'+i)?.value||'');if(u)out.push(n?n+'|'+u:u)}
+  extra.forEach(x=>out.push(x.n?x.n+'|'+x.u:x.u));
+  ta.value=out.join('\n');
+}
+window.cmLk3Sync=sync;
+window.cmLk3Clear=function(i){const a=document.getElementById('lk3n'+i),b=document.getElementById('lk3u'+i);if(a)a.value='';if(b)b.value='';sync()};
+if(typeof window.editProfile==='function'){
+  const e0=window.editProfile;
+  window.editProfile=function(){
+    const r=e0.apply(this,arguments);
+    try{
+      const ta=document.getElementById('editLinks');if(!ta||document.getElementById('lk3'))return r;
+      const list=parse(ta.value);extra=list.slice(MAX);
+      const card=i=>{const x=list[i]||{n:'',u:''};return `<div class="lk3Card"><div class="lk3N"><i>${i+1}</i>Link ${i+1}<button type="button" class="lk3Clr" onclick="cmLk3Clear(${i})">Limpar</button></div><input id="lk3n${i}" class="field" maxlength="30" placeholder="Nome (ex.: Instagram)" value="${esc(x.n)}" oninput="cmLk3Sync()" autocomplete="off"><input id="lk3u${i}" class="field" type="url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Link (ex.: instagram.com/voce)" value="${esc(x.u)}" oninput="cmLk3Sync()" onblur="this.value=this.value.trim();cmLk3Sync()"></div>`};
+      ta.insertAdjacentHTML('beforebegin',`<div id="lk3" class="lk3"><div class="lk3H"><b>Links no perfil</b><small>até ${MAX} links</small></div>${[0,1,2].map(card).join('')}</div>`);
+      sync();
+    }catch(_){}
+    return r;
+  };
+  try{editProfile=window.editProfile}catch(_){}
+}
+/* garante que o que foi digitado vai junto ao salvar */
+if(typeof window.saveProfile==='function'){const s0=window.saveProfile;window.saveProfile=function(){try{sync()}catch(_){}return s0.apply(this,arguments)};try{saveProfile=window.saveProfile}catch(_){}}
+})();
+</script>
 </body></html>
