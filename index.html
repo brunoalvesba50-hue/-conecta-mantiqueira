@@ -14334,4 +14334,77 @@ if(typeof window.saveProfile==='function'){
 }
 })();
 </script>
+<style id="cmPfPills">
+/* música do perfil: pílula menor */
+.pf .pkPMu{gap:7px!important;padding:3px 12px 3px 3px!important;margin:8px 0 2px!important}
+.pf .pkPMu button{width:24px!important;height:24px!important}
+.pf .pkPMu button svg{width:13px!important;height:13px!important}
+.pf .pkPMuTxt{font-size:12.5px!important;line-height:1.2}
+.pf .pkPMuEq{transform:scale(.8)}
+/* links do perfil: pílulas pequenas e clicáveis, iguais à da música */
+.pf .profileContactButtons.lkPills{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px}
+.lkPill{display:inline-flex;align-items:center;gap:7px;max-width:100%;padding:3px 12px 3px 3px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#fff!important;text-decoration:none!important;font-size:12.5px;font-weight:600;line-height:1.2;-webkit-tap-highlight-color:transparent}
+.lkPill:active{transform:scale(.97)}
+.lkPill i{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:rgba(32,223,154,.16);color:#20df9a;font-style:normal}
+.lkPill svg{width:13px;height:13px}
+.lkPill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}
+/* editar perfil: sem campos de link da foto e da capa (as fotos vêm da galeria) */
+#modal #editPhoto,#modal #editCover{display:none!important}
+/* botões em cima da capa: nunca embaixo do relógio */
+.pfTopBtns{top:max(calc(env(safe-area-inset-top,0px) + 12px),54px)!important}
+</style>
+<script>
+/* ===================== Perfil: links viram pílulas pequenas (iguais à da música) ===================== */
+(function(){
+const S=p=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const IC={
+  ig:S('<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".8" fill="currentColor"/>'),
+  wa:S('<path d="M20 11.6A8.4 8.4 0 0 1 7.6 19L3 20.5 4.5 16A8.4 8.4 0 1 1 20 11.6z"/><path d="M9 8.8c.2 2.6 3 5.4 5.6 5.6l1.2-1.2-1.8-1-1 .8c-.9-.4-1.9-1.4-2.3-2.3l.8-1-1-1.8z"/>'),
+  tk:S('<path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5"/><path d="M14 3c.5 2.6 2.3 4.2 5 4.4"/>'),
+  yt:S('<rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10.5 9.5v5l4-2.5z" fill="currentColor"/>'),
+  fb:S('<path d="M14.5 8H17V4.5h-2.5C12 4.5 11 6 11 8.5V11H8.5v3.5H11V21h3.5v-6.5H17l.5-3.5h-3V9c0-.6.4-1 1-1z"/>'),
+  ph:S('<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>'),
+  ln:S('<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>')
+};
+function kind(u){u=String(u||'').toLowerCase();
+  if(/instagram\.com|instagr\.am/.test(u))return 'ig';if(/wa\.me|whatsapp\.com/.test(u))return 'wa';if(/tiktok\.com/.test(u))return 'tk';
+  if(/youtube\.com|youtu\.be/.test(u))return 'yt';if(/facebook\.com|fb\.com|fb\.me/.test(u))return 'fb';if(/^tel:/.test(u))return 'ph';return 'ln'}
+function label(href,text){
+  const t=String(text||'').replace(/^[\s🔗📞💬]+/u,'').trim();
+  if(t&&t!==href&&!/^https?:\/\//i.test(t))return t;
+  try{const u=new URL(href);const host=u.hostname.replace(/^www\./,'');const seg=u.pathname.split('/').filter(Boolean);
+    const k=kind(href);
+    if(k==='ig'&&seg[0])return '@'+seg[0].replace(/^@/,'');
+    if(k==='tk'&&seg[0])return seg[0].startsWith('@')?seg[0]:'@'+seg[0];
+    if(k==='wa')return 'WhatsApp';if(k==='yt')return seg[0]&&seg[0].startsWith('@')?seg[0]:'YouTube';
+    if(k==='fb')return seg[0]?'Facebook · '+seg[0]:'Facebook';
+    return host+(seg[0]?'/'+seg[0]:'');
+  }catch(_){return t||href}
+}
+function dress(h){
+  if(!/profileContactBtn/.test(h))return h;
+  const t=document.createElement('template');t.innerHTML=h;
+  t.content.querySelectorAll('.profileContactButtons').forEach(box=>{
+    box.classList.add('lkPills');
+    box.querySelectorAll('a.profileContactBtn').forEach(a=>{
+      const href=a.getAttribute('href')||'';const k=kind(href);
+      const span=document.createElement('span');span.textContent=label(href,a.textContent);
+      a.className='lkPill';a.innerHTML=`<i>${IC[k]}</i>`;a.appendChild(span);
+    });
+  });
+  return t.innerHTML;
+}
+if(typeof window.pfHeadHtml==='function'){
+  const h0=window.pfHeadHtml;
+  window.pfHeadHtml=function(){const h=h0.apply(this,arguments);try{return dress(h)}catch(_){return h}};
+  try{pfHeadHtml=window.pfHeadHtml}catch(_){}
+}
+/* editar: dica clara para os links */
+if(typeof window.editProfile==='function'){
+  const e0=window.editProfile;
+  window.editProfile=function(){const r=e0.apply(this,arguments);try{const l=document.getElementById('editLinks');if(l)l.placeholder=l.tagName==='TEXTAREA'?'Seus links, um por linha. Ex.:\nInstagram|https://instagram.com/seuperfil\nMinha loja|https://minhaloja.com':'Links, um por linha. Ex.: Instagram|https://instagram.com/seuperfil'}catch(_){}return r};
+  try{editProfile=window.editProfile}catch(_){}
+}
+})();
+</script>
 </body></html>
