@@ -1,6 +1,6 @@
 /* Conecta Mantiqueira — trabalha em segundo plano no celular:
    notificações, app instalado, abrir rápido e funcionar sem internet (como o Instagram). */
-const VER = 'v29';
+const VER = 'v30';
 const CACHE = 'conecta-' + VER;          /* páginas e arquivos do site */
 const LIB = 'conecta-lib-' + VER;        /* biblioteca do Supabase (necessária para abrir) */
 const API = 'conecta-api';               /* últimos dados vistos (feed, perfis, conversas) */
@@ -70,10 +70,9 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
-  /* página do site: sempre confere se há versão nova; sem internet abre a guardada */
+  /* página do site: busca a versão nova PRIMEIRO (até 4 s); só usa a guardada se a internet
+     estiver lenta ou sem sinal. Assim cada atualização aparece logo ao abrir o app. */
   if (req.mode === 'navigate' && url.origin === self.location.origin) {
-    /* abre NA HORA com a versão guardada (igual app instalado) e busca a nova por trás;
-       se mudou, avisa a página, que atualiza sozinha sem atrapalhar */
     e.respondWith((async () => {
       const c = await caches.open(CACHE);
       const hit = await c.match('./', { ignoreSearch: true, ignoreVary: true });
@@ -84,16 +83,23 @@ self.addEventListener('fetch', e => {
           const fresh = await res.clone().text();
           const old = hit ? await hit.clone().text().catch(() => '') : '';
           await c.put('./', res.clone());
-          if (hit && old !== fresh) {
-            await new Promise(r => setTimeout(r, 2500));
+          return { res, changed: !!hit && old !== fresh };
+        } catch (_) { return null; }
+      })();
+      const quick = await Promise.race([net, new Promise(r => setTimeout(() => r('slow'), 4000))]);
+      if (quick && quick !== 'slow') return quick.res;
+      if (hit) {
+        /* internet lenta: abre a guardada e avisa a página se chegou versão nova */
+        e.waitUntil(net.then(async n => {
+          if (n && n.changed) {
             const list = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
             list.forEach(cl => cl.postMessage({ type: 'sw-updated' }));
           }
-          return res;
-        } catch (_) { return null; }
-      })();
-      if (hit) { e.waitUntil(net); return hit; }
-      return (await net) || (await networkFirst(req, CACHE, 0, { cache: 'no-cache' }).catch(() => null)) || Response.error();
+        }));
+        return hit;
+      }
+      const n = await net;
+      return (n && n.res) || (await networkFirst(req, CACHE, 0, { cache: 'no-cache' }).catch(() => null)) || Response.error();
     })());
     return;
   }
