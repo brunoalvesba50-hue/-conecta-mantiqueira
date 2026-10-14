@@ -1099,6 +1099,9 @@ html.cmTiny .cmStkBtn{display:none}
 .screen.bzPScreen{padding-top:0!important;padding-left:0!important;padding-right:0!important}
 .screen.bzPScreen>.bzDetail.bzP{margin:0}
 .bzP *{box-sizing:border-box}
+.bzPLoad,.bzPLine{background:linear-gradient(90deg,#071C2B 25%,#0d2a3d 50%,#071C2B 75%);background-size:200% 100%;animation:bzPSh 1.2s linear infinite}
+.bzPLine{height:28px;border-radius:12px;margin-bottom:10px}
+@keyframes bzPSh{to{background-position:-200% 0}}
 .bzP svg{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .bzPCover{position:relative;width:100%;margin-bottom:-1px;aspect-ratio:390/235;max-height:340px;min-height:190px;overflow:hidden;background:var(--bzpCard)}
 .bzPCoverImg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block}
@@ -2269,11 +2272,11 @@ const PROMO_QUOTA={destaque:1,presenca:3};
 let CM_ADMINS=new Set((()=>{try{return JSON.parse(localStorage.getItem('cm_admins')||'[]')}catch(_){return []}})());
 let CM_PLANS=new Map();
 try{(JSON.parse(localStorage.getItem('cm_plans_cache')||'[]')||[]).forEach(r=>CM_PLANS.set(String(r.business_id),r))}catch(_){}
-async function cmLoadPlans(){
-  try{const a=await sb.from('cm_admins').select('user_id');if(!a.error&&Array.isArray(a.data)){CM_ADMINS=new Set(a.data.map(r=>r.user_id));localStorage.setItem('cm_admins',JSON.stringify([...CM_ADMINS]))}}catch(_){}
-  try{const r=await sb.from('cm_ads').select('id,post_id,owner_id,daily,days,status,starts,until,created_at').neq('status','rejected');if(!r.error&&Array.isArray(r.data))CM_ADS=r.data}catch(_){}
-  try{const r=await sb.from('cm_business_plans').select('business_id,owner_id,plan,until');if(!r.error&&Array.isArray(r.data)){CM_PLANS=new Map(r.data.map(x=>[String(x.business_id),x]));localStorage.setItem('cm_plans_cache',JSON.stringify(r.data))}}catch(_){}
-}
+async function cmLoadPlans(){await Promise.all([
+  (async()=>{try{const a=await sb.from('cm_admins').select('user_id');if(!a.error&&Array.isArray(a.data)){CM_ADMINS=new Set(a.data.map(r=>r.user_id));localStorage.setItem('cm_admins',JSON.stringify([...CM_ADMINS]))}}catch(_){}})(),
+  (async()=>{try{const r=await sb.from('cm_ads').select('id,post_id,owner_id,daily,days,status,starts,until,created_at').neq('status','rejected');if(!r.error&&Array.isArray(r.data))CM_ADS=r.data}catch(_){}})(),
+  (async()=>{try{const r=await sb.from('cm_business_plans').select('business_id,owner_id,plan,until');if(!r.error&&Array.isArray(r.data)){CM_PLANS=new Map(r.data.map(x=>[String(x.business_id),x]));localStorage.setItem('cm_plans_cache',JSON.stringify(r.data))}}catch(_){}})()
+])}
 function cmIsAdmin(uid){if(uid===undefined)uid=me?.id;return !!uid&&CM_ADMINS.has(uid)}
 function bizPlanRec(b){return b?CM_PLANS.get(String(b.id))||null:null}
 function bizPlan(b){const r=bizPlanRec(b);if(!r||!PLAN_TIER[r.plan])return '';return Date.parse(r.until)>Date.now()?r.plan:''}
@@ -2414,11 +2417,11 @@ let BIZ={list:[],loaded:false,loading:false,cat:'',q:'',loc:null};
 try{const l=JSON.parse(sessionStorage.getItem('cm_loc')||'null');if(l&&l.lat)BIZ.loc=l}catch(_){}
 function bizParse(r){if(!r||r.item_type!=='comercio')return null;let d={};try{d=JSON.parse(r.description||'{}')||{}}catch(_){d={desc:r.description||''}}return{id:r.id,owner:r.user_id,name:r.name||'Comércio',cover:r.image_url||'',logo:d.logo||'',cat:d.cat||'servicos',city:d.city||'',desc:d.desc||'',whats:d.whats||'',link:r.link_url||'',addr:d.addr||'',hours:d.hours||'',photos:Array.isArray(d.photos)?d.photos.filter(x=>typeof x==='string'):[],services:(Array.isArray(d.services)?d.services:Array.isArray(d.servicos)?d.servicos:[]).filter(x=>typeof x==='string'&&x.trim()).slice(0,9),lat:Number(d.lat)||null,lng:Number(d.lng)||null,created:r.created_at,active:r.active!==false}}
 async function bizLoad(force){
-  if(BIZ.loading||(BIZ.loaded&&!force))return BIZ.list;BIZ.loading=true;
-  await cmLoadPlans();
-  try{const {data,error}=await sb.from('vitrine_items').select('id,user_id,name,description,image_url,link_url,item_type,active,created_at').eq('item_type','comercio').limit(600);if(error)throw error;BIZ.list=(data||[]).map(bizParse).filter(b=>b&&b.active);BIZ.loaded=true;BIZ.err=''}
+  if(BIZ.loading)return BIZ.prom||BIZ.list;if(BIZ.loaded&&!force)return BIZ.list;BIZ.loading=true;
+  let done;BIZ.prom=new Promise(r=>done=r);
+  try{const [,{data,error}]=await Promise.all([cmLoadPlans().catch(()=>{}),sb.from('vitrine_items').select('id,user_id,name,description,image_url,link_url,item_type,active,created_at').eq('item_type','comercio').limit(600)]);if(error)throw error;BIZ.list=(data||[]).map(bizParse).filter(b=>b&&b.active);BIZ.loaded=true;BIZ.err=''}
   catch(e){BIZ.err=(e&&e.message)||'erro';BIZ.loaded=true}
-  BIZ.loading=false;return BIZ.list;
+  BIZ.loading=false;done(BIZ.list);return BIZ.list;
 }
 function bizDist(b){if(!BIZ.loc||!b.lat||!b.lng)return null;const R=6371e3,t=x=>x*Math.PI/180,dLat=t(b.lat-BIZ.loc.lat),dLng=t(b.lng-BIZ.loc.lng);const a=Math.sin(dLat/2)**2+Math.cos(t(BIZ.loc.lat))*Math.cos(t(b.lat))*Math.sin(dLng/2)**2;return 2*R*Math.asin(Math.sqrt(a))}
 function bizDistTxt(d){if(d==null)return '';return d<1000?Math.round(d/10)*10+' m':(d/1000).toFixed(d<10000?1:0).replace('.',',')+' km'}
@@ -2457,7 +2460,14 @@ function businessScreen(){
   return screen(`<div class="bzPage"><div class="bzHero" style="background-image:linear-gradient(180deg,rgba(4,18,28,.15),rgba(4,18,28,.25) 45%,var(--bg,#04121c)),var(--cm-hero-image)"><div class="bzBrand"><svg viewBox="0 0 48 30" class="bzMark"><path d="M2 28L16 6l8 11 6-7 16 18z" fill="none" stroke="#20df9a" stroke-width="3" stroke-linejoin="round"/><circle cx="31" cy="9" r="5" fill="#ffb21f"/></svg><div><b>Conecta</b></div>${cmIsAdmin()?'<button class="bzTopBtn admBtn" onclick="admOpen()" aria-label="Painel">👑</button>':''}<button class="bzTopBtn" onclick="bizForm()" aria-label="Cadastrar comércio">${bzSvg('plus')}</button></div><h1>Comércios e serviços</h1><p>Descubra e apoie os negócios da nossa região.</p><label class="bzSearch">${bzSvg('search')}<input id="bzQ" placeholder="Buscar comércios, serviços ou categorias..." value="${esc(BIZ.q)}" oninput="bizSearch(this.value)" autocomplete="off"></label></div><div id="bzCatsBox">${bizCatsHtml()}</div><div id="bzLists"></div><div class="bzCta adsCta"><div><b>📣 Anuncie para toda a região</b><span>Turbine uma publicação e apareça no feed, nos vídeos, nas notícias e aqui. A partir de R$ 6 por dia.</span></div><button class="secondary" onclick="adsChoosePost()">Anunciar</button></div><div class="bzCta"><div><b>Tem um negócio na Mantiqueira?</b><span>Cadastre grátis: fotos à vontade, vitrine de produtos, WhatsApp, endereço e mapa.</span></div><button class="primary" onclick="bizForm()">${mine.length?'Gerenciar meu comércio':'Cadastrar meu comércio'}</button></div><div class="bzPlans"><div class="sectionHead"><h2>Divulgue seu negócio</h2></div><div class="planFree"><b>Grátis</b> · página da loja com fotos à vontade, vitrine de produtos (sem preço), WhatsApp, endereço e mapa. Clientes falam com você pelo chat do Conecta.</div><div class="planGrid"><div class="planCard"><b>Perfil Comercial</b><div class="planPrice">R$ 29,90 <span class="sub">/mês</span></div><ul><li>Selo azul de verificado ✔</li><li>Preço, link e botão Comprar na vitrine</li><li>Carrinho com pedido direto no seu WhatsApp</li><li>Aparece acima das lojas grátis</li></ul><button class="secondary" style="width:100%" onclick="chooseBusinessPlan('Perfil Comercial','29,90')">Quero esse plano</button></div><div class="planCard featured"><span class="planBadge">MAIS VISIBILIDADE</span><b style="display:block;margin-top:10px">Empresa em Destaque</b><div class="planPrice">R$ 59,90 <span class="sub">/mês</span></div><ul><li>Tudo do Perfil Comercial</li><li>No carrossel "Destaques da região"</li><li>Topo da sua categoria</li><li>1 promoção por semana fixada no feed</li></ul><button class="primary" onclick="chooseBusinessPlan('Empresa em Destaque','59,90')">Quero esse plano</button></div><div class="planCard"><b>Presença Digital</b><div class="planPrice">R$ 99,90 <span class="sub">/mês</span></div><ul><li>Tudo do plano Destaque</li><li>Topo da página de Comércios</li><li>3 promoções por semana fixadas no feed</li><li>Sua loja nos stories da página inicial</li></ul><button class="secondary" style="width:100%" onclick="chooseBusinessPlan('Presença Digital','99,90')">Quero esse plano</button></div></div><a class="commerceLink" href="javascript:chooseBusinessPlan('Plano personalizado','')">Precisa de um pacote personalizado? Fale com a gente.</a><a class="commerceLink" style="display:block;margin-top:10px;opacity:.8" href="javascript:planTermsOpen()">📄 Termos de Contratação dos planos</a></div></div>`,'business');
 }
 async function bizOpen(id){
-  const b=BIZ.list.find(x=>String(x.id)===String(id));if(!b)return;window.cmCurrentPage='bizDetail';
+  let b=BIZ.list.find(x=>String(x.id)===String(id));
+  if(!b){window.cmCurrentPage='bizDetail';const tk=BIZ.openTk=(BIZ.openTk||0)+1;document.getElementById('app').innerHTML=screen(`<div class="bzDetail bzP"><div class="bzPCover bzPLoad"></div><div class="bzDBody bzPBody"><div class="bzPId"><div class="bzPLogo"><div class="bzPLogoIn bzPLoad"></div></div><div class="bzPIdTxt"><div class="bzPLine" style="width:70%"></div><div class="bzPLine" style="width:45%;height:22px"></div></div></div><div class="bzPLine" style="height:80px;margin-top:18px"></div><div class="bzPLine" style="height:120px;margin-top:18px"></div></div></div>`,'business');try{document.querySelector('#app .screen')?.classList.add('bzPScreen')}catch(_){}window.scrollTo(0,0);
+    if(!BIZ.loaded||BIZ.loading)await bizLoad();b=BIZ.list.find(x=>String(x.id)===String(id));
+    if(!b){await bizLoad(true);b=BIZ.list.find(x=>String(x.id)===String(id))}
+    if(tk!==BIZ.openTk||window.cmCurrentPage!=='bizDetail')return;
+    if(!b){const bd=document.querySelector('#app .bzPBody');if(bd)bd.innerHTML=`<div class="bzPEmpty" style="margin-top:20px">Este comércio não foi encontrado. Ele pode ter sido removido.</div><button class="bzPAct" style="margin-top:14px;width:100%" onclick="go('business')">Ver comércios</button>`;return}
+  }
+  window.cmCurrentPage='bizDetail';
   const mine=b.owner===me?.id,owner=personById(b.owner),fav=bizFavs().includes(b.id),d=bizDist(b);
   const wa=String(b.whats||'').replace(/\D/g,''),waUrl=wa?'https://wa.me/'+(wa.length<=11?'55'+wa:wa)+'?text='+encodeURIComponent('Olá! Vi o '+b.name+' no Conecta.'):'';
   const link=b.link?(/^https?:\/\//.test(b.link)?b.link:(b.link.startsWith('@')?'https://instagram.com/'+b.link.slice(1):'https://'+b.link)):'';
@@ -13935,7 +13945,9 @@ const bootAt=Date.now();let touched=false,pending=false;
 addEventListener('pointerdown',()=>{touched=true},{once:true,capture:true});
 function onUpdate(){
   pending=true;
-  if(!touched&&Date.now()-bootAt<8000&&!document.getElementById('modal'))location.reload();
+  if(!touched&&Date.now()-bootAt<8000&&!document.getElementById('modal')){location.reload();return}
+  if(document.getElementById('cmUpdBar'))return;
+  document.body.insertAdjacentHTML('beforeend',`<button id="cmUpdBar" onclick="location.reload()" style="position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top,0px));z-index:99999;border:1px solid rgba(32,230,190,.5);background:rgba(4,21,33,.94);color:#F5F8FC;border-radius:999px;padding:9px 16px;font:600 14px/1.2 inherit;box-shadow:0 6px 20px rgba(0,0,0,.4);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)">✨ Nova versão do Conecta · <b style="color:#20E6BE">Atualizar</b></button>`);
 }
 document.addEventListener('visibilitychange',()=>{
   if(!document.hidden&&pending&&hiddenAt&&Date.now()-hiddenAt>5*60e3&&!document.getElementById('modal')&&!document.getElementById('sc')&&!document.querySelector('input:focus,textarea:focus'))location.reload();
