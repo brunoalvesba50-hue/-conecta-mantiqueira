@@ -18,10 +18,23 @@ self.addEventListener('install', e => {
 
 self.addEventListener('activate', e => {
   const keep = [CACHE, LIB, API, IMG];
-  e.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.filter(k => !keep.includes(k)).map(k => caches.delete(k))))
-      .then(() => self.clients.claim())
-  );
+  e.waitUntil((async () => {
+    const keys = await caches.keys();
+    /* havia uma versão anterior do app guardada? então isto é uma ATUALIZAÇÃO */
+    const upgrade = keys.some(k => /^conecta-v/.test(k) && k !== CACHE);
+    await Promise.all(keys.filter(k => !keep.includes(k)).map(k => caches.delete(k)));
+    await self.clients.claim();
+    if (!upgrade) return;
+    /* recarrega sozinho as telas abertas na versão nova, uma única vez,
+       para ninguém precisar fechar e abrir o app para receber a atualização */
+    /* (sem esperar aqui dentro: a recarga só anda depois que esta ativação terminar) */
+    const list = await self.clients.matchAll({ type: 'window' });
+    list.forEach(cl => {
+      const msg = () => { try { cl.postMessage({ type: 'sw-updated' }); } catch (_) {} };
+      try { if ('navigate' in cl) { cl.navigate(cl.url).catch(msg); return; } } catch (_) {}
+      msg();
+    });
+  })());
 });
 
 /* limpa os dados guardados quando a pessoa sai da conta */
