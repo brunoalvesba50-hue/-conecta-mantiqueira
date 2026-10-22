@@ -2526,12 +2526,12 @@ async function bizDelete(id){if(!confirm('Excluir este comércio? Ele some da ab
 function newBusiness(){openModal(`<div class="modalHead"><h2>Criar meu comércio</h2><button class="close" onclick="closeModal()">×</button></div><div class="sub">Cadastre os dados da sua empresa. A publicação e a cobrança serão ativadas quando conectarmos o sistema de pagamentos.</div><input id="bizName" class="field" placeholder="Nome do comércio"><input id="bizCity" class="field" placeholder="Cidade"><input id="bizCategory" class="field" placeholder="Categoria (ex.: restaurante, pousada, loja)"><input id="bizWhats" class="field" placeholder="WhatsApp"><input id="bizLink" class="field" placeholder="Instagram ou site"><textarea id="bizDesc" class="textarea" placeholder="Conte brevemente sobre seu negócio"></textarea><button class="primary" onclick="saveBusinessInterest()">Salvar dados do comércio</button></div>`)}
 function saveBusinessInterest(){const name=document.getElementById('bizName')?.value.trim(),city=document.getElementById('bizCity')?.value.trim(),category=document.getElementById('bizCategory')?.value.trim();if(!name||!city||!category){alert('Preencha nome, cidade e categoria.');return}const a=JSON.parse(localStorage.getItem('cm_business_leads')||'[]');a.push({name,city,category,whatsapp:document.getElementById('bizWhats')?.value.trim(),link:document.getElementById('bizLink')?.value.trim(),description:document.getElementById('bizDesc')?.value.trim(),ownerId:me?.id||'',created:Date.now()});localStorage.setItem('cm_business_leads',JSON.stringify(a));closeModal();alert('Dados salvos. A ativação pública e o pagamento serão conectados na próxima etapa.')}
 const CM_SALES_WHATSAPP='5512996653963';
-const PLAN_TERMS_VERSION='1.2 — 05/10/2026';
+const PLAN_TERMS_VERSION='1.3 — 22/10/2026';
 const PLAN_INFO={'Perfil Comercial':'29,90','Empresa em Destaque':'59,90','Presença Digital':'99,90'};
 function planTermsHtml(){return `<div class="planTerms">
 <h3>Termos de Contratação: Planos e Anúncios</h3>
 <p class="small">Versão ${PLAN_TERMS_VERSION}</p>
-<p>Estes termos valem entre o <b>Conecta</b> (a plataforma) e o estabelecimento que contrata um plano (o <b>Contratante</b>). Ao marcar "Li e aceito", o Contratante concorda com as regras abaixo.</p>
+<p>O <b>Conecta</b> é mantido por <b>Bruno José Alves</b>, pessoa física, com sede em Santo Antônio do Pinhal/SP, e-mail brunoalves.ba50@gmail.com.</p><p>Estes termos valem entre o <b>Conecta</b> (a plataforma) e o estabelecimento que contrata um plano (o <b>Contratante</b>). Ao marcar "Li e aceito", o Contratante concorda com as regras abaixo.</p>
 <h4>1. O que está sendo contratado</h4>
 <p>A divulgação do estabelecimento dentro do Conecta, com os recursos do plano escolhido:</p><p><b>Página grátis:</b> página da loja com fotos, vitrine de produtos sem preço e contato pelo chat do Conecta.</p><p><b>Perfil Comercial (R$ 29,90/mês):</b> selo azul de verificado na loja e no perfil do responsável; na vitrine, preço, link, botão Comprar e carrinho que envia o pedido ao WhatsApp da loja; posição acima das lojas grátis.</p><p><b>Empresa em Destaque (R$ 59,90/mês):</b> tudo do Perfil Comercial, presença no carrossel "Destaques da região", topo da sua categoria e 1 publicação promocional por semana, fixada no topo do feed por até 3 dias.</p><p><b>Presença Digital (R$ 99,90/mês):</b> tudo do plano Destaque, topo da página de Comércios, 3 publicações promocionais por semana e exibição da loja nos stories da página inicial.</p><p>Quando houver mais de uma loja no mesmo plano, a ordem entre elas segue a distância até o cliente e a cidade. Pacotes personalizados têm valor e recursos combinados por escrito. Quando o plano vence, os recursos pagos saem automaticamente e a página grátis continua no ar.</p>
 <h4>2. Pagamento e ativação</h4>
@@ -2539,7 +2539,7 @@ function planTermsHtml(){return `<div class="planTerms">
 <h4>3. Renovação, atraso e cancelamento</h4>
 <p>O plano dura 30 dias e renova quando o próximo pagamento é feito. Não há fidelidade nem multa: o Contratante pode cancelar quando quiser, por WhatsApp, e o plano continua ativo até o fim do período já pago. Com mais de 5 dias de atraso, os recursos pagos são pausados; o perfil básico do estabelecimento continua no ar.</p>
 <h4>4. Direito de arrependimento e reembolso</h4>
-<p>Na primeira contratação, o Contratante pode desistir em até 7 dias e recebe o valor de volta integralmente. Depois disso, não há devolução proporcional de dias não usados. Se o Conecta não entregar o que foi contratado, devolve o valor do período afetado.</p>
+<p>Na primeira contratação, o Contratante pode desistir em até 7 dias corridos a partir do pagamento, sem precisar explicar o motivo, e recebe o valor integral de volta. O pedido é feito pelo WhatsApp ou pelo e-mail, e a devolução sai em até 7 dias pelo mesmo meio de pagamento (ou por Pix). Depois desse prazo, não há devolução proporcional de dias não usados. Se o Conecta não entregar o que foi contratado, devolve o valor do período afetado.</p>
 <h4>5. Responsabilidades do Contratante</h4>
 <p>Informar dados verdadeiros; exercer atividade legal; ter direito de uso das fotos, logotipos e textos que enviar; não publicar ofertas enganosas, conteúdo ofensivo, ilegal ou que viole direitos de terceiros. O Contratante é o único responsável pelos seus produtos, serviços, preços, atendimento, entregas, garantias e trocas.</p>
 <h4>6. Responsabilidades do Conecta</h4>
@@ -2547,9 +2547,9 @@ function planTermsHtml(){return `<div class="planTerms">
 <h4>7. O que não é garantido</h4>
 <p>O Conecta divulga, mas não garante quantidade de vendas, clientes, visualizações ou contatos. A plataforma não participa das negociações entre o estabelecimento e seus clientes e não responde por elas. Podem ocorrer pausas curtas para manutenção ou por falhas de serviços de terceiros (internet, hospedagem, redes sociais).</p>
 <h4>8. Remoção de conteúdo</h4>
-<p>Conteúdo que desrespeite estes termos ou a lei pode ser recusado ou removido. Em caso de violação grave (golpe, conteúdo ilegal, ofensa ou fraude), o plano pode ser encerrado, sem devolução do período em curso. Nos demais casos, o Contratante é avisado antes e tem prazo para corrigir.</p>
+<p>Conteúdo que desrespeite estes termos ou a lei pode ser recusado ou removido. Em caso de violação grave (golpe, conteúdo ilegal, ofensa ou fraude), o plano pode ser encerrado, sem devolução do período em curso, e o Contratante é informado do motivo. Nos demais casos, o Contratante é avisado antes e tem prazo para corrigir.</p>
 <h4>9. Dados pessoais (LGPD)</h4>
-<p>Os dados do Contratante são usados só para prestar o serviço, fazer a cobrança e manter contato. Não são vendidos nem repassados a terceiros, exceto quando a lei exigir. O Contratante pode pedir a qualquer momento acesso, correção ou exclusão dos seus dados pelo WhatsApp.</p>
+<p>Os dados do Contratante são usados só para prestar o serviço, fazer a cobrança e manter contato. Não são vendidos nem repassados a terceiros, exceto quando a lei exigir. O Contratante pode pedir a qualquer momento acesso, correção ou exclusão dos seus dados pelo WhatsApp ou pelo e-mail. Os detalhes estão na <a href="#privacidade" onclick="cmLegalOpen('privacidade');return false">Política de Privacidade</a>.</p>
 <h4>10. Mudanças nestes termos</h4>
 <p>Se os termos mudarem, o Contratante é avisado com 30 dias de antecedência. Continuar com o plano depois desse prazo significa aceitar a nova versão; se não concordar, pode cancelar sem custo.</p>
 <h4>11. Anúncios (publicações turbinadas)</h4>
@@ -2557,7 +2557,7 @@ function planTermsHtml(){return `<div class="planTerms">
 <h4>12. Vendas pela vitrine</h4>
 <p>Os pedidos feitos pela vitrine e pelo carrinho são enviados direto à loja. Preço, pagamento, entrega, trocas e garantias são combinados entre a loja e o cliente; o Conecta não participa da venda.</p>
 <h4>13. Contato e foro</h4>
-<p>Atendimento pelo WhatsApp (12) 99665-3963. Fica eleito o foro da comarca do domicílio do Conecta, garantido ao Contratante que for consumidor o direito de usar o foro do seu próprio domicílio.</p>
+<p>Atendimento pelo WhatsApp (12) 99665-3963 ou pelo e-mail brunoalves.ba50@gmail.com. Fica eleito o foro da comarca de Santo Antônio do Pinhal/SP (domicílio do responsável pelo Conecta), garantido ao Contratante que for consumidor o direito de usar o foro do seu próprio domicílio.</p>
 </div>`}
 function planTermsOpen(){openModal(`<div class="modalHead"><h2>Termos dos planos</h2><button class="close" onclick="closeModal()">×</button></div>${planTermsHtml()}<button class="primary" onclick="closeModal()">Fechar</button>`)}
 function chooseBusinessPlan(name,price){
@@ -5414,6 +5414,7 @@ function cfgMain(){
    cfgSec('Assinaturas',[{i:'badge',t:'Selo verificado e planos',s:'Selo azul, Vitrine com preços e Perfil Comercial',r:admin?'Criador':(paid?'Ativo':'Assinar'),on:"cfgGo('goPlans()')",k:'verificado selo plano premium assinatura'}])+
    ((admin||(typeof isSupportOwner==='function'&&isSupportOwner()))?cfgSec('Seus insights e ferramentas',[...(admin?[{i:'crown',t:'Painel do criador',s:'Administração do Conecta',on:"cfgGo('admOpen()')",k:'admin painel'}]:[]),...((typeof isSupportOwner==='function'&&isSupportOwner())?[{i:'inbox',t:'Pedidos de ajuda',on:"cfgGo('supportInbox()')",k:'suporte pedidos'}]:[])]):'')+
    cfgSec('Mais informações e suporte',[{i:'help',t:'Ajuda e suporte',on:"cfgGo('supportScreen()')",k:'ajuda suporte problema'},{i:'leaf',t:'Sobre o Conecta',on:"cfgPush(cfgAbout)",k:'sobre app'}])+
+   cfgSec('Termos e privacidade',[{i:'lock',t:'Política de Privacidade',on:"cmLegalOpen('privacidade')",k:'privacidade lgpd dados'},{i:'info',t:'Termos de Uso',on:"cmLegalOpen('termos')",k:'termos uso regras'},{i:'badge',t:'Termos dos planos e reembolso',on:"planTermsOpen()",k:'reembolso planos contrato arrependimento'},{i:'save',t:'Cookies e armazenamento',on:"cmLegalOpen('cookies')",k:'cookies'},{i:'id',t:'Seus dados (LGPD)',s:'Pedir cópia, correção ou exclusão da conta',on:"cmDataRights()",k:'lgpd excluir apagar conta dados'}])+
    cfgSec('Entrar',[{i:'out',t:'Sair do aplicativo',danger:true,on:"cfgLogout()",k:'sair logout'}])+
    `<div class="cfgFoot">Conectado como <b>${esc(me?.email||p.name)}</b></div>`;
   cfgOpenPage(cfgShell('Configurações e atividade',body,true));
@@ -5467,7 +5468,7 @@ async function cfgActivity(){
   cfgOpenPage(cfgShell('Sua atividade',body,false));
   try{const c=await followCounts(me?.id);const a=document.getElementById('cfgFol'),b=document.getElementById('cfgIng');if(a)a.textContent=c.followers;if(b)b.textContent=c.following}catch(_){}
 }
-function cfgAbout(){cfgOpenPage(cfgShell('Sobre o Conecta',`<div class="cfgHero"><b style="font-size:22px">Conecta</b><span>A rede social das cidades da Serra da Mantiqueira.</span></div><div class="cfgNote">Feito para aproximar pessoas, comércios e notícias da região. Dúvidas ou sugestões? Use “Ajuda e suporte”.</div>`,false))}
+function cfgAbout(){cfgOpenPage(cfgShell('Sobre o Conecta',`<div class="cfgHero"><b style="font-size:22px">Conecta</b><span>A rede social das cidades da Serra da Mantiqueira.</span></div><div class="cfgNote">Feito para aproximar pessoas, comércios e notícias da região. Dúvidas ou sugestões? Use “Ajuda e suporte”.</div><div class="cfgNote">Responsável: Bruno José Alves (pessoa física) · Santo Antônio do Pinhal/SP · brunoalves.ba50@gmail.com</div>`+cfgSec('Documentos',[{i:'lock',t:'Política de Privacidade',on:"cmLegalOpen('privacidade')"},{i:'info',t:'Termos de Uso',on:"cmLegalOpen('termos')"},{i:'badge',t:'Termos dos planos e reembolso',on:"planTermsOpen()"},{i:'save',t:'Cookies e armazenamento',on:"cmLegalOpen('cookies')"}]),false))}
 async function cfgMeta(btn,key){const sw=btn.querySelector('[data-sw]');if(!sw)return;await pfToggleMeta(sw,key);const m=me?.user_metadata||{};const sm=btn.querySelector('small');if(sm&&key==='showcaseEnabled')sm.textContent=m.showcaseEnabled===true?'Ligada: aparece como aba no perfil':'Desligada: fica escondida'}
 function cfgTheme(btn){const sw=btn.querySelector('[data-sw]');sw.classList.toggle('on');const on=sw.classList.contains('on');document.body.classList.toggle('lightTheme',!on);localStorage.setItem('cm_theme',on?'dark':'light')}
 async function cfgPushToggle(btn){const sw=btn.querySelector('[data-sw]'),sm=btn.querySelector('small');if(sw.classList.contains('on')){localStorage.setItem('cm_notifications','off');sw.classList.remove('on');if(sm)sm.textContent='Desativadas';return}let ok=false;try{ok=typeof cmPushEnable==='function'?await cmPushEnable():false}catch(_){}localStorage.setItem('cm_notifications',ok===false?'off':'on');sw.classList.toggle('on',ok!==false);if(sm)sm.textContent=ok!==false?'Ativadas':'Não foi possível ativar neste aparelho'}
@@ -14572,6 +14573,197 @@ function apply(){try{const w=document.getElementById('password')?.closest('.pass
   try{const n=document.getElementById('newPassword')?.closest('.passwordWrap')||document.getElementById('newPassword');if(n){if(!n.id)n.id='pwWrapNew';hint(n.id,'newPassword')}}catch(_){}}
 document.addEventListener('click',()=>setTimeout(apply,50),true);
 new MutationObserver(()=>{if(document.getElementById('password')||document.getElementById('resetPassword')||document.getElementById('newPassword'))apply()}).observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+<!-- ===== Conecta: termos, privacidade, cookies e LGPD ===== -->
+<style>
+.cmLegal{max-height:66vh;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-bottom:12px;padding-right:2px}
+.cmLegal h3{margin:4px 0 2px;font-size:18px}
+.cmLegal h4{margin:16px 0 4px;font-size:14.5px;color:#20df9a}
+.cmLegal p,.cmLegal li{margin:0 0 6px;font-size:13.5px;line-height:1.55;color:#d6e3ea}
+.cmLegal ul{margin:0 0 6px;padding-left:18px}
+.cmLegal a{color:#20df9a}
+.cmLegal .small{opacity:.75}
+body.lightTheme .cmLegal p,body.lightTheme .cmLegal li,body.lightTheme .planTerms p{color:#24343d}
+body.lightTheme .cmLegal h4,body.lightTheme .planTerms h4{color:#0b8a5c}
+.cmTerms{display:flex;gap:10px;align-items:flex-start;margin:10px 2px 4px;font-size:13px;line-height:1.45;color:inherit;text-align:left;cursor:pointer}
+.cmTerms input{flex:none;width:20px;height:20px;margin:1px 0 0;accent-color:#20df9a}
+.cmTerms a{color:#20df9a;text-decoration:underline}
+.cmCookie{position:fixed;z-index:70;left:12px;right:12px;bottom:calc(86px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;background:rgba(5,21,31,.97);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:14px 14px 12px;color:#e8f1f5;font-size:13px;line-height:1.45;box-shadow:0 10px 30px #0008}
+.cmCookie div{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+.cmCookie button{border:0;border-radius:12px;padding:9px 14px;font-weight:700;font-size:13px;cursor:pointer}
+.cmCookie .cmCkMore{background:transparent;color:#20df9a}
+.cmCookie .cmCkOk{background:#20df9a;color:#05151f}
+body:has(#app .auth) .cmCookie{bottom:calc(12px + env(safe-area-inset-bottom))}
+body:has(#modal) .cmCookie{display:none}
+body.lightTheme .cmCookie{background:#fff;color:#1b2a33;border-color:#0002}
+.cmRights button{width:100%;margin-top:8px}
+</style>
+<script>
+(function(){
+const RESP='Bruno José Alves',CIDADE='Santo Antônio do Pinhal/SP',MAIL='brunoalves.ba50@gmail.com',WPP='(12) 99665-3963';
+const VER='1.0 — 22/10/2026';
+const DOCS={
+privacidade:['Política de Privacidade',`
+<p class="small">Versão ${VER}</p>
+<h4>1. Quem cuida dos seus dados</h4>
+<p>O Conecta é mantido por <b>${RESP}</b>, pessoa física, em ${CIDADE}. Ele é o controlador dos dados e também o encarregado pelo tratamento (LGPD). Contato: <b>${MAIL}</b> ou WhatsApp ${WPP}.</p>
+<h4>2. Quais dados coletamos</h4>
+<ul>
+<li><b>Cadastro:</b> nome, cidade, e-mail e senha (a senha fica protegida por criptografia; ninguém consegue lê-la).</li>
+<li><b>Perfil (opcional):</b> foto, capa, bio, interesses, música do perfil e contatos que você escolher mostrar.</li>
+<li><b>O que você publica:</b> fotos, vídeos, stories, comentários, mensagens, áudios, enquetes e respostas.</li>
+<li><b>Interações:</b> quem você segue, curtidas, salvos, visualizações de stories, bloqueios e denúncias.</li>
+<li><b>Comércios e planos:</b> nome do estabelecimento, endereço, WhatsApp, horários, fotos, ponto no mapa e dados do plano contratado.</li>
+<li><b>Suporte:</b> sua mensagem, print enviado, a tela em que você estava e o tipo de aparelho/navegador.</li>
+<li><b>Com sua permissão:</b> localização (para mapa e comércios), câmera, microfone e notificações no celular. Você pode negar ou desligar quando quiser nas configurações do aparelho.</li>
+</ul>
+<p>Não pedimos CPF, documentos, dados bancários nem dados sensíveis para usar a rede.</p>
+<h4>3. Para que usamos</h4>
+<ul>
+<li>Criar e manter sua conta e mostrar seu perfil e publicações (execução do contrato de uso).</li>
+<li>Entregar mensagens, notificações e sugestões de pessoas e comércios da região.</li>
+<li>Manter a segurança, evitar golpes, spam e contas falsas, e cumprir a lei (legítimo interesse e obrigação legal).</li>
+<li>Atender pedidos de ajuda e cobrar planos pagos de comércios.</li>
+<li>Localização, câmera, microfone e notificações: só com o seu consentimento.</li>
+</ul>
+<p>O Conecta <b>não vende</b> seus dados, <b>não usa</b> Google Analytics nem rastreadores de publicidade.</p>
+<h4>4. O que fica público</h4>
+<p>Nome, foto, cidade, bio e o que você publica podem ser vistos por outras pessoas, conforme as opções de privacidade que você escolher (como amigos próximos e quem vê seus stories). O seu e-mail não aparece no perfil.</p>
+<h4>5. Com quem compartilhamos</h4>
+<ul>
+<li><b>Supabase:</b> banco de dados, login e arquivos. Os servidores podem ficar fora do Brasil, com proteções contratuais exigidas pela LGPD.</li>
+<li><b>GitHub Pages:</b> hospedagem do site.</li>
+<li><b>Conteúdo de outros serviços:</b> vídeos do YouTube e do Facebook, músicas (Deezer, Jamendo), figurinhas (Giphy) e imagens (Pexels). Esses serviços só recebem dados quando você abre ou usa esse conteúdo, e seguem as políticas deles.</li>
+<li><b>Autoridades:</b> somente quando a lei ou uma ordem judicial exigir.</li>
+</ul>
+<h4>6. Por quanto tempo guardamos</h4>
+<p>Enquanto sua conta existir. Se você excluir a conta, apagamos seus dados em até 15 dias, exceto o que a lei mandar guardar (por exemplo, registros de acesso por 6 meses, conforme o Marco Civil da Internet) e dados de cobrança de planos pelo prazo legal.</p>
+<h4>7. Seus direitos (LGPD, art. 18)</h4>
+<p>Você pode pedir a qualquer momento: confirmação e acesso aos seus dados, correção, cópia (portabilidade), exclusão, informação sobre com quem compartilhamos e revogação de consentimentos. Use <a href="#" onclick="cmDataRights();return false">Seus dados (LGPD)</a> nas Configurações ou escreva para ${MAIL}. Respondemos em até 15 dias. Você também pode reclamar na ANPD (gov.br/anpd).</p>
+<h4>8. Crianças e adolescentes</h4>
+<p>O Conecta é para maiores de 13 anos. Quem tem entre 13 e 17 anos só pode usar com autorização e acompanhamento dos pais ou responsáveis. Se soubermos de uma conta de criança menor de 13 anos, ela será removida.</p>
+<h4>9. Segurança</h4>
+<p>Usamos conexão criptografada (HTTPS), senhas protegidas e regras de acesso no banco de dados. Nenhum sistema é 100% invulnerável; se houver um incidente que traga risco a você, avisaremos você e a ANPD.</p>
+<h4>10. Mudanças</h4>
+<p>Se esta política mudar, avisaremos no app antes de a nova versão valer.</p>`],
+termos:['Termos de Uso',`
+<p class="small">Versão ${VER}</p>
+<h4>1. Quem somos</h4>
+<p>O Conecta é uma rede social das cidades da Serra da Mantiqueira, mantida por <b>${RESP}</b>, pessoa física, em ${CIDADE}. Contato: ${MAIL} · WhatsApp ${WPP}.</p>
+<h4>2. Aceitação</h4>
+<p>Ao criar uma conta, você concorda com estes Termos e com a <a href="#" onclick="cmLegalOpen('privacidade');return false">Política de Privacidade</a>. Se não concordar, não use o Conecta.</p>
+<h4>3. Quem pode usar</h4>
+<p>Pessoas com 13 anos ou mais. Entre 13 e 17 anos, só com autorização dos pais ou responsáveis. Use seu nome verdadeiro, dados corretos e não compartilhe sua senha. Você responde pelo que acontece na sua conta.</p>
+<h4>4. O que não é permitido</h4>
+<ul>
+<li>Conteúdo ilegal, golpes, pirâmides, venda de produtos proibidos ou propaganda enganosa.</li>
+<li>Ódio, discriminação, ameaças, assédio, bullying ou exposição de outras pessoas sem autorização.</li>
+<li>Nudez, conteúdo sexual ou qualquer conteúdo que envolva menores de forma imprópria.</li>
+<li>Perfis falsos, se passar por outra pessoa ou empresa, spam e robôs.</li>
+<li>Publicar fotos, vídeos, músicas ou textos de outras pessoas sem ter o direito de usar.</li>
+<li>Tentar invadir, copiar em massa ou atrapalhar o funcionamento do Conecta.</li>
+</ul>
+<h4>5. Seu conteúdo</h4>
+<p>O que você publica continua sendo seu. Você autoriza o Conecta a exibir, guardar e adaptar (por exemplo, reduzir o tamanho) esse conteúdo só para fazer a rede funcionar, sem pagamento e enquanto ele estiver publicado. Você declara que tem o direito de publicar o que envia.</p>
+<h4>6. Direitos autorais e pedidos de remoção</h4>
+<p>Se você é dono de uma foto, vídeo, marca ou texto que aparece no Conecta sem sua autorização (inclusive em imagens usadas pelo próprio app), escreva para <b>${MAIL}</b> com: seu nome, onde o conteúdo aparece, e uma prova de que ele é seu. Analisamos e, sendo procedente, removemos o conteúdo o quanto antes, normalmente em até 72 horas.</p>
+<h4>7. Denúncias e moderação</h4>
+<p>Você pode denunciar publicações e perfis. Conteúdo que desrespeite estes Termos ou a lei pode ser removido, e contas podem ser suspensas ou excluídas. Nos casos graves a remoção pode ser imediata; nos demais, quando possível, avisamos antes e explicamos o motivo.</p>
+<h4>8. Comércios, vitrine e anúncios</h4>
+<p>Comércios são responsáveis pelos produtos, preços, entregas, trocas e garantias que oferecem. O Conecta apenas divulga e não participa das vendas. Anúncios aparecem marcados como "Patrocinado". Planos pagos seguem os <a href="#" onclick="planTermsOpen();return false">Termos dos planos e reembolso</a>, incluindo o direito de desistir em 7 dias.</p>
+<h4>9. Limites do serviço</h4>
+<p>Trabalhamos para o Conecta funcionar bem, mas podem ocorrer falhas, pausas para manutenção ou problemas em serviços de terceiros. O Conecta não responde pelo que outras pessoas publicam, salvo nos casos previstos em lei, e responde nos limites do Código de Defesa do Consumidor e do Marco Civil da Internet.</p>
+<h4>10. Encerrar a conta</h4>
+<p>Você pode excluir sua conta quando quiser em Configurações › Seus dados (LGPD).</p>
+<h4>11. Mudanças nestes Termos</h4>
+<p>Avisaremos no app antes de uma nova versão valer. Se não concordar, você pode excluir sua conta.</p>
+<h4>12. Lei e foro</h4>
+<p>Valem as leis do Brasil. Fica eleito o foro de Santo Antônio do Pinhal/SP, garantido a quem for consumidor o direito de usar o foro do próprio domicílio.</p>`],
+cookies:['Cookies e armazenamento',`
+<p class="small">Versão ${VER}</p>
+<p>O Conecta <b>não usa</b> cookies de publicidade, Google Analytics nem rastreadores de terceiros.</p>
+<h4>O que guardamos no seu aparelho</h4>
+<p>Somente o necessário para o app funcionar: sua sessão de login, tema claro/escuro, cidade escolhida, rascunhos, avisos já vistos e preferências de notificação e som. Isso fica no armazenamento do navegador e não é usado para te rastrear.</p>
+<h4>Conteúdo de outros serviços</h4>
+<p>Quando você abre um vídeo do YouTube ou do Facebook, ou usa músicas e figurinhas de serviços externos, esses serviços podem gravar cookies próprios, conforme as políticas deles.</p>
+<h4>Como apagar</h4>
+<p>Você pode limpar os dados do site nas configurações do navegador. Ao fazer isso, você sai da conta e as preferências voltam ao padrão.</p>`]
+};
+function legalHtml(k){const d=DOCS[k];return d?`<div class="modalHead"><h2>${d[0]}</h2><button class="close" aria-label="Fechar" onclick="closeModal()">×</button></div><div class="cmLegal">${d[1]}</div><button class="primary" style="width:100%" onclick="closeModal()">Fechar</button>`:''}
+window.cmLegalOpen=function(k){if(!DOCS[k])return;openModal(legalHtml(k))};
+
+/* ---- Seus dados (LGPD) ---- */
+window.cmDataRights=function(){
+  openModal(`<div class="modalHead"><h2>Seus dados (LGPD)</h2><button class="close" aria-label="Fechar" onclick="closeModal()">×</button></div>
+  <div class="sub">Você tem direito de ver, corrigir, levar e apagar seus dados. Pedidos são respondidos em até 15 dias no seu e-mail.</div>
+  <div class="cmRights">
+  <button class="ghost" onclick="closeModal();editProfile()">Corrigir meus dados</button>
+  <button class="ghost" onclick="cmRightsSend('copia')">Pedir uma cópia dos meus dados</button>
+  <button class="ghost" onclick="cmLegalOpen('privacidade')">Ler a Política de Privacidade</button>
+  <button class="ghost" style="color:#ff6b6b" onclick="cmDeleteAsk()">Excluir minha conta</button>
+  </div>
+  <div class="small" style="margin-top:12px;opacity:.75">Também pode escrever para ${MAIL}.</div>
+  <div id="cmRightsErr" class="error"></div>`)
+};
+window.cmDeleteAsk=function(){
+  openModal(`<div class="modalHead"><h2>Excluir minha conta</h2><button class="close" aria-label="Fechar" onclick="closeModal()">×</button></div>
+  <div class="sub">Sua conta, perfil, publicações, stories, mensagens e comércios serão apagados em até 15 dias. Isso não pode ser desfeito. Até lá, você pode desistir respondendo o e-mail de confirmação.</div>
+  <textarea id="cmDelWhy" class="textarea" placeholder="Quer contar o motivo? (opcional)"></textarea>
+  <div id="cmRightsErr" class="error"></div>
+  <button class="primary" style="width:100%;background:#e5484d;color:#fff" onclick="cmRightsSend('exclusao')">Confirmar exclusão</button>
+  <button class="ghost" style="width:100%;margin-top:8px" onclick="cmDataRights()">Voltar</button>`)
+};
+window.cmRightsSend=async function(kind){
+  const err=document.getElementById('cmRightsErr');
+  try{
+    if(typeof me==='undefined'||!me){throw new Error('Entre na sua conta para fazer o pedido.')}
+    const why=(document.getElementById('cmDelWhy')?.value||'').trim();
+    const msg=kind==='exclusao'?`[LGPD] PEDIDO DE EXCLUSÃO DE CONTA. Apagar conta e dados em até 15 dias.${why?' Motivo: '+why:''}`:'[LGPD] PEDIDO DE CÓPIA DOS DADOS. Enviar cópia dos dados para o e-mail da conta em até 15 dias.';
+    const p=(typeof profileData==='function')?profileData():{};
+    const {error}=await sb.from('support_requests').insert({user_id:me.id,user_name:p.name||'',user_email:me.email||'',message:msg,screenshot_url:'',page:'lgpd',user_agent:navigator.userAgent,created_at:new Date().toISOString(),status:'open'});
+    if(error)throw error;
+    openModal(`<div class="modalHead"><h2>Pedido recebido</h2><button class="close" aria-label="Fechar" onclick="closeModal()">×</button></div><div class="sub">${kind==='exclusao'?'Sua conta será excluída em até 15 dias. Você receberá a confirmação no e-mail '+(me.email||'da conta')+'.':'Você receberá a cópia dos seus dados no e-mail '+(me.email||'da conta')+' em até 15 dias.'}</div><button class="primary" style="width:100%;margin-top:14px" onclick="closeModal()">Ok</button>`);
+  }catch(e){if(err)err.textContent='Não foi possível enviar agora. Escreva para '+MAIL+'. ('+(e?.message||'erro')+')'}
+};
+
+/* ---- Aceite dos termos no cadastro ---- */
+function curMode(){try{return mode}catch(_){return window.mode}}
+function termsBox(){
+  if(document.getElementById('cmTermsWrap'))return syncTerms();
+  const errEl=document.querySelector('.authCard #error');if(!errEl)return;
+  errEl.insertAdjacentHTML('beforebegin',`<label id="cmTermsWrap" class="cmTerms" for="cmTermsOk"><input type="checkbox" id="cmTermsOk"><span>Tenho 13 anos ou mais e li e aceito os <a href="#termos" onclick="event.preventDefault();cmLegalOpen('termos')">Termos de Uso</a> e a <a href="#privacidade" onclick="event.preventDefault();cmLegalOpen('privacidade')">Política de Privacidade</a>.</span></label>`);
+  syncTerms();
+}
+function syncTerms(){const w=document.getElementById('cmTermsWrap');if(w)w.style.display=(curMode()==='register')?'':'none'}
+const a1=window.authScreen;if(typeof a1==='function')window.authScreen=function(){const r=a1.apply(this,arguments);try{termsBox()}catch(e){console.warn(e)}return r};
+const t1=window.toggleAuth;if(typeof t1==='function')window.toggleAuth=function(){const r=t1.apply(this,arguments);try{syncTerms()}catch(_){}return r};
+const s1=window.submitAuth;if(typeof s1==='function')window.submitAuth=function(){
+  if(curMode()==='register'){const c=document.getElementById('cmTermsOk');if(c&&!c.checked){const e=document.getElementById('error');if(e)e.textContent='Para criar a conta, marque que leu e aceita os Termos e a Política de Privacidade.';c.focus();return}}
+  return s1.apply(this,arguments)};
+try{const su=sb.auth.signUp.bind(sb.auth);sb.auth.signUp=function(arg){try{if(arg){arg.options=arg.options||{};arg.options.data=Object.assign({},arg.options.data,{terms_version:VER,terms_accepted_at:new Date().toISOString()})}}catch(_){}return su(arg)}}catch(e){console.warn(e)}
+if(document.querySelector('.authCard'))try{termsBox()}catch(_){}
+
+/* ---- Aviso de cookies (uma vez) ---- */
+function cookieNotice(){
+  let ok=null;try{ok=localStorage.getItem('cm_cookie_ok')}catch(_){ok='1'}
+  if(ok||document.getElementById('cmCookie'))return;
+  document.body.insertAdjacentHTML('beforeend',`<div id="cmCookie" class="cmCookie" role="dialog" aria-label="Aviso de cookies">O Conecta usa só o armazenamento necessário para funcionar (login e preferências). Não usamos cookies de publicidade nem rastreadores.<div><button class="cmCkMore" onclick="cmLegalOpen('cookies')">Saiba mais</button><button class="cmCkOk" onclick="cmCookieOk()">Entendi</button></div></div>`);
+}
+window.cmCookieOk=function(){try{localStorage.setItem('cm_cookie_ok','1')}catch(_){}document.getElementById('cmCookie')?.remove()};
+setTimeout(cookieNotice,1800);
+
+/* ---- Links diretos: #privacidade, #termos, #cookies, #planos ---- */
+function hashOpen(){const h=(location.hash||'').slice(1).toLowerCase();if(DOCS[h])setTimeout(()=>cmLegalOpen(h),600);else if(h==='planos'||h==='reembolso')setTimeout(()=>{try{planTermsOpen()}catch(_){}},600)}
+hashOpen();window.addEventListener('hashchange',hashOpen);
+
+/* ---- Acessibilidade: texto alternativo nas imagens ---- */
+function altFix(root){(root.querySelectorAll?root.querySelectorAll('img:not([alt])'):[]).forEach(img=>{
+  const c=img.className||'';
+  img.alt=/avatar|Avatar|profilePic|highlightCircle/.test(c)?(/highlight/.test(c)?'Destaque':'Foto de perfil'):(img.closest('[aria-hidden="true"]')?'':'Imagem')})}
+altFix(document);
+try{new MutationObserver(ms=>{for(const m of ms)for(const n of m.addedNodes){if(n.nodeType!==1)continue;if(n.tagName==='IMG'&&!n.hasAttribute('alt'))altFix(n.parentNode||document);else altFix(n)}}).observe(document.body,{childList:true,subtree:true})}catch(_){}
+document.documentElement.lang=document.documentElement.lang||'pt-BR';
 })();
 </script>
 </body></html>
