@@ -5928,13 +5928,17 @@ async function srSave(kind){
 </script>
 <style id="evStyle">
 /* ===== EVENTOS: lista, detalhes, adicionar e meus eventos ===== */
+html body.evOn::before{background:#0a1820!important}
+html body.evOn::after{display:none!important}
 .ev{--evg:#20df9a;--evc:var(--dna-glass,rgba(8,27,37,.72));--evl:rgba(255,255,255,.10);--evm:#9baeb9;color:#f5f8fa;padding-bottom:12px}
 .ev h1,.ev h2{margin:0}
 .evTop{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;margin:0 0 16px}
 .evTop .evTtl{text-align:center;min-width:0}
-.evTop h1{font-size:22px;line-height:1.2;font-weight:800}
+.evTop h1{font-size:21px;line-height:1.2;font-weight:800}
 .evRound{width:44px;height:44px;border-radius:50%;border:1px solid var(--evl);background:rgba(8,27,37,.62);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);color:#fff;display:grid;place-items:center;padding:0;cursor:pointer}
 .evRound svg{width:22px;height:22px}
+.evTop .evRound{background:none;border:0;-webkit-backdrop-filter:none;backdrop-filter:none}
+.evTop .evRound svg{width:24px;height:24px}
 .evRound.g{color:var(--evg);border-color:rgba(32,223,154,.4)}
 .evRound.on{color:#ff5d7a}
 .evRound.on svg{fill:currentColor}
@@ -5961,7 +5965,7 @@ async function srSave(kind){
 .evMore svg{width:16px;height:16px}
 .evList{display:flex;flex-direction:column;gap:14px}
 .evCard{border-radius:20px;overflow:hidden;background:var(--evc);border:1px solid var(--evl);box-shadow:0 10px 26px rgba(0,0,0,.30);cursor:pointer;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
-.evImg{position:relative;height:150px;background:#0b1d28 center/cover no-repeat}
+.evImg{position:relative;height:128px;background:#0b1d28 center/cover no-repeat}
 .evImg::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 40%,rgba(8,27,37,.75))}
 .evDate{position:absolute;z-index:1;left:12px;top:12px;min-width:50px;padding:5px 8px 6px;border-radius:12px;background:rgba(6,19,29,.82);border:1px solid rgba(32,223,154,.55);text-align:center;color:var(--evg);font-size:12px;font-weight:700;line-height:1.1;letter-spacing:.3px}
 .evDate b{display:block;color:#fff;font-size:22px;font-weight:800}
@@ -6070,7 +6074,14 @@ textarea.evField{min-height:92px;resize:vertical;line-height:1.45}
 .evSel select:invalid{color:var(--evm)}
 .evSel button{border:0;background:none;color:#c9d6dd;padding:6px;display:grid;place-items:center;cursor:pointer}
 .evSel button svg{width:20px;height:20px}
-.evTwo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.evSel .evPh{position:absolute;left:42px;right:10px;top:50%;transform:translateY(-50%);color:var(--evm);font-size:15px;pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.evSel input.empty{color:transparent}
+.evSel input.empty::-webkit-datetime-edit{color:transparent}
+.evSel input:not(.empty)+.evPh{display:none}
+.evTwo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.evTwo>div{min-width:0}
+.evSel input[type=date],.evSel input[type=time]{width:100%}
+.evSel input::-webkit-calendar-picker-indicator{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
 .evToggle{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:18px 0 6px}
 .evToggle b{display:block;font-size:15px}
 .evToggle small{color:var(--evm);font-size:13px}
@@ -6206,7 +6217,7 @@ function evFiltered(){
 }
 function evCard(x){
   const d=evD(x.event_at),id=evId(x.id),cat=x.sub?evCatOf(x.sub):null,n=evCount(x.id),fav=evIsFav(x.id);
-  return `<article class="evCard" onclick="go('evento','${id}')"><div class="evImg" style="${evPhotoBg(x)}"><span class="evDate"><b>${d.day}</b>${d.mon}</span><button type="button" class="evHeart ${fav?'on':''}" data-evfav="${id}" aria-pressed="${fav}" aria-label="Salvar evento" onclick="event.stopPropagation();evFav('${id}',this)">${EVI.heart}</button></div><div class="evBody"><b class="evName">${esc(x.title)}</b><span class="evLoc">${EVI.pin}<span>${esc(evCityUF(x.city))}</span></span><div class="evChips">${cat?`<span class="evChip" style="--c:${cat[3]}">${EVI[cat[2]]}${esc(x.sub)}</span>`:''}<span class="evChip" style="--c:#c9d6dd">${EVI.clock}${d.hm}</span>${evFree(x)?`<span class="evChip" style="--c:#20df9a">Gratuito</span>`:''}</div><div class="evInt">${evAvs(x.id)}<span>${n?`${n} interessado${n>1?'s':''}`:'Seja o primeiro a confirmar'}</span></div><span class="evGo">${EVI.chev}</span></div></article>`;
+  return `<article class="evCard" onclick="go('evento','${id}')"><div class="evImg" style="${evPhotoBg(x)}"><span class="evDate"><b>${d.day}</b>${d.mon}</span><button type="button" class="evHeart ${fav?'on':''}" data-evfav="${id}" aria-pressed="${fav}" aria-label="Salvar evento" onclick="event.stopPropagation();evFav('${id}',this)">${EVI.heart}</button></div><div class="evBody"><b class="evName">${esc(x.title)}</b><span class="evLoc">${EVI.pin}<span>${esc(evCityUF(x.city))}</span></span><div class="evChips">${cat?`<span class="evChip" style="--c:${cat[3]}">${EVI[cat[2]]}${esc(x.sub)}</span>`:''}${evFree(x)?`<span class="evChip" style="--c:#20df9a">Gratuito</span>`:''}</div><div class="evInt">${evAvs(x.id)}<span>${n?`${n} interessado${n>1?'s':''}`:'Seja o primeiro a confirmar'}</span></div><span class="evGo">${EVI.chev}</span></div></article>`;
 }
 function evNotice(){return EV.missing?`<div class="srNotice">🛠️ Para liberar os Eventos, o administrador precisa rodar o <b>atualizacao-serra.sql</b> no Supabase.</div>`:EV.err?`<div class="evEmpty"><b>Não consegui carregar os eventos</b>Verifique a internet e tente de novo.<br><button class="secondary" type="button" onclick="EV.loaded=false;go(window.cmCurrentPage)">Tentar de novo</button></div>`:''}
 function evPaint(){
@@ -6264,10 +6275,9 @@ async function evDelete(id){
 }
 /* -------- 3. Adicionar evento -------- */
 function evFormScreen(){
-  const pc=(typeof cmCityLabel==='function'?cmCityLabel(profileData().city):'')||'';
   const today=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
   const cs=(typeof cities!=='undefined'?cities:[]);
-  return screen(`<div class="ev evForm"><div class="evTop"><button class="evRound" type="button" onclick="evBack('eventos')" aria-label="Voltar">${EVI.back}</button><div class="evTtl"><h1>Adicionar Evento</h1></div><span></span></div><button id="evPhotoBtn" class="evPhoto" type="button" onclick="document.getElementById('evPhotoIn').click()">${EVI.image}<span>Adicionar foto do evento</span><small>(imagem em destaque)</small><i>${EVI.plus}</i></button><input id="evPhotoIn" class="hidden" type="file" accept="image/*" onchange="evPrev(this)"><label class="evLbl" for="evTitle">Nome do evento</label><input id="evTitle" class="evField" maxlength="120" placeholder="Ex.: Festival da Mantiqueira" autocomplete="off"><label class="evLbl" for="evBody">Descrição</label><textarea id="evBody" class="evField" maxlength="1000" placeholder="Conte mais sobre o evento..."></textarea><label class="evLbl" for="evCatSel">Categoria</label><div class="evSel"><span id="evCatIco" style="display:grid;color:#9b6cff">${EVI.music}</span><select id="evCatSel" onchange="evCatIco(this.value)">${EV_FORM_CATS.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')}</select>${EVI.down.replace('<svg','<svg class="cv"')}</div><label class="evLbl" for="evCity">Cidade</label><div class="evSel">${EVI.pin}<select id="evCity" required><option value="">Selecione a cidade</option>${cs.map(c=>`<option value="${esc(c)}"${c===pc?' selected':''}>${esc(c)}${evUF(c)?' - '+evUF(c):''}</option>`).join('')}</select>${EVI.down.replace('<svg','<svg class="cv"')}</div><div class="evTwo"><div><label class="evLbl" for="evDate">Data do evento</label><div class="evSel">${EVI.cal}<input id="evDate" type="date" min="${today}"></div></div><div><label class="evLbl" for="evTime">Horário</label><div class="evSel">${EVI.clock}<input id="evTime" type="time"></div></div></div><label class="evLbl" for="evPlace">Local do evento</label><div class="evSel">${EVI.pin}<input id="evPlace" maxlength="120" placeholder="Ex.: Praça, Parque, Endereço..." autocomplete="off"><button type="button" onclick="evMapCheck()" aria-label="Conferir no mapa">${EVI.map}</button></div><label class="evLbl" for="evContact">WhatsApp para contato (opcional)</label><input id="evContact" class="evField" inputmode="tel" maxlength="20" placeholder="(12) 99999-9999"><div class="evToggle"><span><b>Evento gratuito</b><small>Ative se a entrada for gratuita</small></span><label class="evSwitch"><input id="evFreeIn" type="checkbox" checked onchange="document.getElementById('evPriceWrap').classList.toggle('hidden',this.checked)" aria-label="Evento gratuito"><i></i></label></div><div id="evPriceWrap" class="hidden"><label class="evLbl" for="evPrice">Valor da entrada</label><input id="evPrice" class="evField" maxlength="40" placeholder="Ex.: R$ 30 (meia R$ 15)"></div><button id="evSend" class="evPublish" type="button" onclick="evSave()">${EVI.send}Publicar Evento</button><div class="small" style="opacity:.7;text-align:center">O evento sai da agenda depois que acontecer.</div></div>`,'home');
+  return screen(`<div class="ev evForm"><div class="evTop"><button class="evRound" type="button" onclick="evBack('eventos')" aria-label="Voltar">${EVI.back}</button><div class="evTtl"><h1>Adicionar Evento</h1></div><span></span></div><button id="evPhotoBtn" class="evPhoto" type="button" onclick="document.getElementById('evPhotoIn').click()">${EVI.image}<span>Adicionar foto do evento</span><small>(imagem em destaque)</small><i>${EVI.plus}</i></button><input id="evPhotoIn" class="hidden" type="file" accept="image/*" onchange="evPrev(this)"><label class="evLbl" for="evTitle">Nome do evento</label><input id="evTitle" class="evField" maxlength="120" placeholder="Ex.: Festival da Mantiqueira" autocomplete="off"><label class="evLbl" for="evBody">Descrição</label><textarea id="evBody" class="evField" maxlength="1000" placeholder="Conte mais sobre o evento..."></textarea><label class="evLbl" for="evCatSel">Categoria</label><div class="evSel"><span id="evCatIco" style="display:grid;color:#9b6cff">${EVI.music}</span><select id="evCatSel" onchange="evCatIco(this.value)">${EV_FORM_CATS.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')}</select>${EVI.down.replace('<svg','<svg class="cv"')}</div><label class="evLbl" for="evCity">Cidade</label><div class="evSel">${EVI.pin}<select id="evCity" required><option value="">Selecione a cidade</option>${cs.map(c=>`<option value="${esc(c)}">${esc(c)}${evUF(c)?' - '+evUF(c):''}</option>`).join('')}</select>${EVI.down.replace('<svg','<svg class="cv"')}</div><div class="evTwo"><div><label class="evLbl" for="evDate">Data do evento</label><div class="evSel">${EVI.cal}<input id="evDate" class="empty" type="date" min="${today}" oninput="this.classList.toggle('empty',!this.value)" onchange="this.classList.toggle('empty',!this.value)"><span class="evPh">Selecione a data</span></div></div><div><label class="evLbl" for="evTime">Horário</label><div class="evSel">${EVI.clock}<input id="evTime" class="empty" type="time" oninput="this.classList.toggle('empty',!this.value)" onchange="this.classList.toggle('empty',!this.value)"><span class="evPh">Selecione</span></div></div></div><label class="evLbl" for="evPlace">Local do evento</label><div class="evSel">${EVI.pin}<input id="evPlace" maxlength="120" placeholder="Ex.: Praça, Parque, Endereço..." autocomplete="off"><button type="button" onclick="evMapCheck()" aria-label="Conferir no mapa">${EVI.map}</button></div><div class="evToggle"><span><b>Evento gratuito</b><small>Ative se a entrada for gratuita</small></span><label class="evSwitch"><input id="evFreeIn" type="checkbox" checked onchange="document.getElementById('evPriceWrap').classList.toggle('hidden',this.checked)" aria-label="Evento gratuito"><i></i></label></div><div id="evPriceWrap" class="hidden"><label class="evLbl" for="evPrice">Valor da entrada</label><input id="evPrice" class="evField" maxlength="40" placeholder="Ex.: R$ 30 (meia R$ 15)"></div><button id="evSend" class="evPublish" type="button" onclick="evSave()">${EVI.send}Publicar Evento</button></div>`,'home');
 }
 function evCatIco(v){const c=evCatOf(v);const el=document.getElementById('evCatIco');if(el){el.innerHTML=EVI[c[2]];el.style.color=c[3]}}
 function evPrev(inp){const f=inp.files&&inp.files[0];const b=document.getElementById('evPhotoBtn');if(!f||!b)return;b.querySelector('img')?.remove();const im=document.createElement('img');im.alt='';im.src=URL.createObjectURL(f);b.prepend(im);b.classList.add('has')}
@@ -6310,20 +6320,28 @@ function evMenu(id){
   openModal(`<div class="stGrab"></div><div class="stSheetHead"><h2>Opções do evento</h2><button class="close" onclick="closeModal()" aria-label="Fechar">×</button></div><div class="stSheetBody"><div class="evSheetList"><button type="button" onclick="closeModal();go('evento','${id}')">${EVI.eye}Ver evento</button><button type="button" onclick="closeModal();evShare('${id}')">${EVI.share}Compartilhar</button><button type="button" class="danger" onclick="evDelete('${id}')">${EVI.trash}Apagar evento</button></div></div>`);
   document.querySelector('#modal .modalBox')?.classList.add('stSheet');
 }
+/* -------- barra de baixo: aba "Eventos" no lugar de Comércios, como no mockup -------- */
+function evNav(){
+  const n=document.querySelector('#app nav');if(!n)return;
+  n.querySelectorAll('button.active').forEach(b=>b.classList.remove('active'));
+  const b=n.querySelector(`button[onclick="go('business')"]`);if(!b)return;
+  b.setAttribute('onclick',"go('eventos')");b.classList.add('active');
+  b.innerHTML=`<span class="nicon n3 navSvg"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" fill="currentColor"/><path d="M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M3.5 10h17" stroke="#06131d" stroke-width="1.6"/><path d="M8 14h2M14 14h2M8 17h2" stroke="#06131d" stroke-width="1.8" stroke-linecap="round"/></svg></span>Eventos`;
+}
 /* -------- rotas -------- */
 (function(){
   const EV_PAGES={eventos:evListScreen,evento:evDetailScreen,eventoNovo:evFormScreen,meusEventos:evMineScreen};
   const g=window.go;
   window.go=async function(page,arg){
-    const f=EV_PAGES[page];if(!f)return g(page,arg);
+    const f=EV_PAGES[page];if(!f){document.body.classList.remove('evOn');return g(page,arg)}
     document.getElementById('cartBar')?.remove();document.getElementById('instBubble')?.remove();
-    window.cmCurrentPage=page;const a=document.getElementById('app');if(!a)return;a.classList.remove('isHome');
-    a.innerHTML=f(arg);window.scrollTo(0,0);
+    window.cmCurrentPage=page;const a=document.getElementById('app');if(!a)return;a.classList.remove('isHome');document.body.classList.add('evOn');
+    a.innerHTML=f(arg);evNav();window.scrollTo(0,0);
     if(page==='eventoNovo')return;
     if(page==='evento'&&EV.loaded&&EV.items.some(i=>evId(i.id)===evId(arg)))return;
     await evLoad();
     if(window.cmCurrentPage!==page)return;
-    if(page==='eventos')evPaint();else if(page==='meusEventos')evPaintMine();else a.innerHTML=f(arg);
+    if(page==='eventos')evPaint();else if(page==='meusEventos')evPaintMine();else{a.innerHTML=f(arg);evNav()}
   };
 })();
 /* ===================== fim EVENTOS ===================== */
