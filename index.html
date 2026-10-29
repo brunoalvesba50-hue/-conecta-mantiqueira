@@ -14766,4 +14766,463 @@ try{new MutationObserver(ms=>{for(const m of ms)for(const n of m.addedNodes){if(
 document.documentElement.lang=document.documentElement.lang||'pt-BR';
 })();
 </script>
+<style>
+/* ===== BATE-PAPO: teclado, menu do +, figurinhas, documento, localização (out/2026) ===== */
+/* teclado aberto: sem o espaço de baixo (a "barra do iPhone" some quando o teclado sobe) */
+.igChat.kbOpen{padding-bottom:0!important}
+.igChat.kbOpen .cmComposer,.igChat.kbOpen .igComposer{padding-bottom:6px!important}
+/* gaveta (menu do +, figurinhas, opções) */
+.cmChat .msgSheet{background:rgba(8,24,34,.9);-webkit-backdrop-filter:blur(22px) saturate(140%);backdrop-filter:blur(22px) saturate(140%);border:1px solid rgba(255,255,255,.1);box-shadow:0 18px 40px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.06);border-radius:26px;transition:transform .2s ease,opacity .2s ease;touch-action:pan-y}
+.cmChat .msgSheet.dragging{transition:none}
+.cmPlusBtn svg{transition:transform .22s cubic-bezier(.3,1.4,.5,1)}
+.cmPlusBtn.open svg{transform:rotate(45deg)}
+.cmPlusBtn.open,.cmStkBtn.open{color:#4ff0bd!important}
+.msgPlus.v2{grid-template-columns:repeat(4,1fr);gap:6px;padding:4px 2px 6px}
+.msgPlus.v2 button{gap:8px;font-size:12.5px;font-weight:600;color:#e8f1f4;letter-spacing:.1px;cursor:pointer}
+.msgPlus.v2 i{width:58px;height:58px;border-radius:20px;background:linear-gradient(150deg,rgba(47,240,176,.16),rgba(20,110,130,.14));border:1px solid rgba(79,240,189,.28);color:#4ff0bd;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.msgPlus.v2 i svg{width:27px;height:27px}
+.msgPlus.v2 button:active i{transform:scale(.92);background:rgba(47,240,176,.22)}
+.msgPlus.v2 button.live i{color:#fff;background:linear-gradient(145deg,#1fcf9e,#139b86);border-color:transparent;box-shadow:0 6px 16px rgba(32,223,154,.3)}
+/* figurinhas: abas e grade */
+.stkWrap{margin:0 -4px}
+.stkTabs{position:sticky;top:-6px;z-index:2;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 8px;background:linear-gradient(rgba(8,24,34,.98) 80%,rgba(8,24,34,0))}
+.stkTabs::-webkit-scrollbar{display:none}
+.stkTabs button{flex:0 0 auto;display:flex;align-items:center;gap:5px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#cfdde3;border-radius:999px;padding:6px 10px;font-size:12.5px;font-weight:600;cursor:pointer}
+.stkTabs button svg{width:15px;height:15px}
+.stkTabs button.on{background:rgba(47,240,176,.16);border-color:rgba(79,240,189,.5);color:#4ff0bd}
+.stkGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:2px}
+.stkGrid>button{position:relative;aspect-ratio:1;border:0;background:rgba(255,255,255,.04);border-radius:16px;padding:6px;cursor:pointer;display:grid;place-items:center;-webkit-touch-callout:none;user-select:none}
+.stkGrid>button:active{transform:scale(.93);background:rgba(47,240,176,.12)}
+.stkGrid>button img{width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+.stkGrid>button.add{border:1.5px dashed rgba(79,240,189,.5);background:rgba(47,240,176,.06);color:#4ff0bd;font-size:12px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.stkGrid>button.add svg{width:28px;height:28px}
+.stkGrid>button .stkFav{position:absolute;top:4px;right:5px;font-size:11px}
+.stkEmpty{grid-column:1/-1;text-align:center;color:#9fb3bb;font-size:13.5px;padding:22px 10px;line-height:1.45}
+.stkEmojis{display:grid;grid-template-columns:repeat(8,1fr);gap:2px}
+.stkEmojis button{border:0;background:none;font-size:28px;padding:6px 0;border-radius:12px;cursor:pointer}
+.stkEmojis button:active{background:rgba(255,255,255,.08)}
+.stkTip{font-size:11.5px;color:#8ea4ad;text-align:center;padding:8px 6px 2px}
+/* figurinha dentro da conversa (sem balão, com contorno branco) */
+.cmChat .msgRow .bubble.stkB,.igChat .msgRow .bubble.stkB{background:none!important;border:0!important;box-shadow:none!important;padding:0!important;position:relative;-webkit-backdrop-filter:none;backdrop-filter:none}
+.bubble.stkB>button{display:block;border:0;background:none;padding:0;cursor:pointer;-webkit-touch-callout:none}
+.bubble.stkB img{display:block;width:150px;height:150px;object-fit:contain;filter:drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 6px 8px rgba(0,0,0,.35))}
+.bubble.stkB img.pk{filter:drop-shadow(0 6px 8px rgba(0,0,0,.35))}
+.cmChat .msgRow .bubble.stkB .bMeta,.igChat .msgRow .bubble.stkB .bMeta{position:static!important;display:table;margin:2px 0 0 auto;background:rgba(0,0,0,.45);border-radius:999px;padding:2px 8px;color:#fff}.msgRow.recv .bubble.stkB .bMeta{margin:2px auto 0 0}
+.msgRow.fresh .bubble.stkB img{animation:stkPop .38s cubic-bezier(.3,1.5,.5,1)}
+@keyframes stkPop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+/* documento e localização */
+.bubble.docB,.bubble.locB{padding:8px!important;min-width:220px;max-width:min(76vw,300px)}
+.docCard,.locCard{display:flex;align-items:center;gap:11px;color:inherit;text-decoration:none;background:rgba(0,0,0,.18);border-radius:16px;padding:10px 12px}
+.docCard>i,.locCard>i{flex:0 0 44px;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:rgba(255,255,255,.14);color:#fff;font-style:normal}
+.docCard>i svg,.locCard>i svg{width:24px;height:24px}
+.docCard span,.locCard span{display:flex;flex-direction:column;min-width:0;flex:1}
+.docCard b,.locCard b{font-size:14.5px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.docCard small,.locCard small{font-size:12px;opacity:.75;margin-top:2px}
+.bubble.docB .bMeta,.bubble.locB .bMeta{display:block;text-align:right;margin-top:4px}
+/* menu ao tocar numa figurinha */
+.stkAct{display:flex;flex-direction:column;align-items:center;gap:10px;padding:4px 4px 6px}
+.stkAct img{width:120px;height:120px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))}
+.stkAct .row{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.stkAct button{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;border-radius:14px;padding:12px 8px;font-size:14px;font-weight:600;cursor:pointer}
+.stkAct button.pri{background:linear-gradient(135deg,#1fcf9e,#139b86);border-color:transparent}
+/* criar figurinha */
+#stkMaker{position:fixed;inset:0;z-index:2147483000;background:#061620;color:#fff;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);animation:stkIn .2s ease}
+@keyframes stkIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+#stkMaker header{display:flex;align-items:center;gap:10px;padding:10px 14px}
+#stkMaker header b{flex:1;font-size:18px}
+#stkMaker header button{width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;cursor:pointer}
+#stkMaker header button svg{width:22px;height:22px}
+.stkStage{position:relative;margin:4px auto 0;width:min(86vw,360px);aspect-ratio:1;border-radius:22px;overflow:hidden;background-color:#20323b;background-image:linear-gradient(45deg,#2a3f49 25%,transparent 25%,transparent 75%,#2a3f49 75%),linear-gradient(45deg,#2a3f49 25%,transparent 25%,transparent 75%,#2a3f49 75%);background-size:22px 22px;background-position:0 0,11px 11px;touch-action:none}
+.stkStage canvas{width:100%;height:100%;display:block}
+.stkBusy{position:absolute;inset:0;display:none;place-items:center;background:rgba(6,22,32,.6);font-size:14px;font-weight:600;text-align:center;padding:20px}
+.stkStage.busy .stkBusy{display:grid}
+.stkHint{text-align:center;font-size:13px;color:#9fb3bb;padding:10px 18px 4px;min-height:22px}
+.stkModes{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:8px 12px}
+.stkModes button{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#dce8ec;border-radius:999px;padding:9px 14px;font-size:13.5px;font-weight:600;cursor:pointer}
+.stkModes button.on{background:rgba(47,240,176,.16);border-color:rgba(79,240,189,.55);color:#4ff0bd}
+.stkTxt{display:block;width:calc(100% - 28px);max-width:420px;margin:6px auto 0;box-sizing:border-box;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#fff;border-radius:16px;padding:13px 14px;font-size:16px;outline:none}
+.stkBtns{display:flex;gap:10px;padding:14px;margin-top:auto;max-width:460px;width:100%;box-sizing:border-box;align-self:center}
+.stkBtns button{flex:1;border:0;border-radius:16px;padding:15px 10px;font-size:15.5px;font-weight:700;cursor:pointer;color:#fff;background:rgba(255,255,255,.1)}
+.stkBtns button.pri{background:linear-gradient(135deg,#1fcf9e,#139b86);box-shadow:0 8px 22px rgba(32,223,154,.3)}
+.stkBtns button:disabled{opacity:.5}
+</style>
+<script>
+/* ===================== BATE-PAPO: TECLADO, MENU DO +, FIGURINHAS, DOCUMENTO E LOCALIZAÇÃO ===================== */
+(function(){
+const LI=(p,w)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w||2}" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const SI={
+  gal:LI('<rect x="3" y="4" width="18" height="16" rx="3.5"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-9 9"/>'),
+  doc:LI('<path d="M14 3H7a2.5 2.5 0 0 0-2.5 2.5v13A2.5 2.5 0 0 0 7 21h10a2.5 2.5 0 0 0 2.5-2.5V8.5z"/><path d="M14 3v5.5h5.5M8.5 13h7M8.5 16.5h5"/>'),
+  loc:LI('<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>'),
+  live:LI('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M2.5 9v4M21.5 9v4"/>'),
+  clock:LI('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
+  star:LI('<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9z"/>'),
+  mine:LI('<path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/>'),
+  mtn:LI('<path d="m3 19 6-10 4 6 2-3 6 7z"/><circle cx="17" cy="6" r="2"/>'),
+  anim:LI('<path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3"/>'),
+  emo:LI('<circle cx="12" cy="12" r="9"/><path d="M8.5 14.5s1.3 2 3.5 2 3.5-2 3.5-2"/><circle cx="9" cy="10" r=".8" fill="currentColor"/><circle cx="15" cy="10" r=".8" fill="currentColor"/>'),
+  add:LI('<path d="M12 5v14M5 12h14"/>',2.4),
+  x:LI('<path d="M6 6l12 12M18 6 6 18"/>',2.4)
+};
+const toast=t=>{try{shareToast(t)}catch(_){alert(t)}};
+
+/* ---------- 1) teclado: barra de mensagem colada no teclado ---------- */
+function chatInputFocused(){const a=document.activeElement;return !!(a&&a.closest&&a.closest('.igChat')&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.type!=='file')}
+const fit0=window.msgFitViewport;
+window.msgFitViewport=function(){
+  const s=document.querySelector('.igChat');
+  if(s){const vv=window.visualViewport;const shrunk=vv?vv.height<window.innerHeight-90:false;s.classList.toggle('kbOpen',chatInputFocused()&&(shrunk||/iP(hone|ad|od)/.test(navigator.userAgent)))}
+  return fit0.apply(this,arguments);
+};
+try{msgFitViewport=window.msgFitViewport}catch(_){}
+if(window.visualViewport){/* os ouvintes antigos chamam a função antiga; estes chamam a nova */visualViewport.addEventListener('resize',()=>window.msgFitViewport());visualViewport.addEventListener('scroll',()=>window.msgFitViewport())}
+['focusin','focusout'].forEach(ev=>document.addEventListener(ev,()=>{if(!document.querySelector('.igChat'))return;setTimeout(window.msgFitViewport,30);setTimeout(window.msgFitViewport,320)}));
+
+/* ---------- 2) gaveta: fecha sozinha, + vira X, puxar para baixo fecha ---------- */
+let SHEET_KIND='';
+const open0=window.msgSheetOpen,close0=window.msgSheetClose;
+function btnState(){document.querySelector('.cmPlusBtn')?.classList.toggle('open',SHEET_KIND==='plus');document.querySelector('.cmStkBtn')?.classList.toggle('open',SHEET_KIND==='stk')}
+function sheetIsOpen(){const sh=document.getElementById('msgSheet');return !!(sh&&!sh.classList.contains('hidden'))}
+window.msgSheetOpen=function(html,kind){
+  SHEET_KIND=kind||'other';
+  const a=document.activeElement;if(a&&a.id==='msgText')a.blur();
+  open0(html);
+  const sh=document.getElementById('msgSheet');if(sh){sh.style.transform='';sh.style.opacity='';sh.dataset.kind=SHEET_KIND;sh.scrollTop=0}
+  btnState();
+};
+window.msgSheetClose=function(){
+  const sh=document.getElementById('msgSheet');
+  close0();SHEET_KIND='';if(sh){sh.style.transform='';sh.style.opacity='';sh.dataset.kind=''}btnState();
+};
+try{msgSheetOpen=window.msgSheetOpen;msgSheetClose=window.msgSheetClose}catch(_){}
+/* tocar fora fecha */
+document.addEventListener('pointerdown',e=>{
+  if(!sheetIsOpen())return;const t=e.target;
+  if(t.closest('#msgSheet,.cmPlusBtn,.cmStkBtn,#stkMaker,#modal,.modal,#cvxMenu'))return;
+  window.msgSheetClose();
+},true);
+/* rolar a conversa fecha */
+document.addEventListener('touchmove',e=>{if(sheetIsOpen()&&e.target.closest&&e.target.closest('#convBody'))window.msgSheetClose()},{passive:true,capture:true});
+/* puxar para baixo pela alcinha (ou pelo topo) fecha */
+let DR=null;
+document.addEventListener('touchstart',e=>{const sh=e.target.closest&&e.target.closest('#msgSheet');if(!sh||!sheetIsOpen())return;const r=sh.getBoundingClientRect(),y=e.touches[0].clientY;if(!(e.target.closest('.msgSheetGrab')||(sh.scrollTop<=0&&y-r.top<56)))return;DR={sh,y0:y,dy:0}},{passive:true});
+document.addEventListener('touchmove',e=>{if(!DR)return;DR.dy=Math.max(0,e.touches[0].clientY-DR.y0);DR.sh.classList.add('dragging');DR.sh.style.transform=`translateY(${DR.dy}px)`;DR.sh.style.opacity=String(Math.max(.3,1-DR.dy/260))},{passive:true});
+document.addEventListener('touchend',()=>{if(!DR)return;const d=DR;DR=null;d.sh.classList.remove('dragging');if(d.dy>60){d.sh.style.transform='translateY(110%)';d.sh.style.opacity='0';setTimeout(window.msgSheetClose,170)}else{d.sh.style.transform='';d.sh.style.opacity=''}});
+/* começar a digitar fecha (o campo já fecha ao focar) */
+document.addEventListener('input',e=>{if(e.target&&e.target.id==='msgText'&&sheetIsOpen())window.msgSheetClose()});
+
+/* ---------- 3) menu do +: Galeria, Documento, Localização, Sala ao vivo ---------- */
+window.msgPlusMenu=function(){
+  if(SHEET_KIND==='plus'&&sheetIsOpen())return window.msgSheetClose();
+  window.msgSheetOpen(`<div class="msgPlus v2">
+    <button type="button" onclick="msgSheetClose();msgPick('gal')"><i>${SI.gal}</i>Galeria</button>
+    <button type="button" onclick="msgSheetClose();cmDocPick()"><i>${SI.doc}</i>Documento</button>
+    <button type="button" onclick="msgSheetClose();cmSendLocation()"><i>${SI.loc}</i>Localização</button>
+    <button type="button" class="live" onclick="msgSheetClose();cmChatRoom()"><i>${SI.live}</i>Sala ao vivo</button>
+  </div>`,'plus');
+};
+try{msgPlusMenu=window.msgPlusMenu}catch(_){}
+
+/* mensagem genérica (texto especial) enviada na hora */
+function sendBody(body,extra){
+  if(!currentPublicUser||!me?.id)return null;
+  const m=Object.assign({id:'tmp-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),sender_id:me.id,receiver_id:currentPublicUser.id,body,created_at:new Date().toISOString(),_sending:true},extra||{});
+  appendMessageBubble(m);deliverMessage(m);return m;
+}
+
+/* documento */
+const DOC_TYPES={pdf:'application/pdf',txt:'text/plain',csv:'text/csv',doc:'application/msword',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',xls:'application/vnd.ms-excel',xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',ppt:'application/vnd.ms-powerpoint',pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation',zip:'application/zip'};
+function docSize(n){n=+n||0;return n>=1048576?(n/1048576).toFixed(1).replace('.',',')+' MB':Math.max(1,Math.round(n/1024))+' KB'}
+window.cmDocPick=function(){
+  let inp=document.getElementById('cmDocFile');
+  if(!inp){inp=document.createElement('input');inp.type='file';inp.id='cmDocFile';inp.className='hidden';inp.accept='.pdf,.txt,.csv,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,'+Object.values(DOC_TYPES).join(',');inp.onchange=()=>{const f=inp.files&&inp.files[0];inp.value='';if(f)cmDocSend(f)};document.body.appendChild(inp)}
+  inp.click();
+};
+async function cmDocSend(f){
+  if(!currentPublicUser||!me?.id)return;
+  const ext=(String(f.name).split('.').pop()||'').toLowerCase();const type=DOC_TYPES[ext]||f.type;
+  if(!type||!Object.values(DOC_TYPES).includes(type))return toast('Esse tipo de arquivo não pode ser enviado. Use PDF, Word, Excel, PowerPoint, texto ou ZIP.');
+  if(f.size>25*1024*1024)return toast('Arquivo muito grande. O limite é 25 MB.');
+  const name=String(f.name||'documento').replace(/[|\]\[]/g,' ').slice(0,90);
+  const extra=encodeURIComponent(name)+'~'+f.size;
+  const m={id:'tmp-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),sender_id:me.id,receiver_id:currentPublicUser.id,body:`[[cm:doc|${URL.createObjectURL(f)}|${extra}]]`,created_at:new Date().toISOString(),_sending:true};
+  appendMessageBubble(m);msgPaintStatus&&msgPaintStatus(m);
+  try{
+    if(typeof cmEnsureSession==='function')await cmEnsureSession(false);
+    const path=`${me.id}/docs/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext||'bin'}`;
+    const bucket=sb.storage.from('conecta-media');
+    const {error}=await bucket.upload(path,f,{contentType:type,upsert:false,cacheControl:'31536000'});if(error)throw error;
+    const {data}=bucket.getPublicUrl(path);if(!data?.publicUrl)throw new Error('sem endereço');
+    m.body=`[[cm:doc|${data.publicUrl}|${extra}]]`;
+    deliverMessage(m);
+  }catch(e){console.error('documento',e);try{m._el&&m._el.remove()}catch(_){}toast('Não consegui enviar o documento. Confira a internet e tente de novo.')}
+}
+
+/* localização */
+window.cmSendLocation=function(){
+  if(!navigator.geolocation)return toast('Seu celular não liberou a localização aqui.');
+  toast('📍 Pegando sua localização…');
+  navigator.geolocation.getCurrentPosition(p=>{const la=p.coords.latitude.toFixed(5),lo=p.coords.longitude.toFixed(5);sendBody(`[[cm:loc|${la},${lo}]]`)},
+    e=>toast(e&&e.code===1?'Para enviar, permita a localização para o Conecta nos ajustes do celular.':'Não consegui achar sua localização agora.'),
+    {enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+};
+
+/* sala ao vivo: chama este amigo e entra na sala da sua cidade */
+window.cmChatRoom=async function(){
+  const p=currentPublicUser;if(!p||!me?.id)return;
+  let city='';try{city=profileData().city;if(/não informada/i.test(city))city=''}catch(_){}
+  city=city||'Mantiqueira';
+  const link=(typeof CONECTA_APP_URL!=='undefined'?CONECTA_APP_URL:location.origin+location.pathname)+'?sala='+encodeURIComponent(city);
+  sendBody(`🎙️ Vem pra Sala ao vivo de ${city}! Toque para entrar: ${link}`);
+  try{typeof cmNotify==='function'&&cmNotify(p.id,'room_invite',{extra:city})}catch(_){}
+  if(window.PK&&typeof PK.roomJoin==='function'){try{await PK.roomJoin(city)}catch(_){}}
+};
+
+/* ---------- 4) FIGURINHAS ---------- */
+const F='font-family="Arial Rounded MT Bold,Arial Black,Helvetica,Arial,sans-serif" font-weight="900"';
+function cap(t,c,y){const n=[...t].length,fs=n>13?20:n>10?23:27;return `<text x="100" y="${y||188}" text-anchor="middle" font-size="${fs}" ${F} fill="${c||'#0f5c48'}" stroke="#fff" stroke-width="8" stroke-linejoin="round" paint-order="stroke">${t}</text>`}
+const steam=a=>[60,90,120].map((x,k)=>`<path d="M${x+10} 62c-8-10 8-16 0-28" fill="none" stroke="#c9d6dc" stroke-width="6" stroke-linecap="round" opacity=".85">${a?`<animateTransform attributeName="transform" type="translate" values="0 8;0 -6;0 8" dur="${1.6+k*.3}s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;.9;0" dur="${1.6+k*.3}s" repeatCount="indefinite"/>`:''}</path>`).join('');
+const mtn=(c1,c2)=>`<path d="M8 160 60 82l28 38 26-44 78 84z" fill="${c1}"/><path d="M8 160 60 82l10 14-16 22 18-8 12 10z" fill="${c2}" opacity=".5"/>`;
+const ART={
+  bau:{t:'Bora pro Baú!',s:()=>`<circle cx="160" cy="44" r="18" fill="#ffb347"/><path d="M6 164q30-46 62-36 30-22 64-6 32-12 62 42z" fill="#2f8f5b"/><path d="M38 140l4-28q4-11 13-11 9 1 10 12l2 26z" fill="#8a9199"/><path d="M62 132l4-64q4-22 30-24h22q24 2 26 24l4 64z" fill="#a3aab2"/><path d="M118 44q24 2 26 24l4 64h-18l-3-64q-2-16-9-24z" fill="#7d848c"/><path d="M84 62v58M100 54v70" stroke="#8a9199" stroke-width="3" stroke-linecap="round"/><path d="M20 160q10-16 22-4 10-14 22 0 12-14 24 0 12-12 24 2 12-14 24 0 12-12 24 4 10-10 20 4z" fill="#21734a"/>`+cap('Bora pro Baú!')},
+  cafe:{t:'Cafezin?',s:a=>steam(a)+`<ellipse cx="96" cy="150" rx="70" ry="12" fill="#e9eef0"/><path d="M48 86h96v34c0 26-21 38-48 38s-48-12-48-38z" fill="#fff" stroke="#6b3f22" stroke-width="5"/><path d="M144 96c22 0 22 30 0 30" fill="none" stroke="#6b3f22" stroke-width="7"/><ellipse cx="96" cy="88" rx="44" ry="8" fill="#6b3f22"/><path d="M78 120c6 6 30 6 36 0" stroke="#e3a35c" stroke-width="5" fill="none" stroke-linecap="round"/>`+cap('Cafezin?','#6b3f22')},
+  capivara:{t:'Tô de boa',s:a=>`<ellipse cx="108" cy="126" rx="64" ry="36" fill="#a8743f"/><ellipse cx="58" cy="100" rx="38" ry="30" fill="#b9834b"/><circle cx="72" cy="74" r="9" fill="#8d5e30"/><ellipse cx="30" cy="106" rx="14" ry="12" fill="#8d5e30"/><circle cx="26" cy="102" r="2.5" fill="#3b2412"/><path d="M48 92q6-5 12 0" stroke="#3b2412" stroke-width="4" fill="none" stroke-linecap="round">${a?'<animate attributeName="d" values="M48 92q6-5 12 0;M48 92q6-5 12 0;M48 94q6 2 12 0;M48 92q6-5 12 0" dur="3s" repeatCount="indefinite"/>':''}</path><circle cx="62" cy="64" r="15" fill="#ff9f1c"/><path d="M62 49q3-8 10-8" stroke="#3aa865" stroke-width="4" fill="none"/><rect x="74" y="150" width="14" height="14" rx="5" fill="#8d5e30"/><rect x="134" y="150" width="14" height="14" rx="5" fill="#8d5e30"/>`+cap('Tô de boa','#7a4b20')},
+  frio:{t:'Que frio!',s:a=>`<g>${a?'<animateTransform attributeName="transform" type="rotate" values="-4 100 100;4 100 100;-4 100 100" dur=".25s" repeatCount="indefinite"/>':''}<circle cx="100" cy="98" r="54" fill="#9fdcff"/><path d="M46 92q0-52 54-52t54 52z" fill="#e63946"/><rect x="44" y="84" width="112" height="16" rx="8" fill="#fff"/><circle cx="100" cy="36" r="11" fill="#fff"/><circle cx="80" cy="112" r="6" fill="#163447"/><circle cx="120" cy="112" r="6" fill="#163447"/><rect x="82" y="128" width="36" height="14" rx="5" fill="#fff" stroke="#163447" stroke-width="3"/><path d="M91 128v14M100 128v14M109 128v14" stroke="#163447" stroke-width="2"/></g>`+[[30,30],[170,50],[24,130],[176,124]].map(([x,y],k)=>`<text x="${x}" y="${y}" font-size="22" fill="#fff" stroke="#7cc6f0" stroke-width="1">❄${a?`<animate attributeName="y" values="${y-14};${y+14}" dur="${1.4+k*.3}s" repeatCount="indefinite"/>`:''}</text>`).join('')+cap('Que frio!','#1b6ea8')},
+  pinhao:{t:'Pinhão!',s:()=>`<path d="M100 28c32 40 42 82 26 112q-26 26-52 0C58 110 68 68 100 28z" fill="#8b4a2b"/><path d="M100 28c10 14 16 26 18 38-10-6-26-6-36 0 2-12 8-24 18-38z" fill="#c78a5c"/><circle cx="88" cy="104" r="6" fill="#2b1407"/><circle cx="114" cy="104" r="6" fill="#2b1407"/><circle cx="90" cy="102" r="2" fill="#fff"/><circle cx="116" cy="102" r="2" fill="#fff"/><path d="M90 122q11 10 22 0" stroke="#2b1407" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="78" cy="118" r="6" fill="#e76f51" opacity=".55"/><circle cx="124" cy="118" r="6" fill="#e76f51" opacity=".55"/>`+cap('Pinhão!','#7a3b1c')},
+  araucaria:{t:'Raiz da serra',s:()=>`<rect x="94" y="78" width="12" height="84" rx="4" fill="#6b4226"/><path d="M100 98 58 76M100 98l42-22M100 120 46 100M100 120l54-20" stroke="#6b4226" stroke-width="5" stroke-linecap="round"/><path d="M28 98q30-26 56-10-28 6-56 10zM116 88q26-16 56 10-28-4-56-10zM40 76q24-24 50-12-26 4-50 12zM110 64q26-12 50 12-24-8-50-12zM70 52q30-26 60 0-30-8-60 0z" fill="#1f6f43" stroke="#1f6f43" stroke-width="8" stroke-linejoin="round"/><path d="M60 162h80" stroke="#3aa865" stroke-width="8" stroke-linecap="round"/>`+cap('Raiz da serra')},
+  bomdia:{t:'Bom dia, serra!',s:a=>`<circle cx="100" cy="${a?96:86}" r="34" fill="#ffc93c">${a?'<animate attributeName="cy" values="128;80;80;128" keyTimes="0;.4;.85;1" dur="3.4s" repeatCount="indefinite"/>':''}</circle>`+mtn('#2f8f5b','#fff')+`<path d="M8 160q50-30 92-6 46-30 92 6z" fill="#21734a"/><rect x="34" y="126" width="64" height="9" rx="4.5" fill="#fff" opacity=".8"/><rect x="104" y="138" width="56" height="9" rx="4.5" fill="#fff" opacity=".7"/>`+cap('Bom dia, serra!','#c46a00')},
+  boanoite:{t:'Boa noite!',s:a=>`<path d="M120 30a40 40 0 1 0 34 64 32 32 0 1 1-34-64z" fill="#ffe08a"/>`+[[46,40],[78,24],[168,34],[30,80],[176,96]].map(([x,y],k)=>`<path d="M${x} ${y-7}l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#fff">${a?`<animate attributeName="opacity" values="1;.15;1" dur="${1+k*.35}s" repeatCount="indefinite"/>`:''}</path>`).join('')+mtn('#21405c','#8fb3d9')+cap('Boa noite!','#21405c')},
+  queijo:{t:'Queijin mineiro',s:()=>`<path d="M30 118 150 64l22 24v58H30z" fill="#ffd24a"/><path d="M30 118 150 64l22 24-142 30z" fill="#ffe47a"/><path d="M30 118h142v28H30z" fill="#f5bf2a"/><circle cx="66" cy="132" r="7" fill="#e0a312"/><circle cx="120" cy="128" r="10" fill="#e0a312"/><circle cx="152" cy="138" r="5" fill="#e0a312"/><ellipse cx="118" cy="92" rx="8" ry="4" fill="#f5bf2a"/>`+cap('Queijin mineiro','#a46b00')},
+  morango:{t:'Docinho!',s:()=>`<path d="M100 160C52 128 40 92 54 70q20-22 46-10 26-12 46 10c14 22 2 58-46 90z" fill="#e63946"/><path d="M70 58q30-26 60 0-12 10-30 4-18 6-30-4z" fill="#3aa865"/><path d="M100 40v18" stroke="#2a7d48" stroke-width="6" stroke-linecap="round"/>`+[[76,86],[100,80],[124,86],[86,108],[114,108],[100,130],[72,110],[128,110]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="3" ry="4.5" fill="#ffe08a"/>`).join('')+cap('Docinho!','#b3202d')},
+  choco:{t:'Chocolate quente',s:a=>steam(a)+`<rect x="52" y="78" width="88" height="80" rx="16" fill="#7b4a2e"/><path d="M140 96c24 0 24 36 0 36" fill="none" stroke="#7b4a2e" stroke-width="9"/><path d="M48 84q10-20 26-14 10-16 26-8 14-12 28 0 16-4 18 18z" fill="#fff8ee"/><rect x="70" y="108" width="12" height="12" rx="3" fill="#ffd1dc" transform="rotate(12 76 114)"/><path d="M68 132q28 10 56 0" stroke="#a46b45" stroke-width="5" fill="none" stroke-linecap="round"/>`+cap('Chocolate quente','#5c321b')},
+  neblina:{t:'Neblinou!',s:()=>`<path d="M48 136q-30 0-30-26t32-24q6-34 44-32 30 2 38 30 36-4 40 26 2 26-30 26z" fill="#fff" stroke="#c9d6dc" stroke-width="4"/><circle cx="82" cy="104" r="6" fill="#4a5a63"/><circle cx="118" cy="104" r="6" fill="#4a5a63"/><path d="M92 122q8 6 16 0" stroke="#4a5a63" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M30 156h70M112 156h56" stroke="#dfe7ea" stroke-width="8" stroke-linecap="round"/>`+cap('Neblinou!','#4a5a63')},
+  uai:{t:'Uai, sô!',s:()=>`<path d="M40 40h120q20 0 20 20v62q0 20-20 20H96l-34 26 6-26H40q-20 0-20-20V60q0-20 20-20z" fill="#1fcf9e"/><text x="100" y="108" text-anchor="middle" font-size="40" ${F} fill="#fff">Uai, sô!</text>`},
+  kkk:{t:'KKKKK',s:a=>`<g>${a?'<animateTransform attributeName="transform" type="translate" values="0 0;0 -8;0 0" dur=".5s" repeatCount="indefinite"/>':''}<circle cx="100" cy="92" r="60" fill="#ffd23f"/><path d="M68 80q10-12 20 0M112 80q10-12 20 0" stroke="#5a3d00" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M62 100q38 40 76 0z" fill="#5a3d00"/><path d="M76 118q24 14 48 0" fill="#e63946"/><path d="M54 84q-14 8-12 26M146 84q14 8 12 26" stroke="#4fc3f7" stroke-width="7" fill="none" stroke-linecap="round"/></g>`+cap('KKKKK','#c46a00')},
+  amo:{t:'Amo a serra',s:a=>`<g>${a?'<animateTransform attributeName="transform" type="scale" values="1;1.08;1;1.05;1" dur="1.1s" additive="sum" repeatCount="indefinite"/>':''}<path d="M100 160C40 120 22 86 34 60q22-34 66-6 44-28 66 6c12 26-6 60-66 100z" fill="#1fcf9e"/><path d="M48 112 76 76l16 20 18-28 40 44q-22 26-50 44-30-20-52-44z" fill="#127a5e"/><path d="M76 76l8 10-8 6zM110 68l10 12-12 4z" fill="#fff"/></g>`+cap('Amo a serra')},
+  valeu:{t:'Valeu!',s:()=>`<circle cx="100" cy="90" r="58" fill="#1fcf9e"/><path d="m72 92 20 20 38-40" stroke="#fff" stroke-width="14" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M160 36l4 10 10 4-10 4-4 10-4-10-10-4 10-4zM36 44l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#ffd23f"/>`+cap('Valeu!')},
+  chegando:{t:'Tô chegando!',s:a=>`<path d="M14 156h172" stroke="#4a5a63" stroke-width="8" stroke-linecap="round" stroke-dasharray="${a?'18 14':'0'}">${a?'<animate attributeName="stroke-dashoffset" values="0;32" dur=".4s" repeatCount="indefinite"/>':''}</path><g>${a?'<animateTransform attributeName="transform" type="translate" values="0 0;0 -3;0 0" dur=".3s" repeatCount="indefinite"/>':''}<path d="M30 132v-22q0-8 8-10l22-4 18-24q4-6 12-6h40q8 0 12 6l18 24 8 4q6 2 6 10v22z" fill="#e63946"/><path d="M84 80h18v18H66zM110 80h18l14 18h-32z" fill="#bfe8ff"/><circle cx="62" cy="134" r="15" fill="#22313a"/><circle cx="62" cy="134" r="6" fill="#c9d6dc"/><circle cx="138" cy="134" r="15" fill="#22313a"/><circle cx="138" cy="134" r="6" fill="#c9d6dc"/></g>${a?'<path d="M10 100h14M4 116h18M12 84h10" stroke="#c9d6dc" stroke-width="5" stroke-linecap="round"/>':''}`+cap('Tô chegando!','#b3202d')},
+  fogo:{t:'Bora pro fogo!',s:a=>`<g>${a?'<animateTransform attributeName="transform" type="scale" values="1 1;1.04 .95;.97 1.05;1 1" dur=".7s" repeatCount="indefinite"/>':''}<path d="M100 28c26 30 46 50 40 86-4 24-22 36-40 36s-36-12-40-36c-4-24 10-38 20-50 2 12 8 18 14 18-6-20 0-36 6-54z" fill="#ff7b25"/><path d="M100 80c14 16 22 26 18 44-2 12-10 18-18 18s-16-6-18-18c-2-10 4-18 10-24 2 6 4 10 8 10-2-10-2-20 0-30z" fill="#ffd23f"/></g><path d="M42 152 158 128M42 128l116 24" stroke="#7b4a2e" stroke-width="16" stroke-linecap="round"/>`+cap('Bora pro fogo!','#c4420e')}
+};
+const PACK=['bomdia','boanoite','cafe','choco','bau','araucaria','pinhao','capivara','frio','neblina','queijo','morango','uai','kkk','amo','valeu','chegando','fogo'];
+const ANIM=['cafe','bomdia','boanoite','frio','kkk','amo','chegando','fogo','capivara','choco'];
+const URI={};
+function pkUri(code){if(URI[code])return URI[code];const a=/A$/.test(code),k=a?code.slice(0,-1):code,art=ART[k];if(!art)return '';return URI[code]='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">${art.s(a)}</svg>`)}
+function stkSrc(id){id=String(id||'');return id.startsWith('pk:')?pkUri(id.slice(3)):id}
+function stkLabel(id){id=String(id||'');if(id.startsWith('pk:')){const k=id.slice(3).replace(/A$/,'');return ART[k]?.t||'Figurinha'}return 'Figurinha'}
+window.cmStkSrc=stkSrc;
+
+/* coleção do usuário (neste aparelho) */
+function sKey(){return 'cm_stk_'+(me?.id||'anon')}
+function store(){try{const s=JSON.parse(localStorage.getItem(sKey())||'{}');return {mine:s.mine||[],fav:s.fav||[],rec:s.rec||[]}}catch(_){return {mine:[],fav:[],rec:[]}}}
+function save(s){try{localStorage.setItem(sKey(),JSON.stringify({mine:s.mine.slice(0,200),fav:s.fav.slice(0,120),rec:s.rec.slice(0,32)}))}catch(_){}}
+function pushTo(list,id){const i=list.indexOf(id);if(i>=0)list.splice(i,1);list.unshift(id)}
+function isFav(id){return store().fav.includes(id)}
+
+/* enviar figurinha */
+function okId(id){id=String(id||'');return id.startsWith('pk:')||(/^https:\/\/[^|\]\s]+$/.test(id))}
+window.cmStkSend=function(id){
+  if(!okId(id))return;window.msgSheetClose();
+  const s=store();pushTo(s.rec,id);save(s);
+  sendBody(`[[cm:stk|${id}]]`);try{navigator.vibrate&&navigator.vibrate(8)}catch(_){}
+};
+
+/* gaveta de figurinhas (botão de carinha do campo de mensagem) */
+let TAB='';
+function tile(id,o){const src=stkSrc(id);if(!src)return '';return `<button type="button" data-stk="${esc(id)}" ${o&&o.manage?`data-manage="${o.manage}"`:''} aria-label="${esc(stkLabel(id))}"><img src="${esc(src)}" alt="" loading="lazy" decoding="async">${isFav(id)&&o&&o.star?'<span class="stkFav">⭐</span>':''}</button>`}
+function gridHtml(tab){
+  const s=store();
+  if(tab==='emoji')return `<div class="stkEmojis">${(typeof MSG_EMOJIS!=='undefined'?MSG_EMOJIS:['😀','😂','😍','👍','🙏','❤️']).map(e=>`<button type="button" onclick="msgInsertEmoji('${e}')">${e}</button>`).join('')}</div>`;
+  let items=[],empty='',extra='';
+  if(tab==='rec'){items=s.rec;empty='As figurinhas que você enviar aparecem aqui.'}
+  else if(tab==='fav'){items=s.fav;empty='Toque numa figurinha da conversa e escolha ⭐ Favoritar.';extra='fav'}
+  else if(tab==='mine'){items=s.mine;extra='mine'}
+  else if(tab==='anim')items=ANIM.map(k=>'pk:'+k+'A');
+  else items=PACK.map(k=>'pk:'+k);
+  const add=tab==='mine'?`<button type="button" class="add" onclick="cmStkMakerPick()">${SI.add}Criar de foto</button>`:'';
+  const body=items.map(id=>tile(id,{manage:extra,star:tab!=='fav'})).join('');
+  const tip=tab==='mine'&&items.length?'<div class="stkTip">Segure uma figurinha para tirar das suas.</div>':tab==='fav'&&items.length?'<div class="stkTip">Segure para tirar das favoritas.</div>':'';
+  return `<div class="stkGrid">${add}${body||(add?'':`<div class="stkEmpty">${empty}</div>`)}${tab==='mine'&&!items.length?'<div class="stkEmpty">Transforme qualquer foto em figurinha, ou salve as que seus amigos mandarem.</div>':''}</div>${tip}`;
+}
+function paintSheet(){
+  const tabs=[['rec',SI.clock,'Recentes'],['fav',SI.star,'Favoritas'],['mine',SI.mine,'Minhas'],['pk',SI.mtn,'Conecta'],['anim',SI.anim,'Animadas'],['emoji',SI.emo,'Emojis']];
+  const html=`<div class="stkWrap"><div class="stkTabs">${tabs.map(([k,i,l])=>`<button type="button" class="${TAB===k?'on':''}" onclick="cmStkTab('${k}')">${i}${l}</button>`).join('')}</div><div id="stkBody">${gridHtml(TAB)}</div></div>`;
+  const sh=document.getElementById('msgSheet');
+  if(SHEET_KIND==='stk'&&sh&&!sh.classList.contains('hidden')){const w=sh.querySelector('.stkWrap');if(w){w.outerHTML=html;return}}
+  window.msgSheetOpen(html,'stk');
+}
+window.cmStkTab=function(k){TAB=k;paintSheet();const sh=document.getElementById('msgSheet');if(sh)sh.scrollTop=0;try{const on=sh&&sh.querySelector('.stkTabs .on');on&&on.scrollIntoView({inline:'center',block:'nearest'})}catch(_){}try{localStorage.setItem('cm_stk_tab',k)}catch(_){}};
+window.msgEmojiPanel=function(){
+  if(SHEET_KIND==='stk'&&sheetIsOpen())return window.msgSheetClose();
+  if(!TAB){let t='';try{t=localStorage.getItem('cm_stk_tab')||''}catch(_){}TAB=t||(store().rec.length?'rec':'pk')}
+  if(TAB==='rec'&&!store().rec.length)TAB='pk';
+  paintSheet();try{document.querySelector('#msgSheet .stkTabs .on')?.scrollIntoView({inline:'center',block:'nearest'})}catch(_){}
+};
+try{msgEmojiPanel=window.msgEmojiPanel}catch(_){}
+/* "Figurinhas" antigas (GIF) também abrem a nova gaveta */
+window.msgGifPanel=function(){TAB='pk';paintSheet()};try{msgGifPanel=window.msgGifPanel}catch(_){}
+
+/* tocar = enviar · segurar = tirar (Minhas/Favoritas) */
+let HOLD=null;
+document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('#msgSheet [data-stk]');if(!b)return;clearTimeout(HOLD);b.__held=false;if(b.dataset.manage)HOLD=setTimeout(()=>{b.__held=true;try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}stkRemove(b.dataset.stk,b.dataset.manage)},520)});
+['pointerup','pointercancel','pointerleave'].forEach(ev=>document.addEventListener(ev,()=>clearTimeout(HOLD)));
+document.addEventListener('contextmenu',e=>{if(e.target.closest&&e.target.closest('#msgSheet [data-stk],.bubble.stkB'))e.preventDefault()});
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#msgSheet [data-stk]');if(!b)return;e.preventDefault();if(b.__held){b.__held=false;return}cmStkSend(b.dataset.stk)});
+function stkRemove(id,where){
+  const s=store();const name=where==='fav'?'das favoritas':'das suas figurinhas';
+  if(!confirm(`Tirar esta figurinha ${name}?`))return;
+  if(where==='fav')s.fav=s.fav.filter(x=>x!==id);else{s.mine=s.mine.filter(x=>x!==id);s.fav=s.fav.filter(x=>x!==id);s.rec=s.rec.filter(x=>x!==id)}
+  save(s);const body=document.getElementById('stkBody');if(body)body.innerHTML=gridHtml(TAB);
+}
+
+/* tocar numa figurinha da conversa: favoritar, salvar, mandar de volta */
+window.cmStkTap=function(btn){
+  const id=btn&&btn.dataset.stk;if(!okId(id))return;
+  const s=store(),fav=s.fav.includes(id),mine=s.mine.includes(id),pk=id.startsWith('pk:');
+  window.msgSheetOpen(`<div class="stkAct"><img src="${esc(stkSrc(id))}" alt=""><div class="row">
+    <button type="button" onclick="cmStkFav('${esc(id)}')">${fav?'Tirar das favoritas':'⭐ Favoritar'}</button>
+    ${pk?`<button type="button" onclick="cmStkTab('${/A$/.test(id)?'anim':'pk'}')">Ver pacote</button>`:`<button type="button" onclick="cmStkKeep('${esc(id)}')">${mine?'✓ Já está salva':'Salvar nas minhas'}</button>`}
+    </div><button type="button" class="pri" style="width:100%" onclick="cmStkSend('${esc(id)}')">Enviar esta figurinha</button></div>`,'stkAct');
+};
+window.cmStkFav=function(id){const s=store();if(s.fav.includes(id)){s.fav=s.fav.filter(x=>x!==id);toast('Tirada das favoritas')}else{pushTo(s.fav,id);toast('⭐ Adicionada às favoritas')}save(s);window.msgSheetClose()};
+window.cmStkKeep=function(id){const s=store();if(!s.mine.includes(id)){pushTo(s.mine,id);save(s);toast('Figurinha salva nas suas ✓')}window.msgSheetClose()};
+
+/* ---------- 5) mostrar na conversa: figurinha, documento, localização ---------- */
+const parse0=window.msgParse;
+window.msgParse=function(b){
+  const m=/^\[\[cm:(stk|doc|loc)\|([^|\]]+)(?:\|([^\]]*))?\]\]$/.exec(String(b||'').trim());
+  if(m)return {t:m[1],url:m[2],extra:m[3]||''};
+  return parse0(b);
+};
+try{msgParse=window.msgParse}catch(_){}
+function docInfo(extra){const [n,sz]=String(extra||'').split('~');let name='Documento';try{name=decodeURIComponent(n||'')||name}catch(_){}return {name,size:+sz||0}}
+const prev0=window.msgPreviewText;
+window.msgPreviewText=function(b){
+  const p=window.msgParse(b);
+  if(p&&p.t==='stk')return '💟 Figurinha';
+  if(p&&p.t==='doc')return '📄 '+docInfo(p.extra).name;
+  if(p&&p.t==='loc')return '📍 Localização';
+  return prev0(b);
+};
+try{msgPreviewText=window.msgPreviewText}catch(_){}
+const DOCI=LI('<path d="M14 3H7a2.5 2.5 0 0 0-2.5 2.5v13A2.5 2.5 0 0 0 7 21h10a2.5 2.5 0 0 0 2.5-2.5V8.5z"/><path d="M14 3v5.5h5.5"/>');
+const body0=window.msgBodyHtml;
+window.msgBodyHtml=function(m){
+  const p=window.msgParse(m&&m.body);
+  if(p&&p.t==='stk'){const id=p.url,src=stkSrc(id);if(src)return {cls:'stkB',html:`<button type="button" data-stk="${esc(id)}" onclick="event.stopPropagation();cmStkTap(this)" aria-label="${esc(stkLabel(id))}"><img class="${id.startsWith('pk:')?'pk':''}" src="${esc(src)}" alt="${esc(stkLabel(id))}" decoding="async" onload="msgScrollBottom()"></button>`}}
+  if(p&&p.t==='doc'){const d=docInfo(p.extra),ext=(d.name.split('.').pop()||'').toUpperCase().slice(0,5);return {cls:'docB',html:`<a class="docCard" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer" download="${esc(d.name)}" onclick="event.stopPropagation()"><i>${DOCI}</i><span><b>${esc(d.name)}</b><small>${esc(ext)}${d.size?' · '+docSize(d.size):''} · Toque para abrir</small></span></a>`}}
+  if(p&&p.t==='loc'){const ll=String(p.url).replace(/[^0-9.,\-]/g,'');return {cls:'locB',html:`<a class="locCard" href="https://www.google.com/maps?q=${encodeURIComponent(ll)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()"><i>${SI.loc}</i><span><b>Localização</b><small>Toque para abrir no mapa</small></span></a>`}}
+  return body0.apply(this,arguments);
+};
+try{msgBodyHtml=window.msgBodyHtml}catch(_){}
+
+/* ---------- 6) CRIAR FIGURINHA A PARTIR DE FOTO ---------- */
+const MP='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
+const MODEL='https://storage.googleapis.com/mediapipe-models/interactive_segmenter/magic_touch/float32/1/magic_touch.tflite';
+const MK={img:null,mode:'cut',pt:{x:.5,y:.5},mask:null,seg:null,segP:null,busy:false};
+window.cmStkMakerPick=function(){
+  let inp=document.getElementById('cmStkFile');
+  if(!inp){inp=document.createElement('input');inp.type='file';inp.id='cmStkFile';inp.accept='image/*';inp.className='hidden';inp.onchange=()=>{const f=inp.files&&inp.files[0];inp.value='';if(f)makerOpen(f)};document.body.appendChild(inp)}
+  inp.click();
+};
+async function loadImg(file){
+  const url=URL.createObjectURL(file);
+  try{const im=new Image();im.decoding='async';await new Promise((ok,no)=>{im.onload=ok;im.onerror=no;im.src=url});
+    const max=720,sc=Math.min(1,max/Math.max(im.naturalWidth,im.naturalHeight));const c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.naturalWidth*sc));c.height=Math.max(1,Math.round(im.naturalHeight*sc));c.getContext('2d').drawImage(im,0,0,c.width,c.height);return c}
+  finally{setTimeout(()=>URL.revokeObjectURL(url),2000)}
+}
+async function makerOpen(file){
+  window.msgSheetClose();document.getElementById('stkMaker')?.remove();
+  document.body.insertAdjacentHTML('beforeend',`<div id="stkMaker" role="dialog" aria-label="Criar figurinha"><header><button type="button" onclick="cmStkMakerClose()" aria-label="Fechar">${SI.x}</button><b>Criar figurinha</b></header>
+    <div class="stkStage" id="stkStage"><canvas id="stkCv" width="512" height="512"></canvas><div class="stkBusy" id="stkBusy">Carregando…</div></div>
+    <div class="stkHint" id="stkHint"></div>
+    <div class="stkModes">${[['cut','✂️ Recortar fundo'],['circle','Círculo'],['square','Quadrado'],['full','Foto inteira']].map(([k,l])=>`<button type="button" data-m="${k}" class="${k==='cut'?'on':''}" onclick="cmStkMode('${k}')">${l}</button>`).join('')}</div>
+    <input class="stkTxt" id="stkTxt" maxlength="28" placeholder="Escreva algo na figurinha (opcional)" autocomplete="off" oninput="cmStkDraw()">
+    <div class="stkBtns"><button type="button" id="stkSaveB" onclick="cmStkMakerDone(false)">Salvar</button><button type="button" class="pri" id="stkSendB" onclick="cmStkMakerDone(true)">Enviar</button></div></div>`);
+  MK.mode='cut';MK.pt={x:.5,y:.5};MK.mask=null;MK.picking=false;
+  busy('Abrindo a foto…');
+  try{MK.img=await loadImg(file)}catch(_){window.cmStkMakerClose();return toast('Não consegui abrir essa foto.')}
+  const stage=document.getElementById('stkStage');
+  stage.addEventListener('click',e=>{if(MK.mode!=='cut'||MK.busy)return;
+    if(!MK.picking){MK.picking=true;hint('Toque no que você quer manter na figurinha.');cmStkDraw();return}
+    const r=stage.getBoundingClientRect(),v=MK.tf;if(!v)return;const x=(e.clientX-r.left)/r.width*512,y=(e.clientY-r.top)/r.height*512;const ix=(x-v.dx)/v.w,iy=(y-v.dy)/v.h;if(ix<0||iy<0||ix>1||iy>1)return;MK.pt={x:ix,y:iy};MK.picking=false;runCut()});
+  runCut();
+}
+window.cmStkMakerClose=function(){document.getElementById('stkMaker')?.remove()};
+function busy(t){MK.busy=!!t;const st=document.getElementById('stkStage'),b=document.getElementById('stkBusy');if(st)st.classList.toggle('busy',!!t);if(b&&t)b.textContent=t;['stkSaveB','stkSendB'].forEach(i=>{const x=document.getElementById(i);if(x)x.disabled=!!t})}
+function hint(t){const h=document.getElementById('stkHint');if(h)h.textContent=t||''}
+window.cmStkMode=function(k){MK.mode=k;MK.picking=false;document.querySelectorAll('#stkMaker .stkModes button').forEach(b=>b.classList.toggle('on',b.dataset.m===k));if(k==='cut'&&!MK.mask)runCut();else{hint(k==='cut'?'Toque no que você quer manter na figurinha.':'');cmStkDraw()}};
+async function segmenter(){
+  if(MK.seg)return MK.seg;if(MK.segP)return MK.segP;
+  MK.segP=(async()=>{const v=await import(MP+'/vision_bundle.mjs');const fs=await v.FilesetResolver.forVisionTasks(MP+'/wasm');MK.seg=await v.InteractiveSegmenter.createFromOptions(fs,{baseOptions:{modelAssetPath:MODEL,delegate:'CPU'},outputCategoryMask:true,outputConfidenceMasks:false});return MK.seg})();
+  try{return await MK.segP}catch(e){MK.segP=null;throw e}
+}
+async function runCut(){
+  if(!MK.img)return;busy(MK.seg?'Recortando…':'Preparando o recorte (só na 1ª vez)…');
+  try{
+    const seg=await segmenter();
+    const img=MK.img,W=img.width,H=img.height;
+    const mask=await new Promise((ok,no)=>{try{seg.segment(img,{keypoint:{x:MK.pt.x,y:MK.pt.y}},res=>{try{const cm=res.categoryMask;const a=cm.getAsUint8Array();ok({w:cm.width,h:cm.height,d:new Uint8Array(a)})}catch(e){no(e)}})}catch(e){no(e)}});
+    const k=Math.min(mask.w-1,Math.round(MK.pt.x*(mask.w-1)))+Math.min(mask.h-1,Math.round(MK.pt.y*(mask.h-1)))*mask.w;const fg=mask.d[k];
+    const mc=document.createElement('canvas');mc.width=mask.w;mc.height=mask.h;const mx=mc.getContext('2d');const id=mx.createImageData(mask.w,mask.h);let n=0;
+    for(let i=0;i<mask.d.length;i++){const on=mask.d[i]===fg;if(on)n++;id.data[i*4+3]=on?255:0}
+    const frac=n/mask.d.length;
+    if(frac<.01||frac>.97)throw new Error('recorte vazio');
+    mx.putImageData(id,0,0);
+    /* bordas mais suaves: reduz e amplia de novo */
+    const sm=document.createElement('canvas');sm.width=W;sm.height=H;const sx=sm.getContext('2d');sx.imageSmoothingEnabled=true;sx.drawImage(mc,0,0,W,H);
+    MK.mask=sm;MK.mode='cut';hint('Não era isso? Toque na figurinha e escolha outra parte da foto.');
+  }catch(e){
+    console.warn('recorte',e);MK.mask=null;
+    if(MK.mode==='cut'){MK.mode='circle';document.querySelectorAll('#stkMaker .stkModes button').forEach(b=>b.classList.toggle('on',b.dataset.m==='circle'))}
+    hint('Não deu para recortar o fundo dessa foto agora. Usei o círculo — você pode tentar de novo em "Recortar fundo".');
+  }
+  busy('');cmStkDraw();
+}
+window.cmStkDraw=function(){
+  const cv=document.getElementById('stkCv');if(!cv||!MK.img)return;const g=cv.getContext('2d');g.clearRect(0,0,512,512);g.save();
+  const img=MK.img;const txt=(document.getElementById('stkTxt')?.value||'').trim();const room=txt?70:0;
+  if(MK.mode==='cut'&&(MK.picking||!MK.mask)){
+    /* escolhendo: mostra a foto inteira com o recorte atual em verde */
+    const s=Math.min(496/img.width,496/img.height),w=img.width*s,h=img.height*s,dx=(512-w)/2,dy=(512-h)/2;MK.tf={dx,dy,w,h};
+    g.drawImage(img,dx,dy,w,h);
+    if(MK.mask){const t=document.createElement('canvas');t.width=img.width;t.height=img.height;const tx=t.getContext('2d');tx.fillStyle='rgba(47,240,176,.45)';tx.fillRect(0,0,t.width,t.height);tx.globalCompositeOperation='destination-in';tx.drawImage(MK.mask,0,0);g.drawImage(t,dx,dy,w,h)}
+    g.restore();return;
+  }else if(MK.mode==='cut'&&MK.mask){
+    /* recorta o objeto e centraliza */
+    const t=document.createElement('canvas');t.width=img.width;t.height=img.height;const tx=t.getContext('2d');tx.drawImage(img,0,0);tx.globalCompositeOperation='destination-in';tx.drawImage(MK.mask,0,0);
+    const b=bbox(MK.mask);const pad=18,avail=512-pad*2;const s=Math.min(avail/b.w,(avail-room)/b.h);const w=b.w*s,h=b.h*s;
+    g.drawImage(t,b.x,b.y,b.w,b.h,(512-w)/2,pad+(avail-room-h)/2,w,h);
+  }else if(MK.mode==='circle'||MK.mode==='square'){
+    const pad=14;const box=512-pad*2-room;const ox=(512-box)/2,oy=pad;
+    g.beginPath();if(MK.mode==='circle')g.arc(256,oy+box/2,box/2,0,Math.PI*2);else rr(g,ox,oy,box,box,64);g.closePath();g.clip();
+    const s=Math.max(box/img.width,box/img.height);g.drawImage(img,ox+(box-img.width*s)/2,oy+(box-img.height*s)/2,img.width*s,img.height*s);
+    g.restore();g.save();g.lineWidth=10;g.strokeStyle='#fff';g.beginPath();if(MK.mode==='circle')g.arc(256,oy+box/2,box/2-5,0,Math.PI*2);else rr(g,ox+5,oy+5,box-10,box-10,60);g.stroke();
+  }else{
+    const pad=16,avail=512-pad*2;const s=Math.min(avail/img.width,(avail-room)/img.height);const w=img.width*s,h=img.height*s;
+    g.beginPath();rr(g,(512-w)/2,pad+(avail-room-h)/2,w,h,36);g.clip();g.drawImage(img,(512-w)/2,pad+(avail-room-h)/2,w,h);
+  }
+  g.restore();
+  if(txt){g.save();let fs=58;g.font=`900 ${fs}px Arial Rounded MT Bold, Arial Black, Helvetica, Arial, sans-serif`;while(g.measureText(txt).width>480&&fs>26){fs-=4;g.font=`900 ${fs}px Arial Rounded MT Bold, Arial Black, Helvetica, Arial, sans-serif`}
+    g.textAlign='center';g.textBaseline='alphabetic';g.lineJoin='round';g.lineWidth=fs*.32;g.strokeStyle='#0b2a33';g.strokeText(txt,256,494);g.fillStyle='#fff';g.fillText(txt,256,494);g.restore()}
+};
+function rr(g,x,y,w,h,r){r=Math.min(r,w/2,h/2);g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r)}
+function bbox(c){const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data;let x0=c.width,y0=c.height,x1=0,y1=0;for(let y=0;y<c.height;y+=2)for(let x=0;x<c.width;x+=2){if(d[(y*c.width+x)*4+3]>40){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}}if(x1<=x0||y1<=y0)return {x:0,y:0,w:c.width,h:c.height};return {x:Math.max(0,x0-4),y:Math.max(0,y0-4),w:Math.min(c.width,x1-x0+8),h:Math.min(c.height,y1-y0+8)}}
+window.cmStkMakerDone=async function(send){
+  const cv=document.getElementById('stkCv');if(!cv||!MK.img||MK.busy)return;
+  if(!me?.id)return toast('Entre na sua conta para criar figurinhas.');
+  busy(send?'Enviando…':'Salvando…');
+  try{
+    const blob=await new Promise(ok=>cv.toBlob(ok,'image/png'));if(!blob)throw new Error('png');
+    if(typeof cmEnsureSession==='function')await cmEnsureSession(false);
+    const path=`${me.id}/stickers/${Date.now()}-${Math.random().toString(36).slice(2)}.png`;const bucket=sb.storage.from('conecta-media');
+    const {error}=await bucket.upload(path,blob,{contentType:'image/png',upsert:false,cacheControl:'31536000'});if(error)throw error;
+    const url=bucket.getPublicUrl(path).data?.publicUrl;if(!url)throw new Error('url');
+    const s=store();pushTo(s.mine,url);save(s);
+    busy('');window.cmStkMakerClose();
+    if(send&&currentPublicUser)window.cmStkSend(url);else{toast('Figurinha salva em "Minhas" ✓');TAB='mine'}
+  }catch(e){console.error('figurinha',e);busy('');toast('Não consegui salvar a figurinha. Confira a internet e tente de novo.')}
+};
+})();
+</script>
+
 </body></html>
