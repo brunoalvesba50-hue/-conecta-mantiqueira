@@ -6265,7 +6265,8 @@ function evFiltered(){
   if(EV.city)a=a.filter(x=>srSameCity(x.city,EV.city));
   if(EV.cat==='free')a=a.filter(evFree);else if(EV.cat!=='all')a=a.filter(x=>evCats(x).includes(EV.cat));
   if(q)a=a.filter(x=>normText([x.title,x.body,x.city,x.place_to,...evCats(x),...evTags(x)].join(' ')).includes(q));
-  return a.sort((x,y)=>Date.parse(x.event_at)-Date.parse(y.event_at));
+  const bz=x=>(typeof cmBoosted==='function'&&cmBoosted('event',String(x.id)))?1:0;
+  return a.sort((x,y)=>(bz(y)-bz(x))||(Date.parse(x.event_at)-Date.parse(y.event_at)));
 }
 function evNotice(){return EV.missing?`<div class="srNotice">🛠️ Para liberar os Eventos, o administrador precisa rodar o <b>atualizacao-serra.sql</b> no Supabase.</div>`:EV.err?`<div class="evEmpty"><b>Não consegui carregar os eventos</b>Verifique a internet e tente de novo.<br><button class="secondary" type="button" onclick="EV.loaded=false;go(window.cmCurrentPage)">Tentar de novo</button></div>`:''}
 function evPaint(){
@@ -6322,13 +6323,14 @@ function evMineScreen(){
 }
 function evTab(t){EV.tab=t;[['evTabMine','mine'],['evTabGo','going']].forEach(([id,k])=>{const b=document.getElementById(id);if(b){b.classList.toggle('on',t===k);b.setAttribute('aria-selected',String(t===k))}});evPaintMine()}
 function evMenu(id){
-  openModal(`<div class="stGrab"></div><div class="stSheetHead"><h2>Opções do evento</h2><button class="close" onclick="closeModal()" aria-label="Fechar">×</button></div><div class="stSheetBody"><div class="evSheetList"><button type="button" onclick="closeModal();go('evento','${id}')">${EVI.eye}Ver evento</button><button type="button" onclick="closeModal();evShare('${id}')">${EVI.share}Compartilhar</button><button type="button" class="danger" onclick="evDelete('${id}')">${EVI.trash}Apagar evento</button></div></div>`);
+  openModal(`<div class="stGrab"></div><div class="stSheetHead"><h2>Opções do evento</h2><button class="close" onclick="closeModal()" aria-label="Fechar">×</button></div><div class="stSheetBody"><div class="evSheetList"><button type="button" onclick="closeModal();go('evento','${id}')">${EVI.eye}Ver evento</button><button type="button" onclick="closeModal();evShare('${id}')">${EVI.share}Compartilhar</button><button type="button" class="cmBoostItem" onclick="closeModal();cmBoostSheet('event','${id}')"><span class="cmBoostStar">★</span>Destacar evento</button><button type="button" class="danger" onclick="evDelete('${id}')">${EVI.trash}Apagar evento</button></div></div>`);
   document.querySelector('#modal .modalBox')?.classList.add('stSheet');
 }
 function evCard(x){
   const d=evD(x.event_at),id=evId(x.id),n=evCount(x.id),fav=evIsFav(x.id);
   const cc=evCats(x).map(c=>{const k=evCatOf(c);return `<span class="evChip" style="--c:${k[3]}">${EVI[k[2]]}${esc(c)}</span>`});const chips=[...cc.slice(0,1),...evTags(x).map(t=>`<span class="evChip" style="--c:#c9d6dd">${esc(t)}</span>`),...cc.slice(1)].slice(0,evFree(x)?2:3).join('');
-  return `<article class="evCard" onclick="go('evento','${id}')"><div class="evImg" style="${evPhotoBg(x)}"><span class="evDate"><b>${d.day}</b>${d.mon}</span><button type="button" class="evHeart ${fav?'on':''}" data-evfav="${id}" aria-pressed="${fav}" aria-label="Salvar evento" onclick="event.stopPropagation();evFav('${id}',this)">${EVI.heart}</button></div><div class="evBody"><b class="evName">${esc(x.title)}</b><span class="evLoc">${EVI.pin}<span>${esc(evCityUF(x.city))}</span></span><div class="evChips">${chips}${evFree(x)?`<span class="evChip" style="--c:#20df9a">Gratuito</span>`:''}</div><div class="evInt">${evAvs(x.id)}<span>${n?`${evFmtN(n)} interessado${n>1?'s':''}`:'Seja o primeiro a confirmar'}</span></div><span class="evGo">${EVI.chev}</span></div></article>`;
+  const bst=(typeof cmBoosted==='function'&&cmBoosted('event',String(x.id)));
+  return `<article class="evCard${bst?' cmBoost':''}" onclick="go('evento','${id}')"><div class="evImg" style="${evPhotoBg(x)}"><span class="evDate"><b>${d.day}</b>${d.mon}</span>${bst?'<span class="cmBoostTag">★ Destaque</span>':''}<button type="button" class="evHeart ${fav?'on':''}" data-evfav="${id}" aria-pressed="${fav}" aria-label="Salvar evento" onclick="event.stopPropagation();evFav('${id}',this)">${EVI.heart}</button></div><div class="evBody"><b class="evName">${esc(x.title)}</b><span class="evLoc">${EVI.pin}<span>${esc(evCityUF(x.city))}</span></span><div class="evChips">${chips}${evFree(x)?`<span class="evChip" style="--c:#20df9a">Gratuito</span>`:''}</div><div class="evInt">${evAvs(x.id)}<span>${n?`${evFmtN(n)} interessado${n>1?'s':''}`:'Seja o primeiro a confirmar'}</span></div><span class="evGo">${EVI.chev}</span></div></article>`;
 }
 function evDetailScreen(id){
   const x=EV.items.find(i=>evId(i.id)===evId(id));
@@ -6338,7 +6340,7 @@ function evDetailScreen(id){
   const mq=encodeURIComponent([x.place_to,x.city,evUF(x.city)].filter(Boolean).join(', '));
   const p=srP(x.user_id)||{name:'Alguém'};const mine=x.user_id===me?.id;const wa=x.contact?String(x.contact).replace(/\D/g,''):'';
   EV.cmFor=x.id;EV.cmList=[];
-  return screen(`<div class="ev evDet"><div class="evHero" style="${evPhotoBg(x)}"><div class="evHeroBar"><button class="evRound" type="button" onclick="evBack('eventos')" aria-label="Voltar">${EVI.back}</button><span class="sp"></span><button class="evRound" type="button" onclick="evShare('${eid}')" aria-label="Compartilhar">${EVI.share}</button><button class="evRound ${fav?'on':''}" type="button" data-evfav="${eid}" aria-pressed="${fav}" onclick="evFav('${eid}',this)" aria-label="Salvar evento">${EVI.heart}</button></div><div class="evHeroInfo"><div class="evDateBig"><b>${d.day}</b><span>${d.mon}</span><small>${d.wd}</small></div>${evFree(x)?`<span class="evFreePill">${EVI.check}Gratuito</span>`:''}</div></div><div class="evDetBody"><h1>${esc(x.title)}</h1><div class="evCatLine">${cs.map((c,i)=>i===cs.length-1?`<b>${esc(c)}</b>`:esc(c)).join(' <i>•</i> ')}</div><div class="evPlace">${EVI.pin}<span>${esc(place)}</span></div><div class="evInfo"><div><span class="ic">${EVI.cal}</span><span>${esc(d.long)}<small>${esc(d.wdl)}</small></span></div><div><span class="ic">${EVI.clock}</span><span>${evHours(x)}<small>Horário</small></span></div></div><div id="evLive">${evLiveHtml(x)}</div><h2 class="evSec">Sobre o evento</h2>${x.body?`<p class="evAbout">${esc(x.body)}</p>`:'<p class="evAbout mut">O organizador não escreveu detalhes.</p>'}${x.price&&!evFree(x)?`<span class="evPrice">Entrada: ${esc(x.price)}</span>`:''}${ph.length>1?`<div class="evGal">${ph.map((u,i)=>`<button type="button" style="background-image:url('${esc(u)}')" aria-label="Ver foto ${i+1}" onclick="evPhotoView('${eid}',${i})"></button>`).join('')}</div>`:''}<h2 class="evSec">Localização</h2><div class="evMap"><iframe title="Mapa do local do evento" loading="lazy" referrerpolicy="no-referrer" src="https://maps.google.com/maps?q=${mq}&z=14&output=embed"></iframe><div class="evMapTxt"><b>${esc(x.place_to||x.city)}</b><small>${esc(evCityUF(x.city))}</small><a href="https://www.google.com/maps/search/?api=1&query=${mq}" target="_blank" rel="noopener">${EVI.map}Ver no mapa</a></div></div><div class="evCmtWrap"><h2 class="evSec">Comentários <span id="evCmtN"></span></h2><div id="evCmts" class="evCmts"><div class="evCmtEmpty">Carregando…</div></div><div class="evCmtNew"><input id="evCmtIn" maxlength="500" placeholder="Escreva um comentário..." autocomplete="off" enterkeyhint="send" aria-label="Escreva um comentário" onkeydown="if(event.key==='Enter'){event.preventDefault();evCmtSend('${eid}')}"><button type="button" aria-label="Enviar comentário" onclick="evCmtSend('${eid}')">${EVI.send}</button></div></div><h2 class="evSec">Quem divulgou</h2><div class="evOrg" onclick="${mine?"go('profile')":`currentPublicUser=srP('${evId(x.user_id)}');go('publicProfile')`}"><img src="${esc(p.photo||avatar(p.name))}" alt=""><span><b>${esc(mine?'Você':p.name)}</b><small>${esc(p.city||'')}</small></span></div><div class="evOrgAct">${mine?`<button type="button" class="danger" onclick="evDelete('${eid}')">${EVI.trash}Apagar evento</button>`:`<button type="button" onclick="currentPublicUser=srP('${evId(x.user_id)}');go('conversation')">${EVI.chat}Chamar no bate-papo</button>${wa?`<a href="https://wa.me/${wa.length<=11?'55'+wa:wa}" target="_blank" rel="noopener">💬 WhatsApp</a>`:''}`}</div></div></div>`,'home');
+  return screen(`<div class="ev evDet"><div class="evHero" style="${evPhotoBg(x)}"><div class="evHeroBar"><button class="evRound" type="button" onclick="evBack('eventos')" aria-label="Voltar">${EVI.back}</button><span class="sp"></span><button class="evRound" type="button" onclick="evShare('${eid}')" aria-label="Compartilhar">${EVI.share}</button><button class="evRound ${fav?'on':''}" type="button" data-evfav="${eid}" aria-pressed="${fav}" onclick="evFav('${eid}',this)" aria-label="Salvar evento">${EVI.heart}</button></div><div class="evHeroInfo"><div class="evDateBig"><b>${d.day}</b><span>${d.mon}</span><small>${d.wd}</small></div>${evFree(x)?`<span class="evFreePill">${EVI.check}Gratuito</span>`:''}</div></div><div class="evDetBody"><h1>${esc(x.title)}</h1>${(mine||(typeof cmIsAdmin==='function'&&cmIsAdmin(me?.id)))&&typeof cmBoostBtn==='function'?cmBoostBtn('event',x.id):''}<div class="evCatLine">${cs.map((c,i)=>i===cs.length-1?`<b>${esc(c)}</b>`:esc(c)).join(' <i>•</i> ')}</div><div class="evPlace">${EVI.pin}<span>${esc(place)}</span></div><div class="evInfo"><div><span class="ic">${EVI.cal}</span><span>${esc(d.long)}<small>${esc(d.wdl)}</small></span></div><div><span class="ic">${EVI.clock}</span><span>${evHours(x)}<small>Horário</small></span></div></div><div id="evLive">${evLiveHtml(x)}</div><h2 class="evSec">Sobre o evento</h2>${x.body?`<p class="evAbout">${esc(x.body)}</p>`:'<p class="evAbout mut">O organizador não escreveu detalhes.</p>'}${x.price&&!evFree(x)?`<span class="evPrice">Entrada: ${esc(x.price)}</span>`:''}${ph.length>1?`<div class="evGal">${ph.map((u,i)=>`<button type="button" style="background-image:url('${esc(u)}')" aria-label="Ver foto ${i+1}" onclick="evPhotoView('${eid}',${i})"></button>`).join('')}</div>`:''}<h2 class="evSec">Localização</h2><div class="evMap"><iframe title="Mapa do local do evento" loading="lazy" referrerpolicy="no-referrer" src="https://maps.google.com/maps?q=${mq}&z=14&output=embed"></iframe><div class="evMapTxt"><b>${esc(x.place_to||x.city)}</b><small>${esc(evCityUF(x.city))}</small><a href="https://www.google.com/maps/search/?api=1&query=${mq}" target="_blank" rel="noopener">${EVI.map}Ver no mapa</a></div></div><div class="evCmtWrap"><h2 class="evSec">Comentários <span id="evCmtN"></span></h2><div id="evCmts" class="evCmts"><div class="evCmtEmpty">Carregando…</div></div><div class="evCmtNew"><input id="evCmtIn" maxlength="500" placeholder="Escreva um comentário..." autocomplete="off" enterkeyhint="send" aria-label="Escreva um comentário" onkeydown="if(event.key==='Enter'){event.preventDefault();evCmtSend('${eid}')}"><button type="button" aria-label="Enviar comentário" onclick="evCmtSend('${eid}')">${EVI.send}</button></div></div><h2 class="evSec">Quem divulgou</h2><div class="evOrg" onclick="${mine?"go('profile')":`currentPublicUser=srP('${evId(x.user_id)}');go('publicProfile')`}"><img src="${esc(p.photo||avatar(p.name))}" alt=""><span><b>${esc(mine?'Você':p.name)}</b><small>${esc(p.city||'')}</small></span></div><div class="evOrgAct">${mine?`<button type="button" class="danger" onclick="evDelete('${eid}')">${EVI.trash}Apagar evento</button>`:`<button type="button" onclick="currentPublicUser=srP('${evId(x.user_id)}');go('conversation')">${EVI.chat}Chamar no bate-papo</button>${wa?`<a href="https://wa.me/${wa.length<=11?'55'+wa:wa}" target="_blank" rel="noopener">💬 WhatsApp</a>`:''}`}</div></div></div>`,'home');
 }
 function evPhotoView(id,i){
   const x=EV.items.find(e=>evId(e.id)===id);if(!x)return;const ph=evPhotos(x);i=(i+ph.length)%ph.length;
@@ -10039,10 +10041,11 @@ async function clLoad(){
   const miss=[...new Set(CL.list.map(x=>x.user_id).filter(id=>id&&!personById(id)))];
   if(miss.length){try{const pr=await sb.from('profiles').select('id,name,city,photo').in('id',miss);(pr.data||[]).forEach(p=>{if(!publicProfilesCache.some(x=>x.id===p.id))publicProfilesCache.push(p)})}catch(_){}}
 }
-function clCard(x){const p=x.photos[0];return `<button class="clCard" onclick="cmClOpen('${esc(x.id)}')"><div class="clPh" style="${p?`background-image:url('${esc(p)}')`:''}">${p?'':`<span>${(CAT.find(c=>c[0]===x.category)||CAT[8])[2]}</span>`}${x.status==='vendido'?'<i class="clSold">Vendido</i>':''}${x.photos.length>1?`<i class="clN">${x.photos.length}</i>`:''}</div><div class="clInfo"><b>${esc(brl(x.price))}</b><span>${esc(x.title)}</span><small>${esc(x.city||'')}${x.city?' · ':''}${esc(timeAgo(Date.parse(x.created_at)||Date.now()))}</small></div></button>`}
+function clCard(x){const p=x.photos[0];const bst=x.status!=='vendido'&&typeof cmBoosted==='function'&&cmBoosted('classified',String(x.id));return `<button class="clCard${bst?' cmBoost':''}" onclick="cmClOpen('${esc(x.id)}')"><div class="clPh" style="${p?`background-image:url('${esc(p)}')`:''}">${p?'':`<span>${(CAT.find(c=>c[0]===x.category)||CAT[8])[2]}</span>`}${bst?'<span class="cmBoostTag">★ Destaque</span>':''}${x.status==='vendido'?'<i class="clSold">Vendido</i>':''}${x.photos.length>1?`<i class="clN">${x.photos.length}</i>`:''}</div><div class="clInfo"><b>${esc(brl(x.price))}</b><span>${esc(x.title)}</span><small>${esc(x.city||'')}${x.city?' · ':''}${esc(timeAgo(Date.parse(x.created_at)||Date.now()))}</small></div></button>`}
 function clPaint(){
   const box=document.getElementById('clGrid');if(!box)return;
   const q=normText(CL.q);const list=CL.list.filter(x=>(!CL.cat||x.category===CL.cat)&&(!q||normText(x.title+' '+(x.description||'')+' '+(x.city||'')).includes(q)));
+  const bz=x=>x.status!=='vendido'&&typeof cmBoosted==='function'&&cmBoosted('classified',String(x.id))?1:0;list.sort((a,b)=>bz(b)-bz(a));
   box.innerHTML=list.length?list.map(clCard).join(''):`<div class="cmEmpty small clEmpty"><div class="cmEmptyIco">🏷️</div><b>${CL.list.length?'Nada encontrado':'Nenhum anúncio ainda'}</b><span>${CL.list.length?'Tente outra categoria ou palavra.':'Seja o primeiro a anunciar algo para a serra!'}</span><button class="cmBtn" onclick="cmClNew()">Anunciar item</button></div>`;
 }
 function classificadosScreen(){
@@ -10054,7 +10057,7 @@ function classificadosScreen(){
 }
 window.cmClSearch=function(v){CL.q=v;clPaint()};
 window.cmClCat=function(c,b){CL.cat=c;document.querySelectorAll('.clCats button').forEach(x=>x.classList.toggle('on',x===b));clPaint()};
-async function clEnter(){try{await clLoad();clPaint()}catch(e){const box=document.getElementById('clGrid');if(box)box.innerHTML=`<div class="cmEmpty small clEmpty"><b>Classificados indisponíveis</b><span>${missingTable(e)?SQL_MSG:'Não foi possível carregar agora. Tente de novo.'}</span></div>`}}
+async function clEnter(){try{await Promise.all([clLoad(),typeof cmBoostLoad==='function'?cmBoostLoad():null]);clPaint()}catch(e){const box=document.getElementById('clGrid');if(box)box.innerHTML=`<div class="cmEmpty small clEmpty"><b>Classificados indisponíveis</b><span>${missingTable(e)?SQL_MSG:'Não foi possível carregar agora. Tente de novo.'}</span></div>`}}
 window.cmClOpen=function(id){
   const x=CL.list.find(y=>String(y.id)===String(id));if(!x)return;const s=person(x.user_id);const mine=x.user_id===me?.id;const cat=CAT.find(c=>c[0]===x.category)||CAT[8];
   openModal(`<div class="clDet">${x.photos.length?`<div class="clCar" onscroll="this.nextElementSibling&&[...this.nextElementSibling.children].forEach((d,k)=>d.classList.toggle('on',k===Math.round(this.scrollLeft/this.clientWidth)))">${x.photos.map(u=>`<img src="${esc(u)}" alt="">`).join('')}</div>${x.photos.length>1?`<div class="clDots">${x.photos.map((_,k)=>`<i class="${k?'':'on'}"></i>`).join('')}</div>`:''}`:`<div class="clCar empty"><span>${cat[2]}</span></div>`}
@@ -10062,6 +10065,7 @@ window.cmClOpen=function(id){
   <div class="clDBody"><div class="clDPrice">${esc(brl(x.price))}${x.status==='vendido'?' <i class="clSold">Vendido</i>':''}</div><h2>${esc(x.title)}</h2><div class="clDMeta">${cat[2]} ${esc(cat[1])} · 📍 ${esc(x.city||'Serra da Mantiqueira')} · ${esc(timeAgo(Date.parse(x.created_at)||Date.now()))}</div>
   ${x.description?`<p class="clDDesc">${esc(x.description).replace(/\n/g,'<br>')}</p>`:''}
   <button class="clSeller" onclick="closeModal();postOpenProfile('${esc(x.user_id)}')"><img src="${ph(s)}" alt=""><span><b>${esc(s.name)}</b><small>${esc(s.city||'')}</small></span>›</button>
+  ${(mine||(typeof cmIsAdmin==='function'&&cmIsAdmin(me?.id)))&&x.status!=='vendido'&&typeof cmBoostBtn==='function'?cmBoostBtn('classified',x.id):''}
   ${mine?`<div class="clActs"><button class="secondary" onclick="cmClSold('${esc(x.id)}')">${x.status==='vendido'?'Marcar como disponível':'Marcar como vendido'}</button><button class="secondary danger" onclick="cmClDel('${esc(x.id)}')">Excluir anúncio</button></div>`:`<div class="clActs"><button class="primary" onclick="cmClChat('${esc(x.id)}')">💬 Chamar no bate-papo</button><button class="secondary" onclick="cmClShare('${esc(x.id)}')">${I.share} Compartilhar</button></div>`}</div></div>`);
   document.getElementById('modal')?.classList.add('sheet','clSheet');
 };
@@ -15780,4 +15784,103 @@ async function weekly(){
 setTimeout(weekly,20000);
 })();
 </script>
+<style>
+/* ===== Destaques pagos (eventos e classificados) ===== */
+.cmBoost{box-shadow:0 0 0 1.5px rgba(245,196,81,.55),0 10px 26px rgba(0,0,0,.30)!important}
+.cmBoostTag{position:absolute;left:8px;bottom:8px;z-index:2;display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:999px;background:rgba(12,18,24,.72);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid rgba(245,196,81,.55);color:#f5c451;font-size:11px;font-weight:800;letter-spacing:.3px;line-height:1;pointer-events:none}
+.cmBoostStar{color:#f5c451;font-size:17px;width:22px;display:inline-grid;place-items:center}
+.cmBoostRow{display:flex;align-items:center;gap:10px;width:100%;margin:10px 0 4px;padding:11px 14px;border-radius:16px;border:1px solid rgba(245,196,81,.35);background:linear-gradient(135deg,rgba(245,196,81,.12),rgba(245,196,81,.04));color:#fff;text-align:left;cursor:pointer;font:inherit}
+.cmBoostRow .ic{flex:0 0 34px;width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:rgba(245,196,81,.16);color:#f5c451;font-size:17px}
+.cmBoostRow span{flex:1;display:flex;flex-direction:column;min-width:0}
+.cmBoostRow b{font-size:14.5px}.cmBoostRow small{font-size:12px;color:#c9d3d8;margin-top:1px}
+.cmBoostRow em{font-style:normal;color:#f5c451;font-size:20px}
+.cmBz{padding:4px 2px 2px}
+.cmBz h2{margin:0;font-size:21px}
+.cmBz .sub{color:#b9c7cd;font-size:14px;line-height:1.45;margin:6px 0 14px}
+.cmBzOn{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:14px;background:rgba(245,196,81,.12);border:1px solid rgba(245,196,81,.35);color:#f5d27a;font-size:13.5px;font-weight:700;margin-bottom:12px}
+.cmBzPlans{display:grid;gap:8px}
+.cmBzPlan{display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;cursor:pointer;text-align:left;font:inherit}
+.cmBzPlan i{flex:0 0 20px;width:20px;height:20px;border-radius:50%;border:2px solid rgba(255,255,255,.35);display:grid;place-items:center}
+.cmBzPlan.on{border-color:rgba(245,196,81,.7);background:rgba(245,196,81,.10)}
+.cmBzPlan.on i{border-color:#f5c451}.cmBzPlan.on i::after{content:'';width:10px;height:10px;border-radius:50%;background:#f5c451}
+.cmBzPlan span{flex:1;display:flex;flex-direction:column}.cmBzPlan b{font-size:15px}.cmBzPlan small{font-size:12px;color:#aebcc2;margin-top:2px}
+.cmBzPlan strong{font-size:16px;color:#f5c451;white-space:nowrap}
+.cmBzPlan .pop{font-style:normal;display:inline-block;margin-left:6px;padding:2px 7px;border-radius:999px;background:#f5c451;color:#1c1606;font-size:10px;font-weight:900;vertical-align:2px}
+.cmBzList{margin:14px 2px 4px;padding:0;list-style:none;display:grid;gap:7px;color:#cfdade;font-size:13.5px}
+.cmBzList li{display:flex;gap:8px}.cmBzList li::before{content:'✓';color:#f5c451;font-weight:900}
+.cmBzGo{width:100%;margin-top:14px;border:0;border-radius:16px;padding:15px;font-size:15.5px;font-weight:800;color:#1c1606;background:linear-gradient(135deg,#f7d36b,#e6a93a);box-shadow:0 8px 22px rgba(230,169,58,.28);cursor:pointer}
+.cmBzNote{text-align:center;color:#8fa2aa;font-size:12px;margin-top:9px}
+.cmBzAdm{margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.1)}
+.cmBzAdm b{display:block;font-size:13px;color:#9fb3bb;margin-bottom:8px;text-transform:uppercase;letter-spacing:.6px}
+.cmBzAdm div{display:flex;gap:6px;flex-wrap:wrap}
+.cmBzAdm button{flex:1;min-width:70px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#fff;border-radius:12px;padding:10px 6px;font-weight:700;cursor:pointer}
+.cmBzAdm button.off{color:#ff8a94;border-color:rgba(255,138,148,.35)}
+</style>
+<script>
+/* ===================== DESTAQUES PAGOS: evento e classificado ===================== */
+(function(){
+const CMB={map:new Map(),at:0,missing:false,loading:null};window.CMB=CMB;
+const PLANS={
+  event:{name:'evento',title:'Destacar evento',sub:'Seu evento aparece no topo da lista de Eventos, com o selo dourado de Destaque.',perks:['Primeiro lugar na lista de Eventos','Selo ★ Destaque no cartão','Mais gente vendo e confirmando presença'],opts:[[3,'9,90'],[7,'19,90',1],[15,'34,90']]},
+  classified:{name:'anúncio',title:'Destacar anúncio',sub:'Seu anúncio aparece no topo dos Classificados, com o selo dourado de Destaque.',perks:['Primeiro lugar nos Classificados','Selo ★ Destaque na foto','Vende mais rápido'],opts:[[3,'4,90'],[7,'9,90',1],[15,'17,90']]}
+};
+window.cmBoostLoad=async function(force){
+  if(!force&&Date.now()-CMB.at<60000)return;if(CMB.loading)return CMB.loading;
+  CMB.loading=(async()=>{try{const r=await sb.from('cm_boosts').select('kind,item_id,until').gt('until',new Date().toISOString()).limit(1000);if(r.error)throw r.error;CMB.map=new Map((r.data||[]).map(x=>[x.kind+':'+x.item_id,x.until]));CMB.missing=false}catch(_){CMB.missing=true}CMB.at=Date.now()})();
+  try{await CMB.loading}finally{CMB.loading=null}
+};
+window.cmBoosted=function(kind,id){const u=CMB.map.get(kind+':'+String(id));return u&&Date.parse(u)>Date.now()?u:''};
+const fmt=iso=>{try{return new Date(iso).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}catch(_){return ''}};
+const isAdm=()=>typeof cmIsAdmin==='function'&&!!me?.id&&cmIsAdmin(me.id);
+function itemOf(kind,id){
+  id=String(id);
+  if(kind==='event'){try{return (EV.items||[]).find(x=>String(x.id)===id)||null}catch(_){return null}}
+  try{const box=document.querySelector('.clDet h2');return {id,title:box?box.textContent:'Anúncio'}}catch(_){return {id,title:'Anúncio'}}
+}
+window.cmBoostBtn=function(kind,id){
+  const u=cmBoosted(kind,id),P=PLANS[kind];
+  return `<button type="button" class="cmBoostRow" onclick="event.stopPropagation();cmBoostSheet('${kind}','${esc(String(id))}')"><i class="ic">★</i><span><b>${u?'Em destaque até '+fmt(u):P.title}</b><small>${u?'Toque para estender o destaque':'Apareça no topo para muito mais gente'}</small></span><em>›</em></button>`;
+};
+let PICK=1;
+window.cmBoostSheet=function(kind,id){
+  const P=PLANS[kind];if(!P)return;id=String(id);const it=itemOf(kind,id);const u=cmBoosted(kind,id);
+  const title=it?.title||'';
+  try{closeModal()}catch(_){}
+  openModal(`<div class="cmBz"><div class="modalHead" style="margin-bottom:0"><h2>${P.title}</h2><button class="close" onclick="closeModal()" aria-label="Fechar">×</button></div>
+    <p class="sub">${P.sub}</p>
+    ${u?`<div class="cmBzOn">★ Em destaque até ${fmt(u)}</div>`:''}
+    <div class="cmBzPlans">${P.opts.map(([d,pr,pop],k)=>`<button type="button" class="cmBzPlan${k===PICK?' on':''}" data-k="${k}" onclick="cmBoostPick(${k})"><i></i><span><b>${d} dias${pop?'<em class="pop">MAIS ESCOLHIDO</em>':''}</b><small>${d===3?'Para um empurrãozinho':d===7?'Uma semana inteira no topo':'Duas semanas de visibilidade'}</small></span><strong>R$ ${pr}</strong></button>`).join('')}</div>
+    <ul class="cmBzList">${P.perks.map(x=>`<li>${x}</li>`).join('')}</ul>
+    <button type="button" class="cmBzGo" onclick="cmBoostOrder('${kind}','${esc(id)}')">Quero destacar pelo WhatsApp</button>
+    <div class="cmBzNote">O pagamento é combinado direto com o Conecta. O destaque entra assim que for confirmado.</div>
+    ${isAdm()?`<div class="cmBzAdm"><b>Administrador · ativar agora</b><div>${P.opts.map(([d])=>`<button type="button" onclick="cmBoostSet('${kind}','${esc(id)}',${d})">+${d} dias</button>`).join('')}${u?`<button type="button" class="off" onclick="cmBoostSet('${kind}','${esc(id)}',0)">Tirar</button>`:''}</div></div>`:''}
+  </div>`);
+  document.getElementById('modal')?.classList.add('sheet');
+  window.__cmBz={kind,id,title};
+};
+window.cmBoostPick=function(k){PICK=k;document.querySelectorAll('.cmBzPlan').forEach(b=>b.classList.toggle('on',+b.dataset.k===k))};
+window.cmBoostOrder=function(kind,id){
+  const P=PLANS[kind],o=P.opts[PICK]||P.opts[1],t=(window.__cmBz&&window.__cmBz.title)||'';
+  const who=(()=>{try{return profileData().name}catch(_){return ''}})();
+  const msg=`Olá! Quero destacar meu ${P.name} no Conecta por ${o[0]} dias (R$ ${o[1]}).\n${t?`${P.name[0].toUpperCase()+P.name.slice(1)}: ${t}\n`:''}Código: ${kind==='event'?'EV':'CL'}-${id}${who?`\nNome: ${who}`:''}`;
+  const num=typeof CM_SALES_WHATSAPP!=='undefined'?CM_SALES_WHATSAPP:'5512996653963';
+  window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`,'_blank');
+};
+window.cmBoostSet=async function(kind,id,days){
+  if(!isAdm())return;
+  try{
+    if(!days){const {error}=await sb.from('cm_boosts').delete().eq('kind',kind).eq('item_id',String(id));if(error)throw error}
+    else{const cur=cmBoosted(kind,id);const base=cur&&Date.parse(cur)>Date.now()?Date.parse(cur):Date.now();const until=new Date(base+days*864e5).toISOString();
+      const {error}=await sb.from('cm_boosts').upsert({kind,item_id:String(id),until},{onConflict:'kind,item_id'});if(error)throw error}
+    await cmBoostLoad(true);try{closeModal()}catch(_){}
+    try{shareToast(days?`★ Destaque ativado por ${days} dias`:'Destaque removido')}catch(_){}
+    try{const pg=window.cmCurrentPage;if(pg==='eventos'||pg==='evento'||pg==='classificados')go(pg,pg==='evento'?id:undefined)}catch(_){}
+  }catch(e){alert(/does not exist|schema cache|relation/i.test(String(e?.message||''))?'Falta ativar os destaques no banco (cm_boosts).':'Não consegui salvar o destaque agora.')}
+};
+/* eventos: carrega os destaques junto */
+const evl=window.evLoad;
+if(typeof evl==='function'){window.evLoad=function(){return Promise.all([evl.apply(this,arguments),cmBoostLoad()]).then(r=>r[0])};try{evLoad=window.evLoad}catch(_){}}
+})();
+</script>
+
 </body></html>
