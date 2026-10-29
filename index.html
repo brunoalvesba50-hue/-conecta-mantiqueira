@@ -1941,7 +1941,7 @@ function renderFeed(){
 function postOpenProfile(id){if(id===me?.id)return go('profile');const pp=personById(id);if(pp){currentPublicUser=pp;go('publicProfile')}}
 function postFind(id){return POSTS.list.find(x=>x.id===String(id))}
 /* ===================== CRIAR PUBLICAÇÃO (foto, vídeo, carrossel, texto) ===================== */
-const CC_MAX_VIDEO_MB=50,CC_MAX_VIDEO_MIN=3,CC_MAX_PHOTOS=20;
+const CC_MAX_VIDEO_MB=50,CC_MAX_VIDEO_MIN=2,CC_MAX_PHOTOS=20;
 const CC_REGION=['Sapucaí-Mirim, MG','Santo Antônio do Pinhal, SP','São Bento do Sapucaí, SP','Campos do Jordão, SP','Gonçalves, MG','Monte Verde, MG','Paraisópolis, MG','Itajubá, MG','Maria da Fé, MG','São Lourenço, MG','Extrema, MG','Camanducaia, MG'];
 const CC_ASPECTS={orig:null,'1:1':1,'4:5':.8,'16:9':16/9};
 let CC=null;
@@ -2000,7 +2000,7 @@ function ccZoom(v){const p=CC.photos[CC.sel];p.zoom=+v;ccLayout()}
 function ccGeom(p,FW,FH){const zoom=CC.aspect==='orig'?1:p.zoom;const base=CC.aspect==='orig'?Math.min(FW/p.w,FH/p.h):Math.max(FW/p.w,FH/p.h);const dw=p.w*base*zoom,dh=p.h*base*zoom;const mx=Math.max(0,(dw-FW)/2),my=Math.max(0,(dh-FH)/2);p.px=Math.max(-1,Math.min(1,p.px));p.py=Math.max(-1,Math.min(1,p.py));return{dw,dh,x:(FW-dw)/2+p.px*mx,y:(FH-dh)/2+p.py*my,mx,my}}
 function ccLayout(){const st=document.getElementById('ccStage'),im=document.getElementById('ccImg');if(!st||!im)return;const p=CC.photos[CC.sel];const g=ccGeom(p,st.clientWidth,st.clientHeight);Object.assign(im.style,{width:g.dw+'px',height:g.dh+'px',left:g.x+'px',top:g.y+'px'})}
 function ccBindPan(){const st=document.getElementById('ccStage');if(!st)return;let s0=null;st.addEventListener('pointerdown',e=>{if(CC.aspect==='orig')return;const p=CC.photos[CC.sel];s0={x:e.clientX,y:e.clientY,px:p.px,py:p.py};try{st.setPointerCapture(e.pointerId)}catch(_){}});st.addEventListener('pointermove',e=>{if(!s0)return;const p=CC.photos[CC.sel];const g=ccGeom(p,st.clientWidth,st.clientHeight);if(g.mx)p.px=s0.px-(e.clientX-s0.x)/g.mx*-1;if(g.my)p.py=s0.py-(e.clientY-s0.y)/g.my*-1;ccLayout()});const end=()=>{s0=null};st.addEventListener('pointerup',end);st.addEventListener('pointercancel',end);if(!window.__ccRs){window.__ccRs=true;window.addEventListener('resize',()=>{if(CC&&CC.step==='edit'&&CC.kind!=='video')ccLayout()})}}
-async function ccRender(p){const r=ccRatio(),max=1440;let W,H;if(CC.aspect==='orig'){const sc=Math.min(1,2048/Math.max(p.w,p.h));W=Math.round(p.w*sc);H=Math.round(p.h*sc)}else{W=r>=1?max:Math.round(max*r);H=r>=1?Math.round(max/r):max}const im=(await ccImgSize(p.url)).img;const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d',{alpha:false});x.fillStyle='#000';x.fillRect(0,0,W,H);x.imageSmoothingQuality='high';const g=ccGeom(p,W,H);x.drawImage(im,g.x,g.y,g.dw,g.dh);const blob=await new Promise(res=>c.toBlob(res,'image/jpeg',.9));if(!blob)throw new Error('Não foi possível preparar a foto.');return{blob,w:W,h:H}}
+async function ccRender(p){const r=ccRatio(),max=1350;let W,H;if(CC.aspect==='orig'){const sc=Math.min(1,2048/Math.max(p.w,p.h));W=Math.round(p.w*sc);H=Math.round(p.h*sc)}else{W=r>=1?max:Math.round(max*r);H=r>=1?Math.round(max/r):max}const im=(await ccImgSize(p.url)).img;const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d',{alpha:false});x.fillStyle='#000';x.fillRect(0,0,W,H);x.imageSmoothingQuality='high';const g=ccGeom(p,W,H);x.drawImage(im,g.x,g.y,g.dw,g.dh);let blob=await new Promise(res=>{try{c.toBlob(res,'image/webp',.82)}catch(_){res(null)}});if(!blob||blob.type!=='image/webp')blob=await new Promise(res=>c.toBlob(res,'image/jpeg',.84));if(!blob)throw new Error('Não foi possível preparar a foto.');return{blob,w:W,h:H}}
 /* vídeo */
 function ccVideoEdit(){
   const v=CC.video;
@@ -6774,7 +6774,7 @@ async function cmDecodeImage0(file){
   try{const i=await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>rej(new Error('decode'));im.src=src});return {w:i.naturalWidth,h:i.naturalHeight,draw:(c,x,y,w,h)=>c.drawImage(i,x,y,w,h),src}}catch(e){URL.revokeObjectURL(src);throw e}
 }
 async function cmImageBlob(file,kind,mime,shrink){
-  const limits={avatar:[1200,.88,700],cover:[1800,.88,900],story:[1920,.9,1200],post:[2048,.9,1400],highlight:[1800,.9,1000],support:[1600,.84,650]};
+  const limits={avatar:[720,.85,180],cover:[1600,.82,450],story:[1440,.82,420],post:[1440,.82,450],highlight:[1080,.82,260],support:[1600,.84,650]};
   let [maxSide,q,maxKB]=limits[kind]||limits.post;if(shrink){maxSide=Math.round(maxSide*shrink);maxKB=Math.round(maxKB*shrink)}
   const im=await cmDecodeImage(file);
   try{
@@ -7065,12 +7065,12 @@ function ccFit(boxW,boxH,r){let W=boxW,H=W/r;if(H>boxH){H=boxH;W=H*r}return{W:Ma
 function ccRatio(){const ph=CC.photos[0]||CC.cur||(CC.pool||[])[0];const r=CC_ASPECTS[CC.aspect];if(r)return r;return ph?Math.max(.8,Math.min(1.91,ph.w/ph.h)):1}
 function ccGeom(p,FW,FH){const zoom=Math.max(1,p.zoom||1);const base=Math.max(FW/p.w,FH/p.h);const dw=p.w*base*zoom,dh=p.h*base*zoom;const mx=Math.max(0,(dw-FW)/2),my=Math.max(0,(dh-FH)/2);p.px=Math.max(-1,Math.min(1,p.px||0));p.py=Math.max(-1,Math.min(1,p.py||0));return{dw,dh,x:(FW-dw)/2+p.px*mx,y:(FH-dh)/2+p.py*my,mx,my}}
 async function ccRender(p){
-  const r=ccRatio(),max=1440;const W=r>=1?max:Math.round(max*r),H=r>=1?Math.round(max/r):max;
+  const r=ccRatio(),max=1350;const W=r>=1?max:Math.round(max*r),H=r>=1?Math.round(max/r):max;
   const im=(await ccImgSize(p.url)).img;const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d',{alpha:false});
   x.fillStyle='#000';x.fillRect(0,0,W,H);x.imageSmoothingQuality='high';const g=ccGeom(p,W,H);x.drawImage(im,g.x,g.y,g.dw,g.dh);
   try{ccApplyMatrix(x,W,H,ccFilterMatrix(ccFilterStr(p)))}catch(_){}
   ccDrawTexts(x,p,W,H);
-  const blob=await new Promise(res=>c.toBlob(res,'image/jpeg',.9));if(!blob)throw new Error('Não foi possível preparar a foto.');return{blob,w:W,h:H}
+  let blob=await new Promise(res=>{try{c.toBlob(res,'image/webp',.82)}catch(_){res(null)}});if(!blob||blob.type!=='image/webp')blob=await new Promise(res=>c.toBlob(res,'image/jpeg',.84));if(!blob)throw new Error('Não foi possível preparar a foto.');return{blob,w:W,h:H}
 }
 
 /* --------- topo e navegação --------- */
@@ -7395,8 +7395,8 @@ async function compressVideoFile(file){
     if(!video){video=document.createElement('video');video.src=url;video.muted=true;video.playsInline=true;video.preload='auto'}
     if(!(video.readyState>=1))await new Promise((res,rej)=>{video.addEventListener('loadedmetadata',res,{once:true});video.addEventListener('error',rej,{once:true})});
     const dur=video.duration||CC?.video?.dur||60;
-    const bps=Math.max(700000,Math.min(4000000,Math.floor(44*8*1048576/Math.max(1,dur))-128000));
-    const maxSide=bps<2200000?720:1080,scale=Math.min(1,maxSide/Math.max(video.videoWidth,video.videoHeight));
+    const bps=Math.max(600000,Math.min(1800000,Math.floor(20*8*1048576/Math.max(1,dur))-96000));
+    const maxSide=720,scale=Math.min(1,maxSide/Math.max(video.videoWidth,video.videoHeight));
     const w=Math.max(2,Math.round(video.videoWidth*scale/2)*2),h=Math.max(2,Math.round(video.videoHeight*scale/2)*2);
     const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d');
     const stream=canvas.captureStream(30);
@@ -7404,7 +7404,7 @@ async function compressVideoFile(file){
     if(audio)stream.addTrack(audio);
     const types=['video/mp4;codecs=avc1,mp4a','video/mp4;codecs=h264,aac','video/mp4','video/webm;codecs=vp9,opus','video/webm'];
     const mime=types.find(t=>{try{return MediaRecorder.isTypeSupported(t)}catch(_){return false}})||'';
-    const rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:bps,audioBitsPerSecond:128000}:{videoBitsPerSecond:bps});const chunks=[];
+    const rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:bps,audioBitsPerSecond:96000}:{videoBitsPerSecond:bps});const chunks=[];
     const done=new Promise((resolve,reject)=>{rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);rec.onerror=reject;rec.onstop=()=>resolve(new Blob(chunks,{type:(rec.mimeType||mime||'video/webm').split(';')[0]}))});
     let raf=0;const draw=()=>{if(video.ended)return;try{ctx.drawImage(video,0,0,w,h)}catch(_){}raf=requestAnimationFrame(draw)};
     video.__busy=true;video.currentTime=0;
@@ -9139,7 +9139,7 @@ window.postRepaint=function(id){
 */
 (function(){
 const LIMIT_MB=CC_MAX_VIDEO_MB;            /* limite do servidor (Supabase) */
-const DIRECT_MB=Math.max(10,LIMIT_MB-4);   /* até aqui sobe o original, sem recomprimir */
+const DIRECT_MB=12;                        /* até aqui sobe o original, sem recomprimir (economiza espaço) */
 
 /* ---------- tela acordada durante o envio ---------- */
 let WL=null,wlN=0;
@@ -9158,10 +9158,10 @@ window.compressVideoFile=async function(file,onp){
     if(!video){video=document.createElement('video');video.src=url;video.muted=true;video.playsInline=true;video.setAttribute('playsinline','');video.preload='auto'}
     if(!(video.readyState>=1))await new Promise((res,rej)=>{const t=setTimeout(()=>rej(new Error('meta')),15000);video.addEventListener('loadedmetadata',()=>{clearTimeout(t);res()},{once:true});video.addEventListener('error',()=>{clearTimeout(t);rej(new Error('meta'))},{once:true})});
     const dur=isFinite(video.duration)&&video.duration>0?video.duration:(CC?.video?.dur||60);
-    /* cabe com folga no limite: ~40 MB no total */
-    const target=(LIMIT_MB-10)*8*1048576;
-    const bps=Math.max(900000,Math.min(5000000,Math.floor(target/Math.max(1,dur))-128000));
-    const maxSide=bps>=3000000?1080:720,scale=Math.min(1,maxSide/Math.max(video.videoWidth||720,video.videoHeight||1280));
+    /* econômico: até ~20 MB no total, em 720p (como o Instagram faz) */
+    const target=20*8*1048576;
+    const bps=Math.max(600000,Math.min(1800000,Math.floor(target/Math.max(1,dur))-96000));
+    const maxSide=720,scale=Math.min(1,maxSide/Math.max(video.videoWidth||720,video.videoHeight||1280));
     const w=Math.max(2,Math.round((video.videoWidth||720)*scale/2)*2),h=Math.max(2,Math.round((video.videoHeight||1280)*scale/2)*2);
     const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d',{alpha:false});
     const stream=canvas.captureStream(30);
@@ -9169,7 +9169,7 @@ window.compressVideoFile=async function(file,onp){
     if(audio)stream.addTrack(audio);
     const types=['video/mp4;codecs=avc1,mp4a','video/mp4;codecs=h264,aac','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
     const mime=types.find(t=>{try{return MediaRecorder.isTypeSupported(t)}catch(_){return false}})||'';
-    const rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:bps,audioBitsPerSecond:128000}:{videoBitsPerSecond:bps});const chunks=[];
+    const rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:bps,audioBitsPerSecond:96000}:{videoBitsPerSecond:bps});const chunks=[];
     const done=new Promise((resolve,reject)=>{rec.ondataavailable=e=>e.data&&e.data.size&&chunks.push(e.data);rec.onerror=reject;rec.onstop=()=>resolve(new Blob(chunks,{type:(rec.mimeType||mime||'video/webm').split(';')[0]}))});
     const draw=()=>{try{ctx.drawImage(video,0,0,w,h)}catch(_){}if(!video.ended)raf=requestAnimationFrame(draw)};
     video.__busy=true;try{video.currentTime=0}catch(_){}
@@ -15761,4 +15761,23 @@ window.cmStkMakerDone=async function(send){
 })();
 </script>
 
+<script>
+/* ===== Economia de espaço (out/2026) ===== */
+(function(){
+/* fotos em WebP quando o celular consegue: o envio usa a extensão certa */
+const up0=window.ccUploadBlob;
+if(typeof up0==='function'){window.ccUploadBlob=function(blob,ext,type,onp){if(blob&&blob.type==='image/webp'&&/jpe?g/i.test(String(ext)+String(type))){ext='webp';type='image/webp'}return up0.call(this,blob,ext,type,onp)};try{ccUploadBlob=window.ccUploadBlob}catch(_){}}
+/* limpeza semanal de arquivos sem uso: só quando o administrador abre o app */
+async function weekly(){
+  try{
+    if(!me?.id||typeof cmIsAdmin!=='function'||!cmIsAdmin(me.id))return;
+    const k='cm_limpeza_'+me.id,last=+localStorage.getItem(k)||0;if(Date.now()-last<7*864e5)return;
+    localStorage.setItem(k,String(Date.now()));
+    const {data,error}=await sb.functions.invoke('limpeza-arquivos',{body:{}});
+    if(error)throw error;if(data&&data.apagados)console.info('Limpeza: '+data.apagados+' arquivos sem uso apagados ('+data.mb+' MB)');
+  }catch(e){console.warn('limpeza',e)}
+}
+setTimeout(weekly,20000);
+})();
+</script>
 </body></html>
