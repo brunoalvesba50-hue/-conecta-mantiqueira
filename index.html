@@ -1319,7 +1319,7 @@ async function cmEnsureCityPhotos(rows){
   }finally{cmCityPhotoRunning=false}
 }
 function homeCityHtml(){const rows=registeredCities();if(!rows.length)return '<div class="empty">As cidades aparecerão aqui conforme as pessoas criarem seus perfis.</div>';const pos=['50% 35%','8% 60%','92% 40%','30% 85%','70% 75%','50% 10%'];const shown=rows.slice(0,40);setTimeout(()=>cmEnsureCityPhotos(shown),0);return shown.map((x,i)=>`<button class="city" data-citykey="${esc(cityKey(x.city))}" style="--pos:${pos[i%6]}${cmCityPhotoStyle(cityKey(x.city))}" onclick="go('people','${esc(x.city)}')"><b>${esc(x.city)}</b><small>${x.count} ${x.count===1?'pessoa':'pessoas'}</small>${cmCityCreditHtml(cityKey(x.city))}</button>`).join("")}
-function home(){const p=profileData();setTimeout(openPendingProfile,500);setTimeout(async()=>{await loadStories();const el=document.getElementById("homeStories");if(el)el.innerHTML=stories();},0);const realPeople=getPublicPeople().filter(x=>x.id!==me?.id&&x.photo).slice(0,12);return screen(`<div class="homePremium"><div class="premiumTop"><div class="premiumBrand">Conecta</div><button class="premiumBell" type="button" onclick="cmNotifOpen()" aria-label="Notificações">🔔<i class="bellDot"></i></button></div><div class="heroSpace"></div><div class="premiumGreeting">Olá, ${esc(p.name)}! 👋</div><div class="premiumSub">Pessoas, lugares e histórias da nossa região.</div><div id="homeStories">${stories()}</div><input id="homePeopleSearch" class="search premiumSearch" placeholder="⌕  Buscar pessoas, cidades, interesses..." oninput="filterPeopleLive(this.value)" autocomplete="off"><div id="homeSearchResults"></div><div class="grid4 homeGrid3"><button class="quick premiumQuick" onclick="go('people')"><div class="ico">♙</div><small>Pessoas</small></button><button class="quick premiumQuick" onclick="go('groups')"><div class="ico">♧</div><small>Grupos</small></button><button class="quick premiumQuick" onclick="go('business')"><div class="ico">★</div><small>Eventos</small></button></div><div class="sectionHead premiumSection"><h2>Cidades em destaque</h2><button class="link" onclick="citySearch()">Ver todas ›</button></div><div class="cityGrid premiumCities">${homeCityHtml()}</div><div class="sectionHead premiumSection"><h2>Pessoas da região</h2><button class="link" onclick="go('people')">Ver todas ›</button></div><div class="peopleRow premiumPeople">${realPeople.length?realPeople.map(p=>`<div class="personMini" onclick="publicProfile('${esc(p.id)}')"><img class="avatar" src="${esc(p.photo)}"><small>${esc(p.name.split(" ")[0])}<br>${esc(p.city||"")}</small></div>`).join(""):"<div class='empty'>Ainda não há outros perfis cadastrados.</div>"+profilesHint()}</div><div class="sectionHead premiumSection"><h2>Grupos da região</h2><button class="link" onclick="go('groups')">Ver todos ›</button></div><div class="premiumGroups">${groupPreview()}</div><div class="sectionHead premiumSection"><h2>Publicações</h2><span><button class="link" onclick="adsChoosePost()">📣 Anunciar</button> <button class="link" onclick="newPost()">＋ Publicar</button></span></div><div id="feed" class="igFeed"></div></div>`,'home')}
+function home(){const p=profileData();setTimeout(openPendingProfile,500);setTimeout(async()=>{await loadStories();const el=document.getElementById("homeStories");if(el)el.innerHTML=stories();},0);const realPeople=getPublicPeople().filter(x=>x.id!==me?.id&&x.photo).slice(0,12);return screen(`<div class="homePremium"><div class="premiumTop"><div class="premiumBrand">Conecta</div><button class="premiumBell" type="button" onclick="cmNotifOpen()" aria-label="Notificações">🔔<i class="bellDot"></i></button></div><div class="heroSpace"></div><div class="premiumGreeting">Olá, ${esc(p.name)}! 👋</div><div class="premiumSub">Pessoas, lugares e histórias da nossa região.</div><div id="homeStories">${stories()}</div><input id="homePeopleSearch" class="search premiumSearch" placeholder="⌕  Buscar pessoas, cidades, interesses..." oninput="filterPeopleLive(this.value)" autocomplete="off"><div id="homeSearchResults"></div><div class="grid4 homeGrid3"><button class="quick premiumQuick" onclick="go('people')"><div class="ico">♙</div><small>Pessoas</small></button><button class="quick premiumQuick" onclick="go('groups')"><div class="ico">♧</div><small>Grupos</small></button><button class="quick premiumQuick" onclick="go('eventos')"><div class="ico">★</div><small>Eventos</small></button></div><div class="sectionHead premiumSection"><h2>Cidades em destaque</h2><button class="link" onclick="citySearch()">Ver todas ›</button></div><div class="cityGrid premiumCities">${homeCityHtml()}</div><div class="sectionHead premiumSection"><h2>Pessoas da região</h2><button class="link" onclick="go('people')">Ver todas ›</button></div><div class="peopleRow premiumPeople">${realPeople.length?realPeople.map(p=>`<div class="personMini" onclick="publicProfile('${esc(p.id)}')"><img class="avatar" src="${esc(p.photo)}"><small>${esc(p.name.split(" ")[0])}<br>${esc(p.city||"")}</small></div>`).join(""):"<div class='empty'>Ainda não há outros perfis cadastrados.</div>"+profilesHint()}</div><div class="sectionHead premiumSection"><h2>Grupos da região</h2><button class="link" onclick="go('groups')">Ver todos ›</button></div><div class="premiumGroups">${groupPreview()}</div><div class="sectionHead premiumSection"><h2>Publicações</h2><span><button class="link" onclick="adsChoosePost()">📣 Anunciar</button> <button class="link" onclick="newPost()">＋ Publicar</button></span></div><div id="feed" class="igFeed"></div></div>`,'home')}
 
 function normText(v){return String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")}
 function cityKey(v){return normText(v).replace(/[^a-z0-9]+/g," ").replace(/\s+/g," ").trim()}
@@ -5926,6 +5926,542 @@ async function srSave(kind){
 /* ===================== fim ABA SERRA ===================== */
 
 </script>
+<style id="evStyle">
+/* ===== EVENTOS: lista, detalhes, adicionar e meus eventos ===== */
+html body.evOn::before{background:#0a1820!important}
+html body.evOn::after{display:none!important}
+.ev{--evg:#20df9a;--evc:var(--dna-glass,rgba(8,27,37,.72));--evl:rgba(255,255,255,.10);--evm:#9baeb9;color:#f5f8fa;padding-bottom:12px}
+.ev h1,.ev h2{margin:0}
+.evTop{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;margin:0 0 16px}
+.evTop .evTtl{text-align:center;min-width:0}
+.evTop h1{font-size:21px;line-height:1.2;font-weight:800}
+.evRound{width:44px;height:44px;border-radius:50%;border:1px solid var(--evl);background:rgba(8,27,37,.62);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);color:#fff;display:grid;place-items:center;padding:0;cursor:pointer}
+.evRound svg{width:22px;height:22px}
+.evTop .evRound{background:none;border:0;-webkit-backdrop-filter:none;backdrop-filter:none}
+.evTop .evRound svg{width:24px;height:24px}
+.evRound.g{color:var(--evg);border-color:rgba(32,223,154,.4)}
+.evRound.on{color:#ff5d7a}
+.evRound.on svg{fill:currentColor}
+.evCityBtn{display:inline-flex;align-items:center;gap:5px;margin-top:3px;border:0;background:none;color:var(--evg);font-weight:600;font-size:13.5px;padding:2px 4px;cursor:pointer;max-width:100%}
+.evCityBtn svg{width:15px;height:15px;flex:none}
+.evCityBtn span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.evSearchRow{display:flex;gap:10px;margin-bottom:14px}
+.evSearch{flex:1;min-width:0;display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;border-radius:16px;background:var(--evc);border:1px solid rgba(255,255,255,.14);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+.evSearch svg{width:20px;height:20px;color:var(--evm);flex:none}
+.evSearch input{flex:1;min-width:0;border:0;background:none;color:#fff;font:inherit;font-size:15px;outline:0}
+.evSearch input::placeholder{color:var(--evm)}
+.evFilt{width:48px;height:48px;flex:none;border-radius:16px;border:1px solid rgba(255,255,255,.14);background:var(--evc);color:#fff;display:grid;place-items:center;cursor:pointer}
+.evFilt svg{width:22px;height:22px}
+.evFilt.on{border-color:var(--evg);color:var(--evg)}
+.evCats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-bottom:22px}
+.evCat{--c:#20df9a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:68px;padding:8px 2px;border-radius:14px;border:1px solid color-mix(in srgb,var(--c) 45%,transparent);background:var(--evc);color:#eaf2f6;font:inherit;font-size:clamp(10.5px,3vw,13px);font-weight:600;cursor:pointer;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);transition:transform .15s ease,background .15s ease}
+.evCat:active{transform:scale(.96)}
+.evCat svg{width:24px;height:24px;color:var(--c)}
+.evCat span{white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.evCat.on{background:color-mix(in srgb,var(--c) 22%,rgba(8,27,37,.8));border-color:var(--c);box-shadow:0 0 16px color-mix(in srgb,var(--c) 30%,transparent)}
+.evHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px}
+.evHead h2{font-size:19px;font-weight:800}
+.evMore{display:inline-flex;align-items:center;gap:2px;border:0;background:none;color:var(--evg);font:inherit;font-weight:700;font-size:14px;cursor:pointer;padding:4px 0}
+.evMore svg{width:16px;height:16px}
+.evList{display:flex;flex-direction:column;gap:14px}
+.evCard{border-radius:20px;overflow:hidden;background:var(--evc);border:1px solid var(--evl);box-shadow:0 10px 26px rgba(0,0,0,.30);cursor:pointer;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+.evImg{position:relative;height:128px;background:#0b1d28 center/cover no-repeat}
+.evImg::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 40%,rgba(8,27,37,.75))}
+.evDate{position:absolute;z-index:1;left:12px;top:12px;min-width:50px;padding:5px 8px 6px;border-radius:12px;background:rgba(6,19,29,.82);border:1px solid rgba(32,223,154,.55);text-align:center;color:var(--evg);font-size:12px;font-weight:700;line-height:1.1;letter-spacing:.3px}
+.evDate b{display:block;color:#fff;font-size:22px;font-weight:800}
+.evHeart{position:absolute;z-index:1;right:10px;top:10px;width:38px;height:38px;border-radius:50%;border:0;background:rgba(6,19,29,.55);color:#fff;display:grid;place-items:center;cursor:pointer;padding:0}
+.evHeart svg{width:21px;height:21px}
+.evHeart.on{color:#ff5d7a}
+.evHeart.on svg{fill:currentColor}
+.evBody{position:relative;padding:12px 60px 14px 14px}
+.evName{display:block;font-size:17px;font-weight:800;line-height:1.25;margin-bottom:5px;overflow-wrap:anywhere}
+.evLoc{display:flex;align-items:center;gap:5px;color:#c9d6dd;font-size:13.5px;min-width:0}
+.evLoc svg{width:15px;height:15px;flex:none;color:var(--evg)}
+.evLoc span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.evChips{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0}
+.evChip{--c:#9b6cff;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent);border:1px solid color-mix(in srgb,var(--c) 40%,transparent)}
+.evChip svg{width:13px;height:13px}
+.evInt{display:flex;align-items:center;gap:8px;font-size:13px;color:#c9d6dd}
+.evAvs{display:flex}
+.evAvs img{width:24px;height:24px;border-radius:50%;object-fit:cover;border:2px solid #0b1d28;margin-left:-8px;background:#12384a}
+.evAvs img:first-child{margin-left:0}
+.evAvs i{display:grid;place-items:center;min-width:32px;height:24px;margin-left:-6px;padding:0 6px;border-radius:999px;background:#12384a;border:2px solid #0b1d28;font-style:normal;font-size:11px;font-weight:700;color:#fff}
+.evGo{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.22);display:grid;place-items:center;color:#fff}
+.evGo svg{width:18px;height:18px}
+.evEmpty{padding:26px 18px;border-radius:20px;background:var(--evc);border:1px dashed rgba(255,255,255,.18);text-align:center;color:var(--evm);font-size:14px}
+.evEmpty b{display:block;color:#fff;font-size:16px;margin-bottom:6px}
+.evEmpty button{margin-top:14px}
+.evSkel{height:250px;border-radius:20px;background:linear-gradient(90deg,rgba(255,255,255,.04),rgba(255,255,255,.09),rgba(255,255,255,.04));background-size:200% 100%;animation:evSk 1.2s linear infinite}
+@keyframes evSk{to{background-position:-200% 0}}
+/* detalhes */
+main.screen:has(>.evDet){padding-top:0}
+.evDet{margin:0 -18px}
+.evHero{position:relative;height:clamp(250px,72vw,340px);background:#0b1d28 center/cover no-repeat}
+.evHero::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,19,29,.35) 0%,rgba(6,19,29,0) 30%,rgba(6,19,29,.55) 70%,#06131d 100%)}
+.evHeroBar{position:absolute;z-index:2;left:0;right:0;top:0;display:flex;align-items:center;gap:10px;padding:calc(14px + env(safe-area-inset-top)) 16px 0}
+.evHeroBar .sp{flex:1}
+.evHeroInfo{position:absolute;z-index:2;left:18px;right:18px;bottom:8px;display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.evDateBig{min-width:66px;padding:7px 10px 8px;border-radius:16px;background:rgba(6,19,29,.82);border:1px solid rgba(32,223,154,.6);text-align:center;color:#fff;font-weight:700;line-height:1.1;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.evDateBig b{display:block;font-size:30px;font-weight:800}
+.evDateBig span{display:block;font-size:14px;letter-spacing:.5px}
+.evDateBig small{display:block;font-size:12px;color:#c9d6dd;margin-top:2px}
+.evFreePill{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:999px;background:rgba(6,19,29,.75);border:1px solid var(--evg);color:var(--evg);font-size:13px;font-weight:700}
+.evFreePill svg{width:15px;height:15px}
+.evDetBody{padding:12px 18px 0}
+.evDetBody h1{font-size:clamp(24px,7vw,30px);font-weight:800;line-height:1.15;overflow-wrap:anywhere}
+.evCatLine{margin:6px 0 8px;font-size:14.5px;color:#c9d6dd}
+.evCatLine b{color:var(--evg);font-weight:600}
+.evCatLine i{font-style:normal;color:var(--evm);margin:0 2px}
+.evPlace{display:flex;align-items:flex-start;gap:7px;font-size:14.5px;color:#eaf2f6}
+.evPlace svg{width:17px;height:17px;flex:none;color:var(--evg);margin-top:1px}
+.evInfo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0 0;padding:14px 0;border-top:1px solid var(--evl);border-bottom:1px solid var(--evl)}
+.evInfo>div{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;line-height:1.25;min-width:0}
+.evInfo small{display:block;font-weight:500;color:var(--evm);font-size:12.5px}
+.evInfo .ic{width:38px;height:38px;flex:none;border-radius:12px;border:1px solid var(--evl);display:grid;place-items:center;color:#c9d6dd}
+.evInfo .ic svg{width:20px;height:20px}
+.evIntRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;font-size:14px;font-weight:600}
+.evIntRow>span{display:flex;align-items:center;gap:10px}
+.evIntRow .ic{width:38px;height:38px;border-radius:12px;border:1px solid var(--evl);display:grid;place-items:center;color:#c9d6dd}
+.evIntRow .ic svg{width:20px;height:20px}
+.evIntRow .evAvs img{width:30px;height:30px}
+.evIntRow .evAvs i{height:30px}
+.evCta{display:flex;gap:10px;margin:6px 0 22px}
+.evConfirm{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:9px;height:54px;border:0;border-radius:16px;background:linear-gradient(90deg,#20df9a,#2ee6b0);color:#04221a;font:inherit;font-weight:800;font-size:16.5px;cursor:pointer;box-shadow:0 10px 26px rgba(32,223,154,.28)}
+.evConfirm svg{width:22px;height:22px}
+.evConfirm.on{background:rgba(32,223,154,.12);color:var(--evg);border:1px solid var(--evg);box-shadow:none}
+.evSave{width:54px;height:54px;flex:none;border-radius:16px;border:1px solid rgba(255,255,255,.22);background:var(--evc);color:#fff;display:grid;place-items:center;cursor:pointer}
+.evSave svg{width:22px;height:22px}
+.evSave.on{color:var(--evg);border-color:var(--evg)}
+.evSave.on svg{fill:currentColor}
+.evSec{font-size:18px!important;font-weight:800;margin:0 0 8px!important}
+.evAbout{margin:0 0 22px;font-size:15px;line-height:1.55;color:#dbe6ec;white-space:pre-line;overflow-wrap:anywhere}
+.evAbout.mut{color:var(--evm)}
+.evPrice{display:inline-flex;margin:-10px 0 22px;padding:6px 12px;border-radius:12px;background:rgba(245,185,66,.12);border:1px solid rgba(245,185,66,.4);color:#f5b942;font-weight:700;font-size:14px}
+.evMap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);border-radius:18px;overflow:hidden;background:var(--evc);border:1px solid var(--evl);margin-bottom:22px}
+.evMap iframe{width:100%;height:130px;border:0;display:block;filter:saturate(.9)}
+.evMapTxt{padding:12px;display:flex;flex-direction:column;gap:2px;font-size:13.5px;min-width:0}
+.evMapTxt b{overflow-wrap:anywhere}
+.evMapTxt small{color:var(--evm)}
+.evMapTxt a{margin-top:auto;display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:8px 10px;border-radius:999px;border:1px solid rgba(32,223,154,.5);color:var(--evg);font-weight:700;font-size:13px;text-decoration:none}
+.evMapTxt a svg{width:15px;height:15px}
+.evOrg{display:flex;align-items:center;gap:12px;padding:12px;border-radius:18px;background:var(--evc);border:1px solid var(--evl);cursor:pointer;margin-bottom:12px}
+.evOrg img{width:46px;height:46px;border-radius:50%;object-fit:cover;background:#12384a}
+.evOrg span{display:flex;flex-direction:column;min-width:0}
+.evOrg small{color:var(--evm)}
+.evOrgAct{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.evOrgAct>*{flex:1;min-width:140px;display:inline-flex;align-items:center;justify-content:center;gap:7px;height:46px;border-radius:14px;border:1px solid rgba(255,255,255,.2);background:var(--evc);color:#fff;font:inherit;font-weight:700;font-size:14px;text-decoration:none;cursor:pointer}
+.evOrgAct svg{width:18px;height:18px}
+.evOrgAct .danger{color:#ff6874;border-color:rgba(255,104,116,.45)}
+/* adicionar */
+.evForm .evLbl{display:block;margin:14px 0 7px;font-size:14.5px;font-weight:700}
+.evPhoto{position:relative;width:100%;min-height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:16px;border-radius:18px;border:1.5px dashed rgba(32,223,154,.55);background:var(--evc);color:#fff;font:inherit;font-size:15px;font-weight:600;cursor:pointer;overflow:hidden}
+.evPhoto svg{width:34px;height:34px;color:#c9d6dd}
+.evPhoto small{color:var(--evm);font-weight:500;font-size:13px}
+.evPhoto>i{position:absolute;right:10px;bottom:10px;z-index:2;width:28px;height:28px;border-radius:50%;background:var(--evg);color:#04221a;display:grid;place-items:center}
+.evPhoto>i svg{width:18px;height:18px;color:#04221a}
+.evPhoto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.evPhoto.has{min-height:180px;border-style:solid}
+.evField,.evSel{width:100%;min-height:50px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:var(--evc);color:#fff;font:inherit;font-size:15px}
+.evField{padding:13px 14px;outline:0}
+textarea.evField{min-height:92px;resize:vertical;line-height:1.45}
+.evField::placeholder,.evSel input::placeholder{color:var(--evm)}
+.evField:focus,.evSel:focus-within{border-color:var(--evg)}
+.evSel{position:relative;display:flex;align-items:center;gap:10px;padding:0 12px}
+.evSel>svg{width:20px;height:20px;flex:none;color:#c9d6dd}
+.evSel>svg.cv{width:18px;height:18px;pointer-events:none}
+.evSel>span svg{width:20px;height:20px}
+.evSel select,.evSel input{flex:1;min-width:0;height:48px;border:0;background:none;color:#fff;font:inherit;font-size:15px;outline:0;-webkit-appearance:none;appearance:none;color-scheme:dark}
+.evSel select option{background:#0b1d28;color:#fff}
+.evSel select:invalid{color:var(--evm)}
+.evSel button{border:0;background:none;color:#c9d6dd;padding:6px;display:grid;place-items:center;cursor:pointer}
+.evSel button svg{width:20px;height:20px}
+.evSel .evPh{position:absolute;left:42px;right:10px;top:50%;transform:translateY(-50%);color:var(--evm);font-size:15px;pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.evSel input.empty{color:transparent}
+.evSel input.empty::-webkit-datetime-edit{color:transparent}
+.evSel input:not(.empty)+.evPh{display:none}
+.evTwo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.evTwo>div{min-width:0}
+.evSel input[type=date],.evSel input[type=time]{width:100%}
+.evSel input::-webkit-calendar-picker-indicator{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.evToggle{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:18px 0 6px}
+.evToggle b{display:block;font-size:15px}
+.evToggle small{color:var(--evm);font-size:13px}
+.evSwitch{position:relative;width:54px;height:32px;flex:none}
+.evSwitch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer;z-index:1}
+.evSwitch i{position:absolute;inset:0;border-radius:999px;background:rgba(255,255,255,.18);transition:background .2s ease}
+.evSwitch i::after{content:'';position:absolute;left:3px;top:3px;width:26px;height:26px;border-radius:50%;background:#fff;transition:transform .2s ease}
+.evSwitch input:checked+i{background:var(--evg)}
+.evSwitch input:checked+i::after{transform:translateX(22px)}
+.evSwitch input:focus-visible+i{outline:2px solid #fff;outline-offset:2px}
+.evPublish{width:100%;display:inline-flex;align-items:center;justify-content:center;gap:9px;height:56px;margin:20px 0 8px;border:0;border-radius:16px;background:linear-gradient(90deg,#1fc8e0,#20df9a);color:#04221a;font:inherit;font-weight:800;font-size:16.5px;cursor:pointer;box-shadow:0 10px 26px rgba(32,223,154,.28)}
+.evPublish svg{width:21px;height:21px}
+.evPublish:disabled{opacity:.6}
+/* meus eventos */
+.evTabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin-bottom:12px;border-radius:16px;background:var(--evc);border:1px solid var(--evl)}
+.evTabs button{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:42px;border:0;border-radius:12px;background:none;color:#c9d6dd;font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+.evTabs button svg{width:17px;height:17px}
+.evTabs button.on{background:var(--evg);color:#04221a}
+.evAddBig{width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:52px;margin-bottom:20px;border:0;border-radius:16px;background:var(--evg);color:#04221a;font:inherit;font-weight:800;font-size:16px;cursor:pointer;box-shadow:0 10px 26px rgba(32,223,154,.25)}
+.evAddBig svg{width:20px;height:20px}
+.evMine{display:flex;flex-direction:column;gap:12px;margin-bottom:22px}
+.evMineCard{display:grid;grid-template-columns:minmax(0,1fr) 40px;gap:8px;align-items:center;padding:8px;border-radius:18px;background:var(--evc);border:1px solid var(--evl);cursor:pointer}
+.evMineCard .evImg{height:118px;border-radius:14px;overflow:hidden}
+.evMineCard .evImg::after{background:linear-gradient(180deg,rgba(0,0,0,0) 30%,rgba(8,27,37,.92))}
+.evMineCard .evDate{left:8px;top:8px;min-width:44px;font-size:11px}
+.evMineCard .evDate b{font-size:19px}
+.evMineTxt{position:absolute;z-index:1;left:10px;right:10px;bottom:8px}
+.evMineTxt b{display:block;font-size:15.5px;font-weight:800;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.evMineTxt .evLoc{font-size:12.5px}
+.evPub{position:absolute;z-index:1;right:8px;top:8px;display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:999px;background:rgba(6,19,29,.8);border:1px solid var(--evg);color:var(--evg);font-size:11.5px;font-weight:700}
+.evPub svg{width:13px;height:13px}
+.evStats{grid-column:1;display:flex;flex-wrap:wrap;gap:14px;padding:2px 4px 2px;color:#c9d6dd;font-size:13px}
+.evStats span{display:inline-flex;align-items:center;gap:5px}
+.evStats svg{width:16px;height:16px}
+.evConf{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:4px 10px;border-radius:999px;background:rgba(32,223,154,.14);border:1px solid rgba(32,223,154,.45);color:var(--evg);font-size:12px;font-weight:700}
+.evConf svg{width:14px;height:14px}
+.evDots{grid-row:1;grid-column:2;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:none;color:#fff;display:grid;place-items:center;cursor:pointer;padding:0}
+.evDots svg{width:20px;height:20px}
+.evSheetList{display:flex;flex-direction:column;gap:8px}
+.evSheetList button{display:flex;align-items:center;gap:10px;border:0;background:rgba(255,255,255,.05);color:#fff;border-radius:14px;padding:13px;font:inherit;font-weight:700;cursor:pointer;text-align:left}
+.evSheetList button svg{width:19px;height:19px}
+.evSheetList button.on{background:rgba(32,223,154,.14);color:var(--evg)}
+.evSheetList .danger{color:#ff6874}
+.evGal{display:flex;gap:8px;overflow-x:auto;margin:-8px -18px 22px;padding:0 18px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.evGal::-webkit-scrollbar{display:none}
+.evGal button{flex:none;width:31%;min-width:100px;aspect-ratio:4/3;border:0;border-radius:12px;background:#0b1d28 center/cover no-repeat;cursor:pointer;scroll-snap-align:start}
+.modal .modalBox.evPvBox{padding:0;background:#000;max-width:min(96vw,720px);overflow:hidden;border-radius:18px}
+.evPv{position:relative;display:grid;place-items:center;min-height:200px}
+.evPv img{display:block;max-width:100%;max-height:80vh;object-fit:contain}
+.evPvX{position:absolute;top:8px;right:8px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:24px;cursor:pointer}
+.evPvNav{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;display:grid;place-items:center;cursor:pointer}
+.evPvNav svg{width:20px;height:20px}
+.evPvNav.l{left:8px}.evPvNav.r{right:8px}
+.evPvN{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);padding:3px 10px;border-radius:999px;background:rgba(0,0,0,.55);color:#fff;font-size:12px}
+.evCmts{display:flex;flex-direction:column;gap:12px;margin-bottom:12px}
+.evCmt{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:10px;align-items:start}
+.evCmt img{width:36px;height:36px;border-radius:50%;object-fit:cover;background:#12384a}
+.evCmt b{font-size:14px}
+.evCmt small{color:var(--evm);font-size:12px}
+.evCmt p{margin:2px 0 0;font-size:14.5px;line-height:1.45;color:#dbe6ec;overflow-wrap:anywhere;white-space:pre-line}
+.evCmt button{border:0;background:none;color:var(--evm);padding:6px;cursor:pointer}
+.evCmt button svg{width:17px;height:17px}
+.evCmtEmpty{color:var(--evm);font-size:14px}
+.evCmtNew{display:flex;align-items:center;gap:8px;margin-bottom:22px;padding:4px 4px 4px 14px;border-radius:16px;background:var(--evc);border:1px solid rgba(255,255,255,.14)}
+.evCmtNew:focus-within{border-color:var(--evg)}
+.evCmtNew input{flex:1;min-width:0;height:42px;border:0;background:none;color:#fff;font:inherit;font-size:15px;outline:0}
+.evCmtNew input::placeholder{color:var(--evm)}
+.evCmtNew button{width:42px;height:42px;flex:none;border:0;border-radius:12px;background:var(--evg);color:#04221a;display:grid;place-items:center;cursor:pointer}
+.evCmtNew button svg{width:19px;height:19px}
+.evForm .evLbl small{color:var(--evm);font-weight:500}
+.evPick{display:flex;flex-wrap:wrap;gap:8px}
+.evPk{--c:#20df9a;display:inline-flex;align-items:center;gap:5px;padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:var(--evc);color:#dbe6ec;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+.evPk svg{width:15px;height:15px;color:var(--c)}
+.evPk.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 18%,rgba(8,27,37,.8));color:#fff}
+.evGalIn{display:flex;flex-wrap:wrap;gap:8px}
+.evGalTh,.evGalAdd{position:relative;width:76px;height:76px;border-radius:14px;overflow:hidden;flex:none}
+.evGalTh img{width:100%;height:100%;object-fit:cover}
+.evGalTh button{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;font-size:16px;line-height:1;cursor:pointer}
+.evGalAdd{border:1.5px dashed rgba(32,223,154,.55);background:var(--evc);color:var(--evg);display:grid;place-items:center;cursor:pointer}
+.evGalAdd svg{width:24px;height:24px}
+@media (max-width:360px){.evCats{gap:6px}.evCat{min-height:62px}.evInfo{grid-template-columns:1fr}.evMap{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.evSkel{animation:none}.evCat,.evSwitch i,.evSwitch i::after{transition:none}}
+</style>
+<script>
+/* ===================== EVENTOS (atalho "Eventos" da Início) =====================
+   Usa a mesma agenda da aba Serra (serra_posts com kind='event' e serra_rsvp).
+   Categoria vai em "sub", o local do evento em "place_to" e "Gratuito" em "price". */
+const evSV=(p,w)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w||2}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+const EVI={
+  back:evSV('<path d="M15 5l-7 7 7 7"/>',2.4),
+  chev:evSV('<path d="M9 6l6 6-6 6"/>',2.4),
+  down:evSV('<path d="M6 9l6 6 6-6"/>',2.2),
+  pin:evSV('<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>'),
+  search:evSV('<circle cx="11" cy="11" r="7"/><path d="M20.5 20.5L16 16"/>',2.2),
+  sliders:evSV('<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>'),
+  cal:evSV('<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/>'),
+  calUser:evSV('<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/><circle cx="12" cy="13.6" r="1.7"/><path d="M8.8 18.2c.6-1.4 1.8-2.1 3.2-2.1s2.6.7 3.2 2.1"/>'),
+  clock:evSV('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'),
+  people:evSV('<circle cx="9" cy="8" r="3.2"/><path d="M3 19c.8-3.3 3.2-5 6-5s5.2 1.7 6 5"/><circle cx="17" cy="9" r="2.6"/><path d="M15.5 14.2c2.6-.3 4.8 1.2 5.5 4.3"/>'),
+  heart:evSV('<path d="M12 20s-7.5-4.6-9.2-9.3C1.7 7.6 3.8 4.5 7 4.5c2 0 3.3 1.1 5 3 1.7-1.9 3-3 5-3 3.2 0 5.3 3.1 4.2 6.2C19.5 15.4 12 20 12 20z"/>'),
+  share:evSV('<circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="M8.2 10.8l7.6-4.1M8.2 13.2l7.6 4.1"/>'),
+  check:evSV('<circle cx="12" cy="12" r="9"/><path d="M8 12.3l2.7 2.7L16 9.7"/>',2.2),
+  bookmark:evSV('<path d="M6.5 3.5h11v17l-5.5-4-5.5 4z"/>'),
+  plus:evSV('<path d="M12 5v14M5 12h14"/>',2.4),
+  image:evSV('<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="9.5" r="1.8"/><path d="M4 17l5-5 4 4 2.5-2.5L20 18"/>',1.8),
+  map:evSV('<path d="M9 4L3 6.5v13.5L9 17.5l6 2.5 6-2.5V4L15 6.5z"/><path d="M9 4v13.5M15 6.5V20"/>'),
+  send:evSV('<path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4z"/>'),
+  dots:evSV('<circle cx="12" cy="5.5" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="12" cy="18.5" r="1.3"/>',2.2),
+  trash:evSV('<path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/>'),
+  chat:evSV('<path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4A8 8 0 1 1 20 12z"/>'),
+  eye:evSV('<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>'),
+  all:evSV('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5l1.4 2.9 3.1.4-2.3 2.2.6 3.1-2.8-1.5-2.8 1.5.6-3.1-2.3-2.2 3.1-.4z"/>',1.8),
+  music:evSV('<path d="M9 18V6l11-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>'),
+  food:evSV('<path d="M6 3v7a2 2 0 0 0 2 2v9M10 3v7a2 2 0 0 1-2 2M8 3v5"/><path d="M17 21V3c-2.2 1-3.5 3.6-3.5 7.5 0 1.5 1 2.5 3.5 2.5"/>'),
+  party:evSV('<path d="M4 20l4.5-12 7.5 7.5z"/><path d="M14 4.5c.4 1.4-.2 2.6-1.5 3M19.5 10c-1.4-.4-2.6.2-3 1.5M17 3.5l.5 1.5M20.5 7l-1.5.5"/>'),
+  sport:evSV('<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5c-2.5 2.3-3.8 5.1-3.8 8.5s1.3 6.2 3.8 8.5M12 3.5c2.5 2.3 3.8 5.1 3.8 8.5s-1.3 6.2-3.8 8.5M3.5 12h17"/>'),
+  culture:evSV('<path d="M5 4h14v6a7 7 0 0 1-14 0z"/><path d="M9 9h.01M15 9h.01M9.5 13c1.4 1 3.6 1 5 0"/>'),
+  free:evSV('<path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="8" cy="8" r="1.6"/>'),
+  kids:evSV('<circle cx="12" cy="13" r="7"/><path d="M9.5 12h.01M14.5 12h.01M9.5 15.5c1.4 1 3.6 1 5 0M10 6c0-1.7 1-2.5 2-2.5s1.5.7 1.5 1.5"/>'),
+  other:evSV('<circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/>',2.2)
+};
+/* categorias do mockup: [chave, nome, ícone, cor] */
+const EV_CATS=[['all','Todos','all','#20df9a'],['Música','Música','music','#9b6cff'],['Gastronomia','Gastronomia','food','#ff9a3c'],['Festas','Festas','party','#f05268'],['Esportes','Esportes','sport','#3b9eff'],['Cultura','Cultura','culture','#b26cff'],['free','Gratuitos','free','#20df9a'],['Infantil','Infantil','kids','#f5b942']];
+const EV_FORM_CATS=['Música','Gastronomia','Festas','Esportes','Cultura','Infantil','Outros'];
+const EV_TAGS=['Ao ar livre','Família','Pet friendly','Acessível','Estacionamento','Coberto'];
+const EV_GAL_MAX=6;
+let EV={items:[],rsvp:new Map(),views:new Map(),comments:new Map(),cmFor:null,cmList:[],galFiles:[],loaded:false,loading:null,missing:false,err:false,cat:'all',q:'',city:'',tab:'mine'};
+function evCatOf(name){return EV_CATS.find(c=>c[0]===name)||['Outros','Outros','other','#9fb2bf']}
+function evId(id){return String(id||'').replace(/[^\w-]/g,'')}
+function evCats(x){return [...new Set([x?.sub,...(Array.isArray(x?.categories)?x.categories:[])].filter(Boolean))]}
+function evTags(x){return Array.isArray(x?.tags)?x.tags.filter(Boolean):[]}
+function evPhotos(x){return [x?.photo,...(Array.isArray(x?.gallery)?x.gallery:[])].filter(Boolean)}
+function evHours(x){const a=evD(x.event_at).hm;return x.ends_at?`${a} às ${evD(x.ends_at).hm}`:a}
+function evFmtN(n){n=Number(n)||0;return n>=1000?(Math.round(n/100)/10).toString().replace('.',',').replace(/,0$/,'')+'k':String(n)}
+function evFree(x){return /gr[aá]tis|gratuit/i.test(x?.price||'')}
+function evUF(city){try{return CM_CITY_UF[city]||''}catch(_){return ''}}
+function evCityUF(city){const uf=evUF(city);return city?(uf?`${city} - ${uf}`:city):''}
+function evGoing(id){return !!me?.id&&(EV.rsvp.get(id)||[]).includes(me.id)}
+function evCount(id){return (EV.rsvp.get(id)||[]).length}
+function evPhotoBg(x){return x?.photo?`background-image:url('${esc(x.photo)}')`:'background-image:linear-gradient(160deg,rgba(32,223,154,.18),rgba(8,27,37,.6)),var(--cm-hero-image)'}
+function evD(t){const d=new Date(t);const cap=s=>s.replace(/^./,c=>c.toUpperCase());return{day:String(d.getDate()).padStart(2,'0'),mon:d.toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase(),wd:d.toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','').toUpperCase(),long:d.getDate()+' de '+cap(d.toLocaleDateString('pt-BR',{month:'long'})),wdl:cap(d.toLocaleDateString('pt-BR',{weekday:'long'})),hm:d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}}
+function evFavs(){try{return new Set(JSON.parse(localStorage.getItem('cm_ev_fav')||'[]'))}catch(_){return new Set()}}
+function evIsFav(id){return evFavs().has(id)}
+function evFav(id,btn){const s=evFavs();const on=!s.has(id);on?s.add(id):s.delete(id);try{localStorage.setItem('cm_ev_fav',JSON.stringify([...s].slice(-300)))}catch(_){}document.querySelectorAll(`[data-evfav="${evId(id)}"]`).forEach(b=>{b.classList.toggle('on',on);b.setAttribute('aria-pressed',String(on))});shareToast(on?'Evento salvo ❤️':'Removido dos salvos')}
+function evPeople(id,max){return (EV.rsvp.get(id)||[]).map(u=>srP(u)).filter(Boolean).slice(0,max||3)}
+function evAvs(id,max){const n=evCount(id);const ps=evPeople(id,max);if(!ps.length)return '';return `<span class="evAvs">${ps.map(p=>`<img src="${esc(p.photo||avatar(p.name))}" alt="" loading="lazy">`).join('')}${n>ps.length?`<i>+${n-ps.length}</i>`:''}</span>`}
+function evBack(fb){try{if(typeof CMH!=='undefined'&&CMH.stack.length>1){history.back();return}}catch(_){}go(fb||'home')}
+async function evLoad(){
+  if(EV.loading)return EV.loading;
+  EV.loading=(async()=>{
+    try{
+      const r=await sb.from('serra_posts').select('*').eq('kind','event').gt('expires_at',new Date().toISOString()).order('event_at',{ascending:true}).limit(300);
+      if(r.error){EV.missing=/does not exist|schema cache|relation/i.test(r.error.message||'');EV.err=!EV.missing;EV.items=[];return}
+      EV.missing=false;EV.err=false;EV.items=r.data||[];const rs=new Map();
+      const ids=EV.items.map(x=>x.id);
+      if(ids.length){const v=await sb.from('serra_rsvp').select('post_id,user_id').in('post_id',ids);if(!v.error)(v.data||[]).forEach(x=>{const a=rs.get(x.post_id)||[];if(!a.includes(x.user_id))a.push(x.user_id);rs.set(x.post_id,a)})}
+      EV.rsvp=rs;
+      const cm=new Map(),vw=new Map();
+      if(ids.length){
+        try{const c=await sb.from('serra_event_comments').select('post_id').in('post_id',ids).limit(5000);if(!c.error)(c.data||[]).forEach(x=>cm.set(x.post_id,(cm.get(x.post_id)||0)+1))}catch(_){}
+        const mineIds=EV.items.filter(x=>x.user_id===me?.id).map(x=>x.id);
+        if(mineIds.length){try{const w=await sb.from('serra_event_views').select('post_id').in('post_id',mineIds).limit(20000);if(!w.error)(w.data||[]).forEach(x=>vw.set(x.post_id,(vw.get(x.post_id)||0)+1))}catch(_){}}
+      }
+      EV.comments=cm;EV.views=vw;
+      const need=[...new Set([...EV.items.map(x=>x.user_id),...[...rs.values()].flat()])].filter(id=>id&&!srP(id)).slice(0,150);
+      if(need.length){try{const pr=await sb.from('profiles').select('id,name,photo,city').in('id',need);(pr.data||[]).forEach(p=>{if(!publicProfilesCache.some(c=>c.id===p.id))publicProfilesCache.push(p)})}catch(_){}}
+    }catch(_){EV.items=[];EV.err=true}
+    finally{EV.loaded=true}
+  })();
+  try{await EV.loading}finally{EV.loading=null}
+}
+/* -------- 1. Lista de eventos -------- */
+function evListScreen(){
+  const filt=!!EV.city;
+  return screen(`<div class="ev"><div class="evTop"><button class="evRound" type="button" onclick="evBack('home')" aria-label="Voltar">${EVI.back}</button><div class="evTtl"><h1>Eventos</h1><button class="evCityBtn" type="button" onclick="evPickCity()">${EVI.pin}<span id="evCityTxt">${esc(EV.city||'Serra da Mantiqueira')}</span></button></div><button class="evRound g" type="button" onclick="go('meusEventos')" aria-label="Meus eventos">${EVI.calUser}</button></div><div class="evSearchRow"><label class="evSearch">${EVI.search}<input id="evQ" type="search" enterkeyhint="search" placeholder="Buscar eventos..." value="${esc(EV.q)}" oninput="EV.q=this.value;evPaint()" autocomplete="off" aria-label="Buscar eventos"></label><button id="evFiltBtn" class="evFilt ${filt?'on':''}" type="button" onclick="evPickCity()" aria-label="Filtrar por cidade">${EVI.sliders}</button></div><div class="evCats" role="group" aria-label="Categorias">${EV_CATS.map(([k,l,ic,c])=>`<button type="button" class="evCat ${EV.cat===k?'on':''}" style="--c:${c}" aria-pressed="${EV.cat===k}" onclick="evSetCat('${k}')">${EVI[ic]}<span>${l}</span></button>`).join('')}</div><div class="evHead"><h2>Próximos eventos</h2><button class="evMore" type="button" onclick="evAll()">Ver todos ${EVI.chev}</button></div><div id="evItems" class="evList" aria-live="polite">${EV.loaded?'':'<div class="evSkel"></div><div class="evSkel"></div>'}</div></div>`,'home');
+}
+function evFiltered(){
+  const q=normText(EV.q||'').trim();
+  let a=EV.items.filter(x=>x.event_at&&Date.parse(x.event_at)>Date.now()-3*3600e3);
+  if(EV.city)a=a.filter(x=>srSameCity(x.city,EV.city));
+  if(EV.cat==='free')a=a.filter(evFree);else if(EV.cat!=='all')a=a.filter(x=>evCats(x).includes(EV.cat));
+  if(q)a=a.filter(x=>normText([x.title,x.body,x.city,x.place_to,...evCats(x),...evTags(x)].join(' ')).includes(q));
+  return a.sort((x,y)=>Date.parse(x.event_at)-Date.parse(y.event_at));
+}
+function evNotice(){return EV.missing?`<div class="srNotice">🛠️ Para liberar os Eventos, o administrador precisa rodar o <b>atualizacao-serra.sql</b> no Supabase.</div>`:EV.err?`<div class="evEmpty"><b>Não consegui carregar os eventos</b>Verifique a internet e tente de novo.<br><button class="secondary" type="button" onclick="EV.loaded=false;go(window.cmCurrentPage)">Tentar de novo</button></div>`:''}
+function evPaint(){
+  const el=document.getElementById('evItems');if(!el)return;
+  if(!EV.loaded){el.innerHTML='<div class="evSkel"></div><div class="evSkel"></div>';return}
+  const n=evNotice();if(n){el.innerHTML=n;return}
+  const a=evFiltered();const filtering=EV.cat!=='all'||EV.q.trim()||EV.city;
+  el.innerHTML=a.length?a.map(evCard).join(''):`<div class="evEmpty"><b>${filtering?'Nenhum evento encontrado':'Nenhum evento divulgado ainda'}</b>${filtering?'Tente outra categoria, busca ou cidade.':'Festa, show, feira ou cavalgada? Divulgue para a região.'}<br>${filtering?`<button class="secondary" type="button" onclick="evAll()">Ver todos os eventos</button>`:`<button class="primary" type="button" onclick="go('eventoNovo')">＋ Divulgar o primeiro</button>`}</div>`;
+}
+function evSetCat(k){EV.cat=k;document.querySelectorAll('.evCat').forEach(b=>{const on=b.getAttribute('onclick')===`evSetCat('${k}')`;b.classList.toggle('on',on);b.setAttribute('aria-pressed',String(on))});evPaint()}
+function evAll(){EV.cat='all';EV.q='';EV.city='';const q=document.getElementById('evQ');if(q)q.value='';const t=document.getElementById('evCityTxt');if(t)t.textContent='Serra da Mantiqueira';document.getElementById('evFiltBtn')?.classList.remove('on');evSetCat('all')}
+function evPickCity(){
+  const mine=(typeof cmCityLabel==='function'?cmCityLabel(profileData().city):'')||'';
+  const cs=[...new Set([mine,...EV.items.map(x=>x.city)].filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  openModal(`<div class="stGrab"></div><div class="stSheetHead"><h2>Eventos de onde?</h2><button class="close" onclick="closeModal()" aria-label="Fechar">×</button></div><div class="stSheetBody"><div class="evSheetList" style="max-height:55vh;overflow:auto"><button type="button" class="${!EV.city?'on':''}" onclick="evSetCity('')">🏔️ Toda a Serra da Mantiqueira</button>${cs.map(c=>{const n=EV.items.filter(x=>srSameCity(x.city,c)).length;return `<button type="button" class="${srSameCity(EV.city,c)?'on':''}" data-c="${esc(c)}" onclick="evSetCity(this.dataset.c)">${EVI.pin} ${esc(c)}${n?` · ${n} evento${n>1?'s':''}`:''}</button>`}).join('')}</div></div>`);
+  document.querySelector('#modal .modalBox')?.classList.add('stSheet');
+}
+function evSetCity(c){EV.city=c||'';closeModal();const t=document.getElementById('evCityTxt');if(t)t.textContent=EV.city||'Serra da Mantiqueira';document.getElementById('evFiltBtn')?.classList.toggle('on',!!EV.city);evPaint()}
+/* -------- 2. Detalhes do evento -------- */
+function evLiveHtml(x){
+  const n=evCount(x.id),going=evGoing(x.id),fav=evIsFav(x.id),eid=evId(x.id);
+  return `<div class="evIntRow"><span><span class="ic">${EVI.people}</span>${n} interessado${n===1?'':'s'}</span>${evAvs(x.id,4)}</div><div class="evCta"><button type="button" class="evConfirm ${going?'on':''}" aria-pressed="${going}" onclick="evRsvp('${eid}')">${EVI.check}${going?'Presença confirmada':'Confirmar presença'}</button><button type="button" class="evSave ${fav?'on':''}" data-evfav="${eid}" aria-pressed="${fav}" aria-label="Salvar evento" onclick="evFav('${eid}',this)">${EVI.bookmark}</button></div>`;
+}
+async function evRsvp(id){
+  if(!me?.id)return;
+  const prev=EV.rsvp.get(id)||[];const on=!prev.includes(me.id);
+  EV.rsvp.set(id,on?[...prev,me.id]:prev.filter(u=>u!==me.id));evLiveRefresh(id);
+  try{const r=on?await sb.from('serra_rsvp').insert({post_id:id,user_id:me.id}):await sb.from('serra_rsvp').delete().eq('post_id',id).eq('user_id',me.id);if(r.error)throw r.error;if(on)shareToast('Presença confirmada! 🎉')}
+  catch(_){EV.rsvp.set(id,prev);evLiveRefresh(id);shareToast('Não foi possível agora')}
+}
+function evLiveRefresh(id){const x=EV.items.find(i=>i.id===id);const el=document.getElementById('evLive');if(x&&el)el.innerHTML=evLiveHtml(x);if(document.getElementById('evItems'))evPaint();if(document.getElementById('evMineList'))evPaintMine()}
+async function evShare(id){
+  const x=EV.items.find(i=>evId(i.id)===id);if(!x)return;const d=evD(x.event_at);
+  const text=`${x.title} — ${d.long} às ${d.hm} · ${[x.place_to,evCityUF(x.city)].filter(Boolean).join(', ')}. Veja no Conecta Mantiqueira:`;
+  const url=location.origin+location.pathname;
+  try{if(navigator.share){await navigator.share({title:x.title,text,url});return}}catch(e){if(e&&e.name==='AbortError')return}
+  try{await navigator.clipboard.writeText(text+' '+url);shareToast('Link copiado ✓')}catch(_){shareToast('Não foi possível compartilhar')}
+}
+async function evDelete(id){
+  if(!confirm('Apagar este evento?'))return;closeModal();
+  const r=await sb.from('serra_posts').delete().eq('id',id).eq('user_id',me.id);
+  if(r.error){alert('Não foi possível apagar agora.');return}
+  EV.items=EV.items.filter(x=>evId(x.id)!==id);try{SR.items=SR.items.filter(x=>evId(x.id)!==id)}catch(_){}
+  shareToast('Evento apagado');
+  if(window.cmCurrentPage==='evento')evBack('meusEventos');else if(document.getElementById('evMineList'))evPaintMine();
+}
+/* -------- 3. Adicionar evento -------- */
+function evCatIco(v){document.querySelectorAll('#evCatsMore .evPk').forEach(b=>{const on=b.dataset.v===v;b.classList.toggle('hidden',on);if(on){b.classList.remove('on');b.setAttribute('aria-pressed','false')}});const c=evCatOf(v);const el=document.getElementById('evCatIco');if(el){el.innerHTML=EVI[c[2]];el.style.color=c[3]}}
+function evPrev(inp){const f=inp.files&&inp.files[0];const b=document.getElementById('evPhotoBtn');if(!f||!b)return;b.querySelector('img')?.remove();const im=document.createElement('img');im.alt='';im.src=URL.createObjectURL(f);b.prepend(im);b.classList.add('has')}
+function evMapCheck(){const p=(document.getElementById('evPlace')?.value||'').trim(),c=document.getElementById('evCity')?.value||'';if(!p&&!c){alert('Escreva o local ou escolha a cidade.');return}window.open('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent([p,c,evUF(c)].filter(Boolean).join(', ')),'_blank','noopener')}
+/* -------- 4. Meus eventos -------- */
+function evMineScreen(){
+  return screen(`<div class="ev"><div class="evTop"><button class="evRound" type="button" onclick="evBack('eventos')" aria-label="Voltar">${EVI.back}</button><div class="evTtl"><h1>Meus Eventos</h1></div><span></span></div><div class="evTabs" role="tablist"><button type="button" role="tab" id="evTabMine" class="${EV.tab==='mine'?'on':''}" aria-selected="${EV.tab==='mine'}" onclick="evTab('mine')">${EVI.cal}Meus eventos</button><button type="button" role="tab" id="evTabGo" class="${EV.tab==='going'?'on':''}" aria-selected="${EV.tab==='going'}" onclick="evTab('going')">Participando</button></div><button class="evAddBig" type="button" onclick="go('eventoNovo')">${EVI.plus}Adicionar novo evento</button><div id="evMineList">${EV.loaded?'':'<div class="evSkel"></div>'}</div></div>`,'home');
+}
+function evTab(t){EV.tab=t;[['evTabMine','mine'],['evTabGo','going']].forEach(([id,k])=>{const b=document.getElementById(id);if(b){b.classList.toggle('on',t===k);b.setAttribute('aria-selected',String(t===k))}});evPaintMine()}
+function evMenu(id){
+  openModal(`<div class="stGrab"></div><div class="stSheetHead"><h2>Opções do evento</h2><button class="close" onclick="closeModal()" aria-label="Fechar">×</button></div><div class="stSheetBody"><div class="evSheetList"><button type="button" onclick="closeModal();go('evento','${id}')">${EVI.eye}Ver evento</button><button type="button" onclick="closeModal();evShare('${id}')">${EVI.share}Compartilhar</button><button type="button" class="danger" onclick="evDelete('${id}')">${EVI.trash}Apagar evento</button></div></div>`);
+  document.querySelector('#modal .modalBox')?.classList.add('stSheet');
+}
+function evCard(x){
+  const d=evD(x.event_at),id=evId(x.id),n=evCount(x.id),fav=evIsFav(x.id);
+  const cc=evCats(x).map(c=>{const k=evCatOf(c);return `<span class="evChip" style="--c:${k[3]}">${EVI[k[2]]}${esc(c)}</span>`});const chips=[...cc.slice(0,1),...evTags(x).map(t=>`<span class="evChip" style="--c:#c9d6dd">${esc(t)}</span>`),...cc.slice(1)].slice(0,evFree(x)?2:3).join('');
+  return `<article class="evCard" onclick="go('evento','${id}')"><div class="evImg" style="${evPhotoBg(x)}"><span class="evDate"><b>${d.day}</b>${d.mon}</span><button type="button" class="evHeart ${fav?'on':''}" data-evfav="${id}" aria-pressed="${fav}" aria-label="Salvar evento" onclick="event.stopPropagation();evFav('${id}',this)">${EVI.heart}</button></div><div class="evBody"><b class="evName">${esc(x.title)}</b><span class="evLoc">${EVI.pin}<span>${esc(evCityUF(x.city))}</span></span><div class="evChips">${chips}${evFree(x)?`<span class="evChip" style="--c:#20df9a">Gratuito</span>`:''}</div><div class="evInt">${evAvs(x.id)}<span>${n?`${evFmtN(n)} interessado${n>1?'s':''}`:'Seja o primeiro a confirmar'}</span></div><span class="evGo">${EVI.chev}</span></div></article>`;
+}
+function evDetailScreen(id){
+  const x=EV.items.find(i=>evId(i.id)===evId(id));
+  if(!x)return screen(`<div class="ev"><div class="evTop"><button class="evRound" type="button" onclick="evBack('eventos')" aria-label="Voltar">${EVI.back}</button><div class="evTtl"><h1>Evento</h1></div><span></span></div>${EV.loaded?(evNotice()||`<div class="evEmpty"><b>Evento não encontrado</b>Ele pode ter acontecido ou sido apagado.<br><button class="secondary" type="button" onclick="go('eventos')">Ver eventos</button></div>`):'<div class="evSkel"></div>'}</div>`,'home');
+  const d=evD(x.event_at),eid=evId(x.id),fav=evIsFav(x.id),cs=evCats(x),ph=evPhotos(x);
+  const place=[x.place_to,evCityUF(x.city)].filter(Boolean).join(' - ');
+  const mq=encodeURIComponent([x.place_to,x.city,evUF(x.city)].filter(Boolean).join(', '));
+  const p=srP(x.user_id)||{name:'Alguém'};const mine=x.user_id===me?.id;const wa=x.contact?String(x.contact).replace(/\D/g,''):'';
+  EV.cmFor=x.id;EV.cmList=[];
+  return screen(`<div class="ev evDet"><div class="evHero" style="${evPhotoBg(x)}"><div class="evHeroBar"><button class="evRound" type="button" onclick="evBack('eventos')" aria-label="Voltar">${EVI.back}</button><span class="sp"></span><button class="evRound" type="button" onclick="evShare('${eid}')" aria-label="Compartilhar">${EVI.share}</button><button class="evRound ${fav?'on':''}" type="button" data-evfav="${eid}" aria-pressed="${fav}" onclick="evFav('${eid}',this)" aria-label="Salvar evento">${EVI.heart}</button></div><div class="evHeroInfo"><div class="evDateBig"><b>${d.day}</b><span>${d.mon}</span><small>${d.wd}</small></div>${evFree(x)?`<span class="evFreePill">${EVI.check}Gratuito</span>`:''}</div></div><div class="evDetBody"><h1>${esc(x.title)}</h1><div class="evCatLine">${cs.map((c,i)=>i===cs.length-1?`<b>${esc(c)}</b>`:esc(c)).join(' <i>•</i> ')}</div><div class="evPlace">${EVI.pin}<span>${esc(place)}</span></div><div class="evInfo"><div><span class="ic">${EVI.cal}</span><span>${esc(d.long)}<small>${esc(d.wdl)}</small></span></div><div><span class="ic">${EVI.clock}</span><span>${evHours(x)}<small>Horário</small></span></div></div><div id="evLive">${evLiveHtml(x)}</div><h2 class="evSec">Sobre o evento</h2>${x.body?`<p class="evAbout">${esc(x.body)}</p>`:'<p class="evAbout mut">O organizador não escreveu detalhes.</p>'}${x.price&&!evFree(x)?`<span class="evPrice">Entrada: ${esc(x.price)}</span>`:''}${ph.length>1?`<div class="evGal">${ph.map((u,i)=>`<button type="button" style="background-image:url('${esc(u)}')" aria-label="Ver foto ${i+1}" onclick="evPhotoView('${eid}',${i})"></button>`).join('')}</div>`:''}<h2 class="evSec">Localização</h2><div class="evMap"><iframe title="Mapa do local do evento" loading="lazy" referrerpolicy="no-referrer" src="https://maps.google.com/maps?q=${mq}&z=14&output=embed"></iframe><div class="evMapTxt"><b>${esc(x.place_to||x.city)}</b><small>${esc(evCityUF(x.city))}</small><a href="https://www.google.com/maps/search/?api=1&query=${mq}" target="_blank" rel="noopener">${EVI.map}Ver no mapa</a></div></div><div class="evCmtWrap"><h2 class="evSec">Comentários <span id="evCmtN"></span></h2><div id="evCmts" class="evCmts"><div class="evCmtEmpty">Carregando…</div></div><div class="evCmtNew"><input id="evCmtIn" maxlength="500" placeholder="Escreva um comentário..." autocomplete="off" enterkeyhint="send" aria-label="Escreva um comentário" onkeydown="if(event.key==='Enter'){event.preventDefault();evCmtSend('${eid}')}"><button type="button" aria-label="Enviar comentário" onclick="evCmtSend('${eid}')">${EVI.send}</button></div></div><h2 class="evSec">Quem divulgou</h2><div class="evOrg" onclick="${mine?"go('profile')":`currentPublicUser=srP('${evId(x.user_id)}');go('publicProfile')`}"><img src="${esc(p.photo||avatar(p.name))}" alt=""><span><b>${esc(mine?'Você':p.name)}</b><small>${esc(p.city||'')}</small></span></div><div class="evOrgAct">${mine?`<button type="button" class="danger" onclick="evDelete('${eid}')">${EVI.trash}Apagar evento</button>`:`<button type="button" onclick="currentPublicUser=srP('${evId(x.user_id)}');go('conversation')">${EVI.chat}Chamar no bate-papo</button>${wa?`<a href="https://wa.me/${wa.length<=11?'55'+wa:wa}" target="_blank" rel="noopener">💬 WhatsApp</a>`:''}`}</div></div></div>`,'home');
+}
+function evPhotoView(id,i){
+  const x=EV.items.find(e=>evId(e.id)===id);if(!x)return;const ph=evPhotos(x);i=(i+ph.length)%ph.length;
+  openModal(`<div class="evPv"><img src="${esc(ph[i])}" alt="Foto ${i+1} do evento"><button type="button" class="evPvX" onclick="closeModal()" aria-label="Fechar">×</button>${ph.length>1?`<button type="button" class="evPvNav l" onclick="evPhotoView('${id}',${i-1})" aria-label="Foto anterior">${EVI.back}</button><button type="button" class="evPvNav r" onclick="evPhotoView('${id}',${i+1})" aria-label="Próxima foto">${EVI.chev}</button><span class="evPvN">${i+1} / ${ph.length}</span>`:''}</div>`);
+  document.querySelector('#modal .modalBox')?.classList.add('evPvBox');
+}
+/* visualização: uma por pessoa (quem criou não conta) */
+function evView(id){
+  const x=EV.items.find(e=>e.id===id);if(!me?.id||!x||x.user_id===me.id)return;
+  try{const k='cm_ev_seen_'+id;if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1')}catch(_){}
+  try{Promise.resolve(sb.from('serra_event_views').insert({post_id:id,user_id:me.id})).catch(()=>{})}catch(_){}
+}
+async function evLoadComments(id){
+  const el=document.getElementById('evCmts');if(!el)return;
+  try{
+    const r=await sb.from('serra_event_comments').select('*').eq('post_id',id).order('created_at',{ascending:true}).limit(200);
+    if(r.error)throw r.error;const list=r.data||[];
+    const need=[...new Set(list.map(c=>c.user_id))].filter(u=>u&&!srP(u));
+    if(need.length){try{const pr=await sb.from('profiles').select('id,name,photo,city').in('id',need);(pr.data||[]).forEach(p=>{if(!publicProfilesCache.some(c=>c.id===p.id))publicProfilesCache.push(p)})}catch(_){}}
+    if(EV.cmFor!==id)return;EV.cmList=list;EV.comments.set(id,list.length);evPaintComments(id);
+  }catch(_){document.querySelector('.evCmtWrap')?.classList.add('hidden')}
+}
+function evPaintComments(id){
+  const el=document.getElementById('evCmts');if(!el||EV.cmFor!==id)return;
+  const x=EV.items.find(i=>i.id===id);const owner=!!x&&x.user_id===me?.id;const list=EV.cmList||[];
+  const n=document.getElementById('evCmtN');if(n)n.textContent=list.length?`(${list.length})`:'';
+  el.innerHTML=list.length?list.map(c=>{const p=srP(c.user_id)||{name:'Alguém'};const mine=c.user_id===me?.id;return `<div class="evCmt"><img src="${esc(p.photo||avatar(p.name))}" alt=""><div><b>${esc(mine?'Você':p.name)}</b> <small>${timeAgo(Date.parse(c.created_at))}</small><p>${esc(c.body)}</p></div>${mine||owner?`<button type="button" aria-label="Apagar comentário" onclick="evCmtDel('${evId(c.id)}','${evId(id)}')">${EVI.trash}</button>`:''}</div>`}).join(''):'<div class="evCmtEmpty">Seja o primeiro a comentar.</div>';
+}
+async function evCmtSend(id){
+  const inp=document.getElementById('evCmtIn');const body=(inp?.value||'').trim();if(!body||!me?.id)return;
+  inp.disabled=true;
+  try{const r=await sb.from('serra_event_comments').insert({post_id:id,user_id:me.id,body}).select('*').single();if(r.error)throw r.error;
+    if(EV.cmFor===id){EV.cmList=[...(EV.cmList||[]),r.data||{id:'tmp',post_id:id,user_id:me.id,body,created_at:new Date().toISOString()}];EV.comments.set(id,EV.cmList.length);evPaintComments(id)}inp.value='';}
+  catch(_){shareToast('Não foi possível comentar agora')}
+  finally{inp.disabled=false}
+}
+async function evCmtDel(cid,id){
+  if(!confirm('Apagar este comentário?'))return;
+  const r=await sb.from('serra_event_comments').delete().eq('id',cid);
+  if(r.error){shareToast('Não foi possível apagar agora');return}
+  EV.cmList=(EV.cmList||[]).filter(c=>evId(c.id)!==cid);EV.comments.set(id,EV.cmList.length);evPaintComments(id);
+}
+function evFormScreen(){
+  const today=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+  const cs=(typeof cities!=='undefined'?cities:[]);EV.galFiles=[];
+  const tgl=`onclick="this.classList.toggle('on');this.setAttribute('aria-pressed',this.classList.contains('on'))" aria-pressed="false"`;
+  const empty=`oninput="this.classList.toggle('empty',!this.value)" onchange="this.classList.toggle('empty',!this.value)"`;
+  return screen(`<div class="ev evForm"><div class="evTop"><button class="evRound" type="button" onclick="evBack('eventos')" aria-label="Voltar">${EVI.back}</button><div class="evTtl"><h1>Adicionar Evento</h1></div><span></span></div><button id="evPhotoBtn" class="evPhoto" type="button" onclick="document.getElementById('evPhotoIn').click()">${EVI.image}<span>Adicionar foto do evento</span><small>(imagem em destaque)</small><i>${EVI.plus}</i></button><input id="evPhotoIn" class="hidden" type="file" accept="image/*" onchange="evPrev(this)"><label class="evLbl" for="evTitle">Nome do evento</label><input id="evTitle" class="evField" maxlength="120" placeholder="Ex.: Festival da Mantiqueira" autocomplete="off"><label class="evLbl" for="evBody">Descrição</label><textarea id="evBody" class="evField" maxlength="1000" placeholder="Conte mais sobre o evento..."></textarea><label class="evLbl" for="evCatSel">Categoria</label><div class="evSel"><span id="evCatIco" style="display:grid;color:#9b6cff">${EVI.music}</span><select id="evCatSel" onchange="evCatIco(this.value)">${EV_FORM_CATS.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')}</select>${EVI.down.replace('<svg','<svg class="cv"')}</div><label class="evLbl" for="evCity">Cidade</label><div class="evSel">${EVI.pin}<select id="evCity" required><option value="">Selecione a cidade</option>${cs.map(c=>`<option value="${esc(c)}">${esc(c)}${evUF(c)?' - '+evUF(c):''}</option>`).join('')}</select>${EVI.down.replace('<svg','<svg class="cv"')}</div><div class="evTwo"><div><label class="evLbl" for="evDate">Data do evento</label><div class="evSel">${EVI.cal}<input id="evDate" class="empty" type="date" min="${today}" ${empty}><span class="evPh">Selecione a data</span></div></div><div><label class="evLbl" for="evTime">Horário</label><div class="evSel">${EVI.clock}<input id="evTime" class="empty" type="time" ${empty}><span class="evPh">Selecione</span></div></div></div><label class="evLbl" for="evEnd">Termina às <small>(opcional)</small></label><div class="evSel">${EVI.clock}<input id="evEnd" class="empty" type="time" ${empty}><span class="evPh">Selecione o horário de término</span></div><label class="evLbl" for="evPlace">Local do evento</label><div class="evSel">${EVI.pin}<input id="evPlace" maxlength="120" placeholder="Ex.: Praça, Parque, Endereço..." autocomplete="off"><button type="button" onclick="evMapCheck()" aria-label="Conferir no mapa">${EVI.map}</button></div><span class="evLbl">Mais categorias <small>(opcional)</small></span><div id="evCatsMore" class="evPick">${EV_FORM_CATS.filter(c=>c!=='Outros').map(c=>{const k=evCatOf(c);return `<button type="button" class="evPk${c===EV_FORM_CATS[0]?' hidden':''}" style="--c:${k[3]}" data-v="${esc(c)}" ${tgl}>${EVI[k[2]]}${esc(c)}</button>`}).join('')}</div><span class="evLbl">Etiquetas <small>(opcional)</small></span><div id="evTagsIn" class="evPick">${EV_TAGS.map(t=>`<button type="button" class="evPk" style="--c:#20df9a" data-v="${esc(t)}" ${tgl}>${esc(t)}</button>`).join('')}</div><span class="evLbl">Mais fotos <small>(até ${EV_GAL_MAX})</small></span><div id="evGalIn" class="evGalIn"><button type="button" class="evGalAdd" onclick="document.getElementById('evGalFile').click()" aria-label="Adicionar mais fotos">${EVI.plus}</button></div><input id="evGalFile" class="hidden" type="file" accept="image/*" multiple onchange="evGalAdd(this)"><div class="evToggle"><span><b>Evento gratuito</b><small>Ative se a entrada for gratuita</small></span><label class="evSwitch"><input id="evFreeIn" type="checkbox" checked onchange="document.getElementById('evPriceWrap').classList.toggle('hidden',this.checked)" aria-label="Evento gratuito"><i></i></label></div><div id="evPriceWrap" class="hidden"><label class="evLbl" for="evPrice">Valor da entrada</label><input id="evPrice" class="evField" maxlength="40" placeholder="Ex.: R$ 30 (meia R$ 15)"></div><button id="evSend" class="evPublish" type="button" onclick="evSave()">${EVI.send}Publicar Evento</button></div>`,'home');
+}
+function evGalAdd(inp){
+  const fs=[...(inp.files||[])].filter(f=>/^image\//.test(f.type));inp.value='';
+  const room=EV_GAL_MAX-EV.galFiles.length;if(fs.length>room)shareToast(`Até ${EV_GAL_MAX} fotos extras`);
+  EV.galFiles.push(...fs.slice(0,Math.max(0,room)));evGalPaint();
+}
+function evGalDel(i){EV.galFiles.splice(i,1);evGalPaint()}
+function evGalPaint(){
+  const el=document.getElementById('evGalIn');if(!el)return;
+  el.querySelectorAll('img').forEach(im=>{try{URL.revokeObjectURL(im.src)}catch(_){}});
+  el.innerHTML=EV.galFiles.map((f,i)=>`<span class="evGalTh"><img src="${URL.createObjectURL(f)}" alt=""><button type="button" onclick="evGalDel(${i})" aria-label="Tirar foto">×</button></span>`).join('')+(EV.galFiles.length<EV_GAL_MAX?`<button type="button" class="evGalAdd" onclick="document.getElementById('evGalFile').click()" aria-label="Adicionar mais fotos">${EVI.plus}</button>`:'');
+}
+async function evSave(){
+  const v=id=>(document.getElementById(id)?.value||'').trim();
+  const title=v('evTitle'),city=officialCity(v('evCity'))||v('evCity'),date=v('evDate'),time=v('evTime'),end=v('evEnd'),free=!!document.getElementById('evFreeIn')?.checked;
+  if(title.length<2){alert('Escreva o nome do evento.');document.getElementById('evTitle')?.focus();return}
+  if(!city){alert('Selecione a cidade.');return}
+  if(!date||!time){alert('Escolha a data e o horário do evento.');return}
+  const at=new Date(date+'T'+time).getTime();
+  if(!at||at<Date.now()-3600e3){alert('Escolha uma data futura.');return}
+  let endAt=end?new Date(date+'T'+end).getTime():0;if(endAt&&endAt<=at)endAt+=86400e3; /* termina depois da meia-noite */
+  if(!free&&!v('evPrice')){alert('Escreva o valor da entrada ou marque "Evento gratuito".');return}
+  const main=v('evCatSel');const pick=sel=>[...document.querySelectorAll(sel+' .evPk.on')].map(b=>b.dataset.v);
+  const row={user_id:me.id,kind:'event',sub:main,city,title,body:v('evBody'),place_to:v('evPlace'),price:free?'Gratuito':v('evPrice'),event_at:new Date(at).toISOString(),expires_at:new Date(endAt?endAt+3600e3:at+6*3600e3).toISOString()};
+  const extra={categories:pick('#evCatsMore').filter(c=>c!==main).slice(0,3),tags:pick('#evTagsIn').slice(0,6),gallery:[]};if(endAt)extra.ends_at=new Date(endAt).toISOString();
+  const b=document.getElementById('evSend');if(b){b.disabled=true;b.lastChild.textContent='Publicando…'}
+  try{
+    const f=document.getElementById('evPhotoIn')?.files?.[0];if(f)row.photo=await uploadMedia(f,'serra','post');
+    for(const g of (EV.galFiles||[]).slice(0,EV_GAL_MAX)){const u=await uploadMedia(g,'serra','post');if(u)extra.gallery.push(u)}
+    let r=await sb.from('serra_posts').insert(Object.assign({},row,extra)).select('*').single();
+    /* banco ainda sem o atualizacao-eventos.sql: publica sem os detalhes novos */
+    if(r.error&&/column|schema cache/i.test(r.error.message||'')&&!/relation/i.test(r.error.message||'')){r=await sb.from('serra_posts').insert(row).select('*').single();if(!r.error)shareToast('Publicado sem os detalhes extras')}
+    if(r.error)throw r.error;
+    const it=r.data||row;EV.items.push(it);EV.galFiles=[];try{SR.items.unshift(it)}catch(_){}
+    EV.tab='mine';shareToast('Evento publicado! 🎉');go('meusEventos');
+  }catch(e){if(b){b.disabled=false;b.lastChild.textContent='Publicar Evento'}alert(/does not exist|schema cache|relation/i.test(String(e?.message||''))?'O administrador precisa rodar o atualizacao-serra.sql no Supabase.':'Não foi possível publicar agora.')}
+}
+function evPaintMine(){
+  const el=document.getElementById('evMineList');if(!el)return;
+  if(!EV.loaded){el.innerHTML='<div class="evSkel"></div>';return}
+  const n=evNotice();if(n){el.innerHTML=n;return}
+  const byDate=(x,y)=>Date.parse(x.event_at)-Date.parse(y.event_at);
+  const mine=EV.items.filter(x=>x.user_id===me?.id).sort(byDate);
+  const going=EV.items.filter(x=>evGoing(x.id)).sort(byDate);
+  const created=`<div class="evHead"><h2>Eventos que criei</h2></div><div class="evMine">${mine.length?mine.map(x=>{const d=evD(x.event_at),id=evId(x.id);return `<div class="evMineCard" onclick="go('evento','${id}')"><div class="evImg" style="${evPhotoBg(x)}"><span class="evDate"><b>${d.day}</b>${d.mon}</span><span class="evPub">${EVI.check}Publicado</span><div class="evMineTxt"><b>${esc(x.title)}</b><span class="evLoc">${EVI.pin}<span>${esc(evCityUF(x.city))}</span></span></div></div><button type="button" class="evDots" aria-label="Opções do evento" onclick="event.stopPropagation();evMenu('${id}')">${EVI.dots}</button><div class="evStats"><span title="Visualizações">${EVI.eye}${evFmtN(EV.views.get(x.id)||0)}</span><span title="Interessados">${EVI.people}${evFmtN(evCount(x.id))}</span><span title="Comentários">${EVI.chat}${evFmtN(EV.comments.get(x.id)||0)}</span></div></div>`}).join(''):`<div class="evEmpty"><b>Você ainda não divulgou eventos</b>Toque em “Adicionar novo evento” para divulgar o seu.</div>`}</div>`;
+  const part=`<div class="evHead"><h2>Eventos que vou participar</h2></div><div class="evMine">${going.length?going.map(x=>{const d=evD(x.event_at),id=evId(x.id);return `<div class="evMineCard" onclick="go('evento','${id}')"><div class="evImg" style="${evPhotoBg(x)}"><span class="evDate"><b>${d.day}</b>${d.mon}</span><div class="evMineTxt"><b>${esc(x.title)}</b><span class="evLoc">${EVI.pin}<span>${esc(evCityUF(x.city))}</span></span></div></div><span class="evDots" aria-hidden="true">${EVI.chev}</span><div class="evStats"><span class="evConf">${EVI.check}Presença confirmada</span></div></div>`}).join(''):`<div class="evEmpty"><b>Nenhuma presença confirmada</b>Abra um evento e toque em “Confirmar presença”.<br><button class="secondary" type="button" onclick="go('eventos')">Ver eventos</button></div>`}</div>`;
+  el.innerHTML=EV.tab==='going'?part:created+part;
+}
+/* -------- barra de baixo: aba "Eventos" no lugar de Comércios, como no mockup -------- */
+function evNav(){
+  const n=document.querySelector('#app nav');if(!n)return;
+  n.querySelectorAll('button.active').forEach(b=>b.classList.remove('active'));
+  const b=n.querySelector(`button[onclick="go('business')"]`);if(!b)return;
+  b.setAttribute('onclick',"go('eventos')");b.classList.add('active');
+  b.innerHTML=`<span class="nicon n3 navSvg"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" fill="currentColor"/><path d="M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M3.5 10h17" stroke="#06131d" stroke-width="1.6"/><path d="M8 14h2M14 14h2M8 17h2" stroke="#06131d" stroke-width="1.8" stroke-linecap="round"/></svg></span>Eventos`;
+}
+function evAfter(page,arg){if(page!=='evento')return;const x=EV.items.find(i=>evId(i.id)===evId(arg));if(!x)return;evView(x.id);evLoadComments(x.id)}
+/* -------- rotas -------- */
+(function(){
+  const EV_PAGES={eventos:evListScreen,evento:evDetailScreen,eventoNovo:evFormScreen,meusEventos:evMineScreen};
+  const g=window.go;
+  window.go=async function(page,arg){
+    const f=EV_PAGES[page];if(!f){document.body.classList.remove('evOn');return g(page,arg)}
+    document.getElementById('cartBar')?.remove();document.getElementById('instBubble')?.remove();
+    window.cmCurrentPage=page;const a=document.getElementById('app');if(!a)return;a.classList.remove('isHome');document.body.classList.add('evOn');
+    a.innerHTML=f(arg);evNav();window.scrollTo(0,0);evAfter(page,arg);
+    if(page==='eventoNovo')return;
+    if(page==='evento'&&EV.loaded&&EV.items.some(i=>evId(i.id)===evId(arg)))return;
+    await evLoad();
+    if(window.cmCurrentPage!==page)return;
+    if(page==='eventos')evPaint();else if(page==='meusEventos')evPaintMine();else{a.innerHTML=f(arg);evNav();evAfter(page,arg)}
+  };
+})();
+/* ===================== fim EVENTOS ===================== */
+</script>
 <script>
 try{Object.assign(NOTIF_TXT,{serra_alert:'publicou um alerta na sua cidade. ⚠️'})}catch(_){}
 (function(){const g=window.cmNotifGo;window.cmNotifGo=async function(id){const n=(CM_NOTIF.list||[]).find(x=>x.id===id);if(n&&n.kind==='serra_alert'){closeModal();go('serra');return}return g(id)}})();
@@ -9694,7 +10230,7 @@ window.cmExpSearchBlur=function(){setTimeout(()=>{const b=document.getElementByI
 window.cmExpSearchClose=function(){const b=document.getElementById('cmExpQ'),q=document.getElementById('exploreQ');if(q){q.value='';q.blur()}FEEDF.q='';if(b)b.classList.remove('on');try{POSTS.shown=20;renderFeed()}catch(_){}};
 /* Início: quarto atalho "Classificados" */
 if(typeof home==='function'){const hm=window.home;window.home=function(){let h=hm.apply(this,arguments);
-  if(!/cmClassQuick/.test(h))h=h.replace(/(<div class="grid4 homeGrid3">[\s\S]*?go\('business'\)[\s\S]*?<\/button>)/,`$1<button class="quick premiumQuick cmClassQuick" onclick="go('classificados')"><div class="ico">🏷️</div><small>Classificados</small></button>`).replace('class="grid4 homeGrid3"','class="grid4 homeGrid4"');
+  if(!/cmClassQuick/.test(h))h=h.replace(/(<div class="grid4 homeGrid3">[\s\S]*?go\('eventos'\)[\s\S]*?<\/button>)/,`$1<button class="quick premiumQuick cmClassQuick" onclick="go('classificados')"><div class="ico">🏷️</div><small>Classificados</small></button>`).replace('class="grid4 homeGrid3"','class="grid4 homeGrid4"');
   return h}}
 /* abrir anúncio por link (?cl=ID) */
 try{const sp=new URLSearchParams(location.search),c=sp.get('cl');if(c){sp.delete('cl');history.replaceState(null,'',location.pathname+(sp.toString()?'?'+sp:'')+location.hash);const t=setInterval(()=>{if(me?.id&&document.querySelector('#app .nav')){clearInterval(t);go('classificados');const w=setInterval(()=>{if(CL.loaded){clearInterval(w);cmClOpen(c)}},300);setTimeout(()=>clearInterval(w),15000)}},500);setTimeout(()=>clearInterval(t),30000)}}catch(_){}
@@ -10365,7 +10901,7 @@ function dressHome(h){
   /* atalhos: Pessoas, Grupos, Eventos, Comércios, Classificados */
   const g=r.querySelector('.grid4');
   if(g){const btns=[...g.querySelectorAll('button')];const on=lbl=>{const b=btns.find(x=>(x.textContent||'').trim().toLowerCase().startsWith(lbl));return b?b.getAttribute('onclick'):''};
-    const items=[['Pessoas',XI.people,on('pessoas')||"go('people')",'#20df9a'],['Grupos',XI.groups,on('grupos')||"go('groups')",'#9b6cff'],['Eventos',XI.cal,on('eventos')||"go('business')",'#f5b942'],['Comércios',XI.store,"go('business')",'#3b9eff'],['Classificados',XI.tag,on('classificados')||"go('classificados')",'#f05268']];
+    const items=[['Pessoas',XI.people,on('pessoas')||"go('people')",'#20df9a'],['Grupos',XI.groups,on('grupos')||"go('groups')",'#9b6cff'],['Eventos',XI.cal,"go('eventos')",'#f5b942'],['Comércios',XI.store,"go('business')",'#3b9eff'],['Classificados',XI.tag,on('classificados')||"go('classificados')",'#f05268']];
     g.outerHTML=`<div class="hmQuick">${items.map(([l,ic,oc,c])=>`<button type="button" class="hmQ" style="--qc:${c}" onclick="${oc}"><span>${ic}</span><small>${l}</small></button>`).join('')}</div>`}
   /* cidades em destaque: cartões deslizáveis com fotinhas de quem é de lá */
   const cg=r.querySelector('.premiumCities');
